@@ -94,6 +94,15 @@ assert(!indexHtml.includes('http://') && !indexHtml.includes('https://'), 'Zero 
 assert(!mainCss.includes('http://') && !mainCss.includes('https://'), 'Zero external HTTP/HTTPS links in main-layout.css');
 assert(!virtCss.includes('http://') && !virtCss.includes('https://'), 'Zero external HTTP/HTTPS links in virtual-screen.css');
 
+// 8. Realism Verification: PC Power-On on Left Tower & Physical USB Unplugging
+console.log('\n[Layout 8] Verifying Realism: Power Button on Tower & Physical USB Unplugging...');
+assert(appJs.includes('monitor-osd-panel'), 'Phase 1 renders authentic Monitor OSD banner (No Signal) instead of a screen button');
+assert(!appJs.includes('standby-power-glyph'), 'Phase 1 does NOT contain any fake power switch on the monitor glass');
+assert(appJs.includes('physical-tower-callout-panel'), 'Phase 6 displays directional callout pointing to Left Tower');
+assert(appJs.includes('tower-unplug-target'), 'Phase 6 targets the Left Tower USB port for physical removal');
+assert(appJs.includes('usb-drive-detaching'), 'Phase 6 triggers physical detachment animation on Tower port');
+assert(!appJs.includes('btnUnplugUsbNow'), 'Phase 6 eliminated artificial screen button in favor of physical tower action');
+
 console.log('\n================================================================');
 if (allPassed) {
   console.log('✓ ALL 3-COLUMN WORKSTATION LAYOUT TESTS PASSED WITH 100% SUCCESS!');

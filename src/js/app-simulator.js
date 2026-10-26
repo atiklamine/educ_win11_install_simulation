@@ -185,23 +185,61 @@ function renderPhase1Workstation(container) {
           <p>اختر وسيط التثبيت المناسب من الرف الموجود على اليمين، ليتم توصيله بالوحدة المركزية على اليسار، ثم اضغط زر التشغيل (Power):</p>
         </div>
 
-        <div class="standby-screen-center">
-          <div class="standby-pulse-ring">
-            <span class="standby-power-glyph">&#x23FB;</span>
+        <div class="standby-screen-center" id="standbyScreenCenter" title="شاشة العرض (في وضع الاستعداد)">
+          <!-- Realistic Monitor On-Screen Display (OSD) Banner when PC has no video signal -->
+          <div class="monitor-osd-panel">
+            <div class="osd-header">
+              <span class="osd-port-tag">DisplayPort 1.4</span>
+              <span class="osd-resolution">2560 × 1440 @ 144Hz</span>
+            </div>
+            <div class="osd-body">
+              <div class="osd-icon-warning">&#9888;</div>
+              <div class="osd-text-block">
+                <strong class="osd-signal-status">No Signal Detected</strong>
+                <span class="osd-subtext">Check video cable or power on the PC</span>
+              </div>
+            </div>
+            <div class="osd-footer-timer">
+              <span>Auto Power Saving Standby</span>
+              <span>[ ALGERIA-EDU IPS ]</span>
+            </div>
           </div>
-          <h3 class="standby-headline">الشاشة في وضع الاستعداد (Standby Mode)</h3>
-          <div class="standby-status-pill" id="standbyMediaStatusPill">
-            ${currentSelected === 'usb' ? '✔ تم توصيل مفتاح Kingston 32GB في المنفذ الأمامي' : 
-              currentSelected === 'dvd' ? '✔ تم تحميل قرص Windows 11 DVD في القارئ' : 
-              currentSelected === 'pxe' ? '✔ تم توصيل كابل الشبكة RJ-45 (PXE)' :
-              '○ في انتظار اختيار وسيط التثبيت من الرف الأيمن'}
-          </div>
-          <div class="standby-instruction-hint" id="standbyInstructionHint">
-            ${currentSelected ? 'اضغط الآن على زر الطاقة (Power) بالوحدة المركزية على اليسار لبدء الإقلاع الذاتي (POST).' : 'انقر على وسيط التثبيت المناسب على اليمين ليتم توصيله بالوحدة المركزية.'}
+
+          <!-- Pedagogical Lab Guidance underneath Monitor OSD -->
+          <div class="standby-lab-guide">
+            <h3 class="standby-headline">محطة العمل في وضع الاستعداد (Workstation Standby)</h3>
+            <div class="standby-status-pill" id="standbyMediaStatusPill">
+              ${currentSelected === 'usb' ? '✔ تم توصيل مفتاح Kingston 32GB في المنفذ الأمامي' : 
+                currentSelected === 'dvd' ? '✔ تم تحميل قرص Windows 11 DVD في القارئ' : 
+                currentSelected === 'pxe' ? '✔ تم توصيل كابل الشبكة RJ-45 (PXE)' :
+                '○ الخطوة 1: اختر وسيط التثبيت المناسب من الرف على اليمين'}
+            </div>
+            <div class="standby-instruction-hint" id="standbyInstructionHint">
+              ${currentSelected ? 
+                '<div class="guide-callout-power"><span class="guide-arrow-left">&#8592;</span> الخطوة 2: اضغط على <strong>زر الطاقة (Power) الحقيقي</strong> الموجود بالوحدة المركزية على اليسار لبدء الإقلاع الذاتي (POST).</div>' : 
+                'انقر أولاً على وسيط التثبيت المناسب على اليمين ليتم توصيله بالوحدة المركزية.'}
+            </div>
           </div>
         </div>
       </div>
     `;
+
+    // Click on monitor glass gives educational guidance: power button is on the tower, not the screen!
+    const standbyCenter = container.querySelector('.standby-screen-center');
+    if (standbyCenter) {
+      standbyCenter.onclick = () => {
+        const pBtn = document.getElementById('btnTactilePower');
+        if (pBtn) {
+          pBtn.classList.remove('pulsing');
+          void pBtn.offsetWidth;
+          pBtn.classList.add('pulsing');
+        }
+        const hint = document.getElementById('standbyInstructionHint');
+        if (hint && currentSelected) {
+          hint.innerHTML = '<div class="guide-callout-power" style="border-color: #f59e0b; background: rgba(245, 158, 11, 0.15);"><span class="guide-arrow-left" style="color: #f59e0b;">&#8592;</span> <strong>تنبيه:</strong> هذه شاشة عرض وليست زراً للتشغيل! اضغط على <strong>زر الطاقة بالوحدة المركزية</strong> على اليسار.</div>';
+        }
+      };
+    }
 
     updateCompanionTowerAndShelf();
   }
@@ -1055,75 +1093,160 @@ function enterSecondBootBios(container) {
 
 function renderPhase6UnplugUsb(container) {
   let isUnplugged = false;
+  const portEl = document.getElementById('usb-port');
+  const towerStatus = document.getElementById('towerLiveStatus');
+  const shelfMsg = document.getElementById('shelfConnectionMsg');
+
+  // Ensure the USB drive is visibly inserted in the Left Tower's USB port with target pulse animation
+  if (portEl) {
+    if (!portEl.querySelector('#usb-drive')) {
+      portEl.innerHTML = `
+        <div id="usb-drive" class="inserted tower-unplug-target" title="انقر هنا لنزع مفتاح USB فيزيائياً من المنفذ">
+          <svg viewBox="0 0 32 32" width="28" height="28">
+            <rect class="usb-connector-tip" x="10" y="20" width="12" height="10" fill="#cbd5e1" stroke="#475569" stroke-width="1" rx="1"/>
+            <rect x="12.5" y="23" width="2" height="3" fill="#0284c7"/>
+            <rect x="17.5" y="23" width="2" height="3" fill="#0284c7"/>
+            <rect class="usb-drive-body" x="6" y="2" width="20" height="20" fill="#dc2626" rx="3" stroke="#991b1b" stroke-width="1.5" />
+            <line x1="9" y1="7" x2="23" y2="7" stroke="#fca5a5" stroke-width="1" />
+            <line x1="9" y1="11" x2="23" y2="11" stroke="#fca5a5" stroke-width="1" />
+            <circle cx="16" cy="16" r="1.5" fill="#38bdf8" />
+          </svg>
+        </div>
+      `;
+    } else {
+      const existingDrive = portEl.querySelector('#usb-drive');
+      if (existingDrive) {
+        existingDrive.className = 'inserted tower-unplug-target';
+        existingDrive.setAttribute('title', 'انقر هنا لنزع مفتاح USB فيزيائياً من المنفذ');
+      }
+    }
+  }
+
+  if (towerStatus) {
+    towerStatus.innerHTML = '<span style="color: #f59e0b; font-weight: bold; animation: blinkAmber 1s infinite;">⚠ انقر لنزع الفلاشة</span>';
+  }
+  if (shelfMsg) {
+    shelfMsg.innerHTML = '<span style="color: #f59e0b;">⚠ يجب نزع الفلاشة من الوحدة المركزية</span>';
+  }
 
   function redraw() {
     container.innerHTML = `
-      <div class="virtual-black-screen flex-center" style="flex-direction: column; padding: 24px;">
-        <div style="font-size: 40px; color: #f59e0b; margin-bottom: 8px;">&#9888;</div>
-        <h2 style="color: #ffffff; font-size: 20px; margin-bottom: 6px;">فصل وسيط التثبيت الخارجي (Physical USB Removal)</h2>
-        <p style="color: #94a3b8; font-size: 13px; max-width: 580px; text-align: center; margin-bottom: 20px; line-height: 1.5;">
-          تم نسخ ملفات الإقلاع بالكامل داخل قسم EFI بالقرص الصلب الداخلي. <strong>انقر على مفتاح USB الموصول بالوحدة المركزية لنزعه وفصله الآن:</strong>
+      <div class="virtual-black-screen flex-center" style="flex-direction: column; padding: 28px; text-align: center;">
+        <div style="font-size: 46px; color: #f59e0b; margin-bottom: 12px; animation: blinkWarn 1.6s infinite ease-in-out;">&#9888;</div>
+        <h2 style="color: #ffffff; font-size: 22px; margin-bottom: 8px;">إعادة التشغيل: نزع وسيط التثبيت الخارجي (Physical USB Removal)</h2>
+        <p style="color: #94a3b8; font-size: 14px; max-width: 640px; margin-bottom: 24px; line-height: 1.6;">
+          تم نسخ ملفات الإقلاع بالكامل داخل قسم EFI بالقرص الصلب الداخلي (SSD).<br>
+          <strong style="color: #f8fafc;">لتفادي الوقوع في حلقة الإقلاع وإعادة تشغيل برنامج التثبيت مجدداً (Boot Loop)، يجب الآن نزع مفتاح USB مباشرة من منفذ الوحدة المركزية.</strong>
         </p>
 
-        <!-- Interactive PC Tower with inserted USB -->
-        <div style="display: flex; align-items: center; gap: 30px; margin-bottom: 24px;">
-          <!-- Front I/O Box Simulation -->
-          <div style="width: 220px; background: #1a1e24; border: 2px solid #334155; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.6);">
-            <span style="font-size: 11px; font-weight: 700; color: #38bdf8;">المنفذ الأمامي للوحدة المركزية (USB 3.0)</span>
-            
-            <div style="position: relative; padding: 20px 0; display: flex; justify-content: center; width: 100%;">
-              <div class="usb-port-slot" style="width: 36px; height: 16px; background: #050608; border: 2px solid #475569;">
-                <!-- Pluggable USB Drive -->
-                ${!isUnplugged ? `
-                  <div id="interactiveUnplugFlash" style="position: absolute; top: -38px; cursor: pointer; animation: pulseWarning 1.2s infinite;" title="انقر لنزع الفلاش ديسك">
-                    <svg viewBox="0 0 32 38" width="42" height="42">
-                      <rect x="10" y="22" width="12" height="12" fill="#cbd5e1" stroke="#475569" stroke-width="1" rx="1" />
-                      <rect x="6" y="0" width="20" height="24" fill="#dc2626" rx="4" stroke="#991b1b" stroke-width="1.5" />
-                      <line x1="9" y1="6" x2="23" y2="6" stroke="#fca5a5" stroke-width="1.5" />
-                      <line x1="9" y1="12" x2="23" y2="12" stroke="#fca5a5" stroke-width="1.5" />
-                      <circle cx="16" cy="18" r="2" fill="#38bdf8" />
-                    </svg>
-                  </div>
-                ` : `
-                  <span style="font-size: 9px; color: #64748b;">(فارغ)</span>
-                `}
-              </div>
-            </div>
-
-            <div style="font-size: 11.5px; font-weight: bold; color: ${!isUnplugged ? '#fca5a5' : '#34d399'};">
-              ${!isUnplugged ? '● مفتاح USB موصول (خطر حلقة الإقلاع!)' : '✔ تم فصل مفتاح USB بنجاح (فصل نهائي لوسيط التثبيت)'}
-            </div>
+        <!-- Directional Physical Callout to Left Tower -->
+        <div class="physical-tower-callout-panel" id="physicalTowerCallout" title="انقر لنزع الفلاشة من الوحدة المركزية">
+          <div class="callout-arrow-pointer">&#8592;</div>
+          <div class="callout-text-content">
+            <strong style="color: #38bdf8; font-size: 15px;">الإجراء المادي المطلوب:</strong>
+            <p style="margin: 4px 0 0 0; color: #e2e8f0; font-size: 13.5px; line-height: 1.6;">
+              توجه بمؤشر الفأرة إلى <strong>الوحدة المركزية (على يسار الشاشة)</strong>، وانقر مباشرة على <strong>مفتاح USB الأحمر</strong> الموجود بالمنفذ الأمامي لنزعه فيزيائياً من مكانه.
+            </p>
           </div>
         </div>
 
-        <button class="fluent-btn fluent-btn-accent" id="btnUnplugUsbNow" style="padding: 0 28px; height: 42px; font-size: 14px;">
-          ${!isUnplugged ? '&#128190; نزع مفتاح USB من المنفذ (فصل نهائي)' : 'متابعة الإقلاع الذاتي من القرص الداخلي &gt;'}
-        </button>
+        <div class="unplug-live-status-card" id="unplugLiveStatusCard" style="margin-top: 14px;">
+          <span class="status-indicator-dot amber-blink" id="unplugStatusDot"></span>
+          <span id="unplugStatusMsg">في انتظار قيامك بنزع مفتاح USB من منفذ الوحدة المركزية على اليسار...</span>
+        </div>
       </div>
     `;
 
-    // Click on either the USB SVG or the button
-    const handleUnplugAction = () => {
-      if (!isUnplugged) {
-        if (window.soundSynth) window.soundSynth.playSuccess();
-        isUnplugged = true;
-        window.stateEngine.secondBootConfig.usbUnplugged = true;
-        redraw();
-      } else {
-        // Proceed to 3s Windows 11 spinning logo & checkpoint 4
-        renderPhase6Win11BootLogo(container, () => {
-          window.quizManager.showQuizForBank('bank_second_boot', () => {
-            window.stateEngine.completePhase(6);
-          });
-        });
+    function handlePhysicalRemoval() {
+      if (isUnplugged) return;
+      isUnplugged = true;
+
+      if (window.soundSynth) window.soundSynth.playSuccess();
+
+      // Physical unplug animation on the Left Tower's USB port
+      const currentPort = document.getElementById('usb-port');
+      const currentDrive = currentPort ? currentPort.querySelector('#usb-drive') : null;
+
+      if (currentDrive) {
+        currentDrive.classList.remove('tower-unplug-target');
+        currentDrive.classList.add('usb-drive-detaching');
       }
-    };
 
-    const flashSvg = container.querySelector('#interactiveUnplugFlash');
-    if (flashSvg) flashSvg.addEventListener('click', handleUnplugAction);
+      setTimeout(() => {
+        if (currentPort) currentPort.innerHTML = ''; // Physically empty port on the Central Unit!
 
-    const btnUnplug = container.querySelector('#btnUnplugUsbNow');
-    if (btnUnplug) btnUnplug.addEventListener('click', handleUnplugAction);
+        const tStatus = document.getElementById('towerLiveStatus');
+        const sMsg = document.getElementById('shelfConnectionMsg');
+        const uStatus = document.getElementById('usbPlugStatus');
+        const sUsbSlot = document.getElementById('usbShelfSlot');
+
+        if (tStatus) tStatus.textContent = '✔ تم فصل الفلاشة بنجاح';
+        if (sMsg) sMsg.textContent = '✔ تم فصل مفتاح USB بنجاح لمنع حلقة الإقلاع';
+        if (uStatus) uStatus.textContent = '○ غير موصول (Detached)';
+        if (sUsbSlot) {
+          sUsbSlot.innerHTML = `
+            <div id="usb-drive" class="detached" title="مفتاح Kingston 32GB">
+              <svg viewBox="0 0 32 32" width="28" height="28">
+                <rect class="usb-connector-tip" x="10" y="2" width="12" height="10" fill="#cbd5e1" stroke="#475569" stroke-width="1" rx="1"/>
+                <rect x="12.5" y="4" width="2" height="3" fill="#0284c7"/>
+                <rect x="17.5" y="4" width="2" height="3" fill="#0284c7"/>
+                <rect class="usb-drive-body" x="6" y="10" width="20" height="20" fill="#dc2626" rx="3" stroke="#991b1b" stroke-width="1.5"/>
+                <line x1="9" y1="15" x2="23" y2="15" stroke="#fca5a5" stroke-width="1" />
+                <line x1="9" y1="19" x2="23" y2="19" stroke="#fca5a5" stroke-width="1" />
+                <circle cx="16" cy="24" r="1.5" fill="#38bdf8"/>
+              </svg>
+            </div>
+          `;
+        }
+
+        // Update state engine
+        window.stateEngine.secondBootConfig.usbUnplugged = true;
+        window.stateEngine.selectedMedia = null;
+
+        // Visual screen confirmation
+        const statusMsg = document.getElementById('unplugStatusMsg');
+        const statusDot = document.getElementById('unplugStatusDot');
+        const callout = document.getElementById('physicalTowerCallout');
+
+        if (statusDot) statusDot.className = 'status-indicator-dot green-active';
+        if (statusMsg) {
+          statusMsg.innerHTML = '<strong style="color: #34d399;">✔ رائع! تم نزع مفتاح USB فيزيائياً من الوحدة المركزية بنجاح.</strong>';
+        }
+        if (callout) {
+          callout.style.borderColor = '#10b981';
+          callout.style.boxShadow = '0 0 25px rgba(16, 185, 129, 0.4)';
+          callout.innerHTML = `
+            <div style="font-size: 32px; color: #10b981; flex-shrink: 0;">✔</div>
+            <div class="callout-text-content">
+              <strong style="color: #34d399; font-size: 15px;">تم النزع بنجاح من الوحدة المركزية!</strong>
+              <p style="margin: 4px 0 0 0; color: #cbd5e1; font-size: 13.5px;">
+                المنفذ أصبح فارغاً تماماً. جاري متابعة الإقلاع الذاتي لنظام Windows 11 من القرص الداخلي SSD...
+              </p>
+            </div>
+          `;
+        }
+
+        // Proceed to Windows 11 spinning logo and checkpoint quiz
+        setTimeout(() => {
+          renderPhase6Win11BootLogo(container, () => {
+            window.quizManager.showQuizForBank('bank_second_boot', () => {
+              window.stateEngine.completePhase(6);
+            });
+          });
+        }, 1300);
+      }, 450);
+    }
+
+    // Attach click events to the real physical elements on the Left Tower
+    const pEl = document.getElementById('usb-port');
+    if (pEl) pEl.onclick = handlePhysicalRemoval;
+
+    const tDrive = document.getElementById('usb-drive');
+    if (tDrive) tDrive.onclick = handlePhysicalRemoval;
+
+    // Accessibility / touchscreen fallback: clicking the callout panel also triggers the physical removal
+    const calloutPanel = container.querySelector('#physicalTowerCallout');
+    if (calloutPanel) calloutPanel.onclick = handlePhysicalRemoval;
   }
 
   redraw();
