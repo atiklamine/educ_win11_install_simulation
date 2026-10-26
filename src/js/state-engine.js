@@ -134,6 +134,10 @@ class StateEngine {
       btnOpenFinale.classList.add('hidden');
     }
 
+    if (window.syncMonitorPowerLed) {
+      window.syncMonitorPowerLed(false);
+    }
+
     this.startTimer();
     this.updateHUD();
     this.updateStepper();

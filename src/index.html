@@ -41,6 +41,7 @@
 
       <div class="hud-actions-section">
         <button class="hud-btn hidden" id="btnOpenFinaleResults" title="عرض بطاقة التقييم والتقرير النهائي" style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #4ade80; font-weight: 700;">&#127881; النتيجة والتقرير</button>
+        <button class="hud-btn" id="btnToggleViewMode" title="التبديل بين وضع الحاسوب الافتراضي ووضع ملء مساحة العرض (F10)">&#9974; ملء مساحة العرض</button>
         <button class="hud-btn" id="btnToggleTheme" title="التبديل بين المظهر الفاتح والمظلم (Light / Dark Mode)">☀️ فاتح</button>
         <button class="hud-btn" id="btnNewSession" title="بدء جلسة تقييم جديدة">&#10010; جلسة جديدة</button>
         <button class="hud-btn" id="btnOpenExpertGuide" title="دليل النظام الخبير للتثبيت">&#128218; دليل النظام الخبير</button>
@@ -53,7 +54,7 @@
     </header>
 
     <!-- 2. Virtual Monitor Container -->
-    <main class="virtual-monitor-wrapper">
+    <main class="virtual-monitor-wrapper view-mode-rig" id="virtualMonitorWrapper">
       <!-- Draggable Hint Bar -->
       <div class="draggable-hint-bar" id="draggableHintBar">
         <div class="hint-handle" id="hintDragHandle">
@@ -65,11 +66,45 @@
         <button class="hint-reset-btn" id="btnResetHintPos">استرجاع الموضع</button>
       </div>
 
-      <!-- Simulated Monitor Frame -->
-      <div class="monitor-frame">
-        <div class="virtual-screen-content" id="virtualScreenContent">
-          <!-- Dynamic 2D Screens Rendered by AppSimulator -->
+      <!-- Workstation Rig Stage (Mode: Virtual Rig on Desk) -->
+      <div class="workstation-rig-stage" id="workstationRigStage">
+        <!-- Virtual Monitor Unit -->
+        <div class="rig-monitor-unit" id="rigMonitorUnit">
+          <!-- Simulated Monitor Frame with Bezel -->
+          <div class="monitor-frame" id="monitorFrame">
+            <!-- Monitor Bezel Top Bar (Webcam & Quick Toggle) -->
+            <div class="monitor-bezel-top">
+              <span class="monitor-webcam-dot" title="كاميرا الشاشة المدمجة"></span>
+              <button class="monitor-quick-toggle-btn" id="btnMonitorQuickToggle" title="تكبير الشاشة لملء مساحة العرض (F10)">
+                <span class="toggle-icon">&#9974;</span>
+                <span class="toggle-label">ملء مساحة العرض</span>
+              </button>
+            </div>
+
+            <!-- Screen Display Area (Where all 8 phases render) -->
+            <div class="virtual-screen-content" id="virtualScreenContent">
+              <!-- Dynamic 2D Screens Rendered by AppSimulator -->
+            </div>
+
+            <!-- Monitor Chin Bar (Bottom Bezel) -->
+            <div class="monitor-chin-bar" id="monitorChinBar">
+              <span class="monitor-brand-logo">ALGERIA-EDU 27" IPS</span>
+              <div class="monitor-chin-controls">
+                <span class="monitor-power-led" id="monitorPowerLed" title="مؤشر تغذية الشاشة"></span>
+                <button class="monitor-chin-btn" id="btnMonitorChinToggle" title="التبديل بين وضع الحاسوب الافتراضي ووضع ملء مساحة العرض (F10)">
+                  &#9974; تكبير الشاشة
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Monitor Stand Neck & Base (Visible in view-mode-rig) -->
+          <div class="monitor-stand-neck" id="monitorStandNeck"></div>
+          <div class="monitor-stand-base" id="monitorStandBase"></div>
         </div>
+
+        <!-- Desk Surface Underneath Rig -->
+        <div class="rig-desk-surface" id="rigDeskSurface"></div>
       </div>
     </main>
 
@@ -545,6 +580,9 @@
       // 3. Initialize Draggable Hint Bar
       initDraggableHintBar();
 
+      // 3.5. Initialize Dual View Mode Controller (Rig Mode vs Expanded Mode)
+      initViewModeController();
+
       // 4. Bind HUD Buttons
       bindHudControls();
 
@@ -881,6 +919,88 @@
           bar.style.transform = 'translateX(-50%)';
         });
       }
+    }
+
+    // Dual View Mode Controller: Virtual Computer Rig vs Expanded Screen
+    function initViewModeController() {
+      const wrapper = document.getElementById('virtualMonitorWrapper');
+      const btnHud = document.getElementById('btnToggleViewMode');
+      const btnQuick = document.getElementById('btnMonitorQuickToggle');
+      const btnChin = document.getElementById('btnMonitorChinToggle');
+      if (!wrapper) return;
+
+      let currentMode = 'rig'; // 'rig' = Virtual Computer on Desk (Default), 'expanded' = Full Stage Mode
+
+      function updateUI(mode) {
+        currentMode = mode;
+        if (mode === 'expanded') {
+          wrapper.classList.remove('view-mode-rig');
+          wrapper.classList.add('view-mode-expanded');
+
+          if (btnHud) {
+            btnHud.innerHTML = '&#128187; وضع الحاسوب';
+            btnHud.title = 'العودة إلى وضع الحاسوب الافتراضي في المخبر (F10)';
+            btnHud.classList.add('active');
+          }
+          if (btnQuick) {
+            btnQuick.innerHTML = '<span class="toggle-icon">&#128187;</span><span class="toggle-label">وضع الحاسوب</span>';
+            btnQuick.title = 'العودة إلى وضع الحاسوب الافتراضي (F10)';
+          }
+          if (btnChin) {
+            btnChin.innerHTML = '&#128187; استعادة وضع الحاسوب';
+            btnChin.title = 'العودة إلى وضع الحاسوب الافتراضي (F10)';
+          }
+        } else {
+          wrapper.classList.remove('view-mode-expanded');
+          wrapper.classList.add('view-mode-rig');
+
+          if (btnHud) {
+            btnHud.innerHTML = '&#9974; ملء مساحة العرض';
+            btnHud.title = 'تكبير الشاشة لملء مساحة العرض بالكامل (F10)';
+            btnHud.classList.remove('active');
+          }
+          if (btnQuick) {
+            btnQuick.innerHTML = '<span class="toggle-icon">&#9974;</span><span class="toggle-label">ملء مساحة العرض</span>';
+            btnQuick.title = 'تكبير الشاشة لملء مساحة العرض (F10)';
+          }
+          if (btnChin) {
+            btnChin.innerHTML = '&#9974; تكبير الشاشة';
+            btnChin.title = 'تكبير الشاشة لملء مساحة العرض (F10)';
+          }
+        }
+      }
+
+      const toggleMode = () => {
+        if (window.soundSynth) window.soundSynth.playClick();
+        updateUI(currentMode === 'rig' ? 'expanded' : 'rig');
+      };
+
+      if (btnHud) btnHud.addEventListener('click', toggleMode);
+      if (btnQuick) btnQuick.addEventListener('click', toggleMode);
+      if (btnChin) btnChin.addEventListener('click', toggleMode);
+
+      // Keyboard Shortcut: F10
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'F10') {
+          e.preventDefault();
+          toggleMode();
+        }
+      });
+
+      // Synchronize Power LED with StateEngine
+      window.syncMonitorPowerLed = function(isOn) {
+        const led = document.getElementById('monitorPowerLed');
+        if (led) {
+          if (isOn) {
+            led.classList.add('active');
+          } else {
+            led.classList.remove('active');
+          }
+        }
+      };
+
+      window.setViewMode = updateUI;
+      window.getViewMode = () => currentMode;
     }
   </script>
 </body>

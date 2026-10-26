@@ -293,6 +293,7 @@ function renderPhase1Workstation(container) {
         if (towerLed) towerLed.classList.add('active');
         if (hddLed) hddLed.classList.add('active');
         if (monLed) monLed.classList.add('active');
+        if (window.syncMonitorPowerLed) window.syncMonitorPowerLed(true);
         if (monScreen) {
           monScreen.classList.add('powered-on');
           monScreen.innerHTML = `
@@ -313,6 +314,7 @@ function renderPhase1Workstation(container) {
 
 function renderPhase1POST(container) {
   window.stateEngine.isPowerOn = true;
+  if (window.syncMonitorPowerLed) window.syncMonitorPowerLed(true);
 
   container.innerHTML = `
     <div class="virtual-black-screen">

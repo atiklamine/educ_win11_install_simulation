@@ -98,6 +98,22 @@ assert(indexHtml.includes('id="btnOpenFinaleResults"'), 'HUD must have #btnOpenF
 assert(stateEngine.includes("document.getElementById('btnOpenFinaleResults')"), 'stateEngine must toggle btnOpenFinaleResults visibility');
 console.log('  ✓ PASS: End-of-program modal provides complete navigation: Return to desktop, Clean Exit, New Session, and Export PDF.');
 
+// 8. Verify Dual View Mode (Virtual Computer on Desk vs Expanded Full Stage)
+console.log('\n[Fix 8] Verifying Dual View Mode (Virtual Computer on Desk vs Expanded Full Stage)...');
+const mainLayoutCss = fs.readFileSync(path.join(__dirname, 'src', 'css', 'main-layout.css'), 'utf8');
+assert(indexHtml.includes('id="btnToggleViewMode"'), 'HUD must have #btnToggleViewMode button');
+assert(indexHtml.includes('id="btnMonitorQuickToggle"'), 'Monitor bezel must have #btnMonitorQuickToggle');
+assert(indexHtml.includes('id="btnMonitorChinToggle"'), 'Monitor chin must have #btnMonitorChinToggle');
+assert(indexHtml.includes('view-mode-rig'), 'Default view mode must be view-mode-rig (Virtual Computer on Desk)');
+assert(indexHtml.includes('id="monitorStandNeck"'), 'Monitor must have physical stand neck');
+assert(indexHtml.includes('id="monitorStandBase"'), 'Monitor must have physical stand base');
+assert(indexHtml.includes('id="rigDeskSurface"'), 'Rig stage must have physical desk surface');
+assert(mainLayoutCss.includes('.view-mode-rig'), 'main-layout.css must style view-mode-rig with monitor stand & desk');
+assert(mainLayoutCss.includes('.view-mode-expanded'), 'main-layout.css must style view-mode-expanded with 100% full stage');
+assert(indexHtml.includes("e.key === 'F10'"), 'index.html must handle F10 keyboard shortcut to toggle view modes');
+console.log('  ✓ PASS: Dual View Mode configured with Virtual Computer default, single-button expansion, and F10 shortcut.');
+
 console.log('\n================================================================');
 console.log('ALL FIXES VERIFIED SUCCESSFULLY WITH 100% PASS RATE!');
 console.log('================================================================');
+
