@@ -1,0 +1,47 @@
+{
+  "name": "simu-win11-dz",
+  "version": "1.0.0",
+  "description": "Ultra-Lightweight 2D Windows 11 Educational Simulator (Algerian Curriculum)",
+  "main": "main.js",
+  "author": "أستاذ مادة المعلوماتية - الأغواط <hadj.aissa.informatique@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "test": "node test_simulator.js && electron test_electron_runtime.js",
+    "test:pdf": "electron test_pdf_export.js",
+    "build:portable": "electron-builder --win portable --ia32 --x64",
+    "build:portable64": "electron-builder --win portable --x64",
+    "build:portable32": "electron-builder --win portable --ia32",
+    "build:universal": "electron-builder --win portable --ia32 --x64 --config.portable.artifactName=Win11_Edu_Simulator_Universal_Auto.exe",
+    "dist": "electron-builder"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "22.3.27",
+    "electron-builder": "24.13.3"
+  },
+  "build": {
+    "appId": "dz.education.win11.simulator",
+    "productName": "محاكي تنصيب ويندوز 11 التعليمي",
+    "copyright": "وزارة التربية الوطنية - الجمهورية الجزائرية الديمقراطية الشعبية",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
+    },
+    "portable": {
+      "artifactName": "Win11_Edu_Simulator_${arch}.exe",
+      "requestExecutionLevel": "user"
+    }
+  }
+}

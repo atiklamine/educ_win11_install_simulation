@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <defs>
+    <linearGradient id="monitorBezel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="monitorScreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="50%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#0369A1"/>
+    </linearGradient>
+    <linearGradient id="standGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#94A3B8"/>
+      <stop offset="100%" stop-color="#64748B"/>
+    </linearGradient>
+  </defs>
+  <!-- Monitor Stand Base -->
+  <ellipse cx="32" cy="54" rx="14" ry="4" fill="url(#standGrad)"/>
+  <!-- Monitor Neck -->
+  <path d="M29,42 L35,42 L34,53 L30,53 Z" fill="url(#standGrad)"/>
+  <!-- Monitor Outer Bezel -->
+  <rect x="8" y="10" width="48" height="34" rx="3.5" fill="url(#monitorBezel)" stroke="#475569" stroke-width="1.5"/>
+  <!-- Monitor Screen (with Bloom glow) -->
+  <rect x="11" y="13" width="42" height="28" rx="2" fill="url(#monitorScreen)"/>
+  <!-- Mini Windows 11 Logo on screen -->
+  <g transform="translate(32 27) scale(0.1)">
+    <rect x="-40" y="-40" width="36" height="36" rx="4" fill="#FFFFFF"/>
+    <rect x="4" y="-40" width="36" height="36" rx="4" fill="#FFFFFF"/>
+    <rect x="-40" y="4" width="36" height="36" rx="4" fill="#FFFFFF"/>
+    <rect x="4" y="4" width="36" height="36" rx="4" fill="#FFFFFF"/>
+  </g>
+</svg>

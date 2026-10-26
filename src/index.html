@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>محاكي تنصيب ويندوز 11 التعليمي - المنهاج الجزائري (1AS)</title>
+  <link rel="stylesheet" href="css/main-layout.css">
+  <link rel="stylesheet" href="css/virtual-screen.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script>
+    (function() {
+      var savedTheme = localStorage.getItem('app_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+</head>
+<body>
+
+  <div class="app-viewport">
+
+    <!-- 1. HUD Top Bar (z-index: 200, pointer-events: auto at all times) -->
+    <header class="hud-top-bar">
+      <div class="hud-identity-section">
+        <div class="hud-app-logo">
+          <img src="assets/logo-win11-blue.svg" class="win11-official-logo" style="width: 20px; height: 20px;" alt="Windows 11">
+          <span>المحاكي التعليمي: Windows 11</span>
+        </div>
+
+        <div class="hud-student-info">
+          <span>التلميذ:</span>
+          <strong id="hudStudentName">تلميذ (غير مسجل)</strong>
+          <span class="hud-badge" id="hudStudentGroup">1AS-01</span>
+          <span class="hud-badge" id="hudStudentMode" style="background: #0284c7; color: #fff;">امتحان (صارم)</span>
+        </div>
+      </div>
+
+      <div class="hud-timer-section">
+        <span class="hud-timer-label">مؤقت الحصة:</span>
+        <span class="hud-timer-display" id="hudTimer">30:00</span>
+      </div>
+
+      <div class="hud-actions-section">
+        <button class="hud-btn" id="btnToggleTheme" title="التبديل بين المظهر الفاتح والمظلم (Light / Dark Mode)">☀️ فاتح</button>
+        <button class="hud-btn" id="btnNewSession" title="بدء جلسة تقييم جديدة">&#10010; جلسة جديدة</button>
+        <button class="hud-btn" id="btnOpenExpertGuide" title="دليل النظام الخبير للتثبيت">&#128218; دليل النظام الخبير</button>
+        <button class="hud-btn hud-btn-accent" id="btnExportPdf" title="استخراج شهادة تقييم الكفاءة PDF">&#128196; تصدير PDF</button>
+        <button class="hud-btn" id="btnToggleSound" title="كتم / تفعيل المؤثرات الصوتية">&#128266; صوت</button>
+        <button class="hud-btn" id="btnToggleFullscreen" title="ملء الشاشة [F11]">&#9974; F11</button>
+        <button class="hud-btn" id="btnOpenAbout" title="معلومات المطور والأستاذ والمؤسسة">&#8505; حول البرنامج</button>
+        <button class="hud-btn hud-btn-danger" id="btnQuitApp" title="خروج من التطبيق">&times;</button>
+      </div>
+    </header>
+
+    <!-- 2. Virtual Monitor Container -->
+    <main class="virtual-monitor-wrapper">
+      <!-- Draggable Hint Bar -->
+      <div class="draggable-hint-bar" id="draggableHintBar">
+        <div class="hint-handle" id="hintDragHandle">
+          <span>&#10024; الهدف البيداغوجي:</span>
+        </div>
+        <div class="hint-text" id="hintBarText">
+          المرحلة 1: اختر وسيط التثبيت المناسب، اضغط زر تشغيل الحاسوب، ثم اضغط سريعاً على F2 أو Del لدخول البيوس قبل انقضاء 10 ثوانٍ.
+        </div>
+        <button class="hint-reset-btn" id="btnResetHintPos">استرجاع الموضع</button>
+      </div>
+
+      <!-- Simulated Monitor Frame -->
+      <div class="monitor-frame">
+        <div class="virtual-screen-content" id="virtualScreenContent">
+          <!-- Dynamic 2D Screens Rendered by AppSimulator -->
+        </div>
+      </div>
+    </main>
+
+    <!-- 3. Pedagogical Stepper Bar -->
+    <footer class="pedagogical-stepper-bar">
+      <div class="stepper-phases-container">
+        <div class="stepper-item active" id="stepperPhase1">
+          <span class="step-num">1</span>
+          <span>الإقلاع والعتاد</span>
+        </div>
+        <div class="stepper-item" id="stepperPhase2">
+          <span class="step-num">2</span>
+          <span>ضبط البيوس</span>
+        </div>
+        <div class="stepper-item" id="stepperPhase3">
+          <span class="step-num">3</span>
+          <span>المعايير الإقليمية</span>
+        </div>
+        <div class="stepper-item" id="stepperPhase4">
+          <span class="step-num">4</span>
+          <span>الترخيص والنسخة</span>
+        </div>
+        <div class="stepper-item" id="stepperPhase5">
+          <span class="step-num">5</span>
+          <span>التجزئة والتهيئة</span>
+        </div>
+        <div class="stepper-item" id="stepperPhase6">
+          <span class="step-num">6</span>
+          <span>التثبيت والنسخ</span>
+        </div>
+        <div class="stepper-item" id="stepperPhase7">
+          <span class="step-num">7</span>
+          <span>إعدادات OOBE</span>
+        </div>
+        <div class="stepper-item" id="stepperPhase8">
+          <span class="step-num">8</span>
+          <span>الإقلاع المستقل</span>
+        </div>
+      </div>
+
+      <div class="stepper-score-container">
+        <div class="stepper-score-box">
+          <span class="stepper-score-label">العلامة الحية:</span>
+          <span class="stepper-score-value" id="stepperScoreValue">14.00 / 20.00</span>
+        </div>
+        <div class="stepper-penalties-box">
+          <span>الخصومات:</span>
+          <span class="stepper-penalties-value" id="stepperPenaltiesValue">-0.00</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- =======================================================================
+       MODALS ARCHITECTURE (Strict max-height: 90vh, gap: 15px)
+       ======================================================================= -->
+
+  <!-- Modal 1: New Session Registration -->
+  <div class="modal-overlay" id="sessionModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">تسجيل بيانات التلميذ وبدء الحصة التطبيقية</h3>
+        <button class="modal-close-btn" id="btnCloseSessionModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="win11-label" style="margin-bottom: 0;">اللقب (Nom de famille):</label>
+            <span class="name-lang-badge forced-french" id="nameLangBadgeNom">حروف فرنسية فقط (FR)</span>
+          </div>
+          <input type="text" class="win11-input" id="regLastName" placeholder="Ex: MOHAMMEDI" value="MOHAMMEDI" autocomplete="off" spellcheck="false">
+          <div class="name-validation-msg" id="lastNameError" style="display: none;"></div>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="win11-label" style="margin-bottom: 0;">الاسم (Prénom):</label>
+            <span class="name-lang-badge forced-french" id="nameLangBadgePrenom">حروف فرنسية فقط (FR)</span>
+          </div>
+          <input type="text" class="win11-input" id="regFirstName" placeholder="Ex: Abdellah" value="Abdellah" autocomplete="off" spellcheck="false">
+          <div class="name-validation-msg" id="firstNameError" style="display: none;"></div>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <label class="win11-label">القسم / الفوج التربوي:</label>
+          <select class="win11-select" id="regGroup">
+            <!-- Populated exclusively from settings groups -->
+          </select>
+          <div id="regGroupNotice" style="color: #f59e0b; font-size: 11.5px; margin-top: 4px; display: none;"></div>
+        </div>
+        <!-- Modification 6: Session mode container toggled via session_mode_enabled -->
+        <div id="regModeContainer" style="margin-bottom: 14px;">
+          <label class="win11-label">نمط الحصة البيداغوجية:</label>
+          <select class="win11-select" id="regMode">
+            <option value="exam" selected>نمط الامتحان الصارم (مؤقت تنازلي 30:00 دقيقة مع خصم الجزاءات)</option>
+            <option value="practice">نمط التدريب الحر (مؤقت منقضي مفتوح وتوجيه إرشادي مرن)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="fluent-btn fluent-btn-standard" id="btnCancelSession">إلغاء</button>
+        <button class="fluent-btn fluent-btn-accent" id="btnConfirmSession">بدء المحاكاة الآن &#10095;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Conceptual MCQ Quiz (Does not block HUD) -->
+  <div class="modal-overlay" id="quizModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">محطة التقويم المعرفي والمفاهيمي (MCQ)</h3>
+        <span class="hud-badge" id="quizAttemptBadge">المحاولة رقم: 1</span>
+      </div>
+      <div class="modal-body">
+        <p id="quizPromptText" style="font-weight: 700; font-size: 15px; color: #ffffff; line-height: 1.5; margin-bottom: 16px;">
+          السؤال التقويمي يتم تحميله...
+        </p>
+
+        <div class="quiz-options-grid" id="quizOptionsContainer">
+          <!-- Dynamic 4 balanced options rendered by QuizManager -->
+        </div>
+
+        <div class="quiz-feedback hidden" id="quizFeedbackBox"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="fluent-btn fluent-btn-accent" id="quizSubmitBtn" disabled>تأكيد الإجابة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Developer Credentials & Teacher / Institution Section -->
+  <div class="modal-overlay" id="aboutModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">حول المحاكي التعليمي لتنصيب Windows 11</h3>
+        <button class="modal-close-btn" id="btnCloseAboutModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Modification 2: Teacher & Institution info section -->
+        <div style="background: rgba(0, 120, 212, 0.08); border: 1px solid rgba(0, 120, 212, 0.25); border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+          <h4 style="color: #38bdf8; font-size: 13.5px; margin-bottom: 8px; font-weight: 700;">بيانات الأستاذ والمؤسسة التعليمية:</h4>
+          <div class="about-info-grid" style="margin-bottom: 0;">
+            <div><strong>أستاذ المادة:</strong> <span id="aboutTeacherName">أستاذ مادة المعلوماتية</span></div>
+            <div><strong>المؤسسة التعليمية:</strong> <span id="aboutInstitution">ثانوية مخبر الإعلام الآلي</span></div>
+            <div><strong>السنة الدراسية:</strong> <span id="aboutSchoolYear">2025/2026</span></div>
+            <div><strong>إعدادات النظام:</strong> <span>اضغط [Ctrl+Shift+S]</span></div>
+          </div>
+        </div>
+
+        <div class="about-info-grid">
+          <div><strong>المطور:</strong> أستاذ مادة المعلوماتية - الأغواط</div>
+          <div><strong>البريد الإلكتروني:</strong> hadj.aissa.informatique@gmail.com</div>
+          <div><strong>الهاتف:</strong> 00213.662.60.82</div>
+          <div><strong>البيئة المستهدفة:</strong> ثانويات الجزائر - 1AS</div>
+        </div>
+
+        <div class="about-quote-box">
+          "نحو تعليم رقمي جزائري رائد، نؤمن بأن العلم هو أساس النهضة، وأن المبادرة الفردية وروح المسؤولية هما محرك التقدم. هذا العمل المتواضع هو بذرة نضعها بين أيدي أساتذتنا الأفاضل وتلاميذنا الأعزاء، لعلها تسهم في تذليل الصعاب، وربح الوقت والجهد، واستخدام الوسائل الحديثة التي ترفع من كفاءة أدائنا التربوي. نفتخر بانتمائنا لوزارة التربية الوطنية ولجزائر العلم والمعرفة، ونشجع كل مبادرات التطوير والتحديث. معاً، نحو أفق تعليمي أكثر إشراقاً وتطوراً."
+        </div>
+
+        <p style="font-size: 11.5px; color: #94a3b8;">
+          تطبيق خفيف 100% ثنائي الأبعاد، متوافق مع الحواسيب القديمة (Windows 7/8/10/11) ومعتمد وفق المنهاج الوزاري للمقاربة بالكفاءات.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="fluent-btn fluent-btn-standard" id="btnOkAbout">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Expert System Simulation Guide -->
+  <div class="modal-overlay" id="expertGuideModal">
+    <div class="modal-dialog" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 class="modal-title">&#128218; دليل النظام الخبير للمحاكاة (The Expert Guide)</h3>
+        <button class="modal-close-btn" id="btnCloseGuideModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 14px;">
+          دليل إرشادي استباقي يطابق الكود البرمجي للمحاكاة، ويقدم تنبيهات تنبؤية للخطوات الحاسمة:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="background: rgba(0, 120, 212, 0.1); border-right: 4px solid #0078d4; padding: 10px 14px; border-radius: 4px;">
+            <strong style="color: #38bdf8; display: block; margin-bottom: 2px;">1. مقاطعة الإقلاع الأولي (POST):</strong>
+            <span>تنبيه: إذا انقضت مهلة الـ 10 ثوانٍ دون الضغط على F2 أو Del، ستفقد فرصة دخول البيوس وسيخصم -1.00 نقطة.</span>
+          </div>
+
+          <div style="background: rgba(245, 158, 11, 0.1); border-right: 4px solid #f59e0b; padding: 10px 14px; border-radius: 4px;">
+            <strong style="color: #f59e0b; display: block; margin-bottom: 2px;">2. إعدادات البيوس ووسيط الإقلاع:</strong>
+            <span>تنبيه: إذا تركت القرص الداخلي الفارغ كإقلاع أول، سيظهر لك خطأ (No bootable device found). يجب اختيار USB وتفعيل TPM 2.0 و Secure Boot ثم الضغط حصراً على F10.</span>
+          </div>
+
+          <div style="background: rgba(16, 185, 129, 0.1); border-right: 4px solid #10b981; padding: 10px 14px; border-radius: 4px;">
+            <strong style="color: #34d399; display: block; margin-bottom: 2px;">3. التجزئة والتهيئة بنظام NTFS:</strong>
+            <span>تنبيه: إذا حاولت الضغط على Next دون تهيئة القسم الأساسي (Primary) بنظام NTFS، سيتوقف التثبيت مع خصم نقطي. اضغط New ثم Format.</span>
+          </div>
+
+          <div style="background: rgba(239, 68, 68, 0.1); border-right: 4px solid #ef4444; padding: 10px 14px; border-radius: 4px;">
+            <strong style="color: #fca5a5; display: block; margin-bottom: 2px;">4. كسر حلقة الإقلاع الثاني وفصل الفلاشة:</strong>
+            <span>تنبيه: بعد انتهاء نسخ الملفات، اضغط F2 لإعادة القرص الصلب كإقلاع أول ثم انزع مفتاح USB لمرة واحدة لمنع تكرار شاشة التثبيت الأولى.</span>
+          </div>
+
+          <div style="background: rgba(168, 85, 247, 0.1); border-right: 4px solid #a855f7; padding: 10px 14px; border-radius: 4px;">
+            <strong style="color: #d8b4fe; display: block; margin-bottom: 2px;">5. حماية الخصوصية الرقمية (OOBE):</strong>
+            <span>تنبيه: في مرحلة OOBE، يجب تعطيل كافة خيارات التتبع الإعلانية السبعة (Turn All OFF) لضمان حماية بيانات التلميذ.</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="fluent-btn fluent-btn-standard" id="btnOkGuide">فهمت التعليمات</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Grand Finale Success & Prominent Score + Time Cards (Modification 4) -->
+  <div class="modal-overlay" id="grandFinaleModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">&#127881; اكتمال محاكاة تنصيب Windows 11 بنجاح</h3>
+      </div>
+      <div class="modal-body">
+        <!-- Modification 4: Side-by-Side Prominent Cards -->
+        <div class="finale-cards-row">
+          <div class="finale-metric-card">
+            <div class="finale-metric-title">العلامة:</div>
+            <div class="finale-metric-value" id="finaleScoreNumber">18.50 / 20.00</div>
+            <div class="badge-appreciation grade-excellent" id="finaleScoreAppreciation" style="margin-top: 6px;">متحكم جداً (ممتاز)</div>
+          </div>
+          <div class="finale-metric-card">
+            <div class="finale-metric-title">الوقت المستغرق:</div>
+            <div class="finale-metric-value" id="finaleTimeNumber">00:21:40</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;" id="finaleDuration">21 دقيقة و 40 ثانية</div>
+          </div>
+        </div>
+        <div class="finale-tie-note">في حالة تساوي العلامة، يُرجَّح التلميذ الأقل وقتًا.</div>
+
+        <div class="finale-stats-grid">
+          <div class="finale-stat-item">
+            <span>الجانب المعرفي (MCQs):</span>
+            <strong id="finaleCognitiveScore">5.50 / 6.00</strong>
+          </div>
+          <div class="finale-stat-item">
+            <span>الجانب المهاري (العملي):</span>
+            <strong id="finalePracticalScore">13.00 / 14.00</strong>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px;">
+          <div style="font-size: 12.5px; font-weight: 700; color: #ffffff; margin-bottom: 6px;">سجل الخصومات والجزاءات:</div>
+          <div class="penalties-list-box">
+            <ul id="finalePenaltiesList">
+              <li class="penalty-none">أداء مهاري مثالي - لا توجد أي خصومات مسجلة ✔</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="fluent-btn fluent-btn-standard" id="btnFinaleRestart">&#8635; جلسة جديدة</button>
+        <button class="fluent-btn fluent-btn-accent" id="btnFinaleExportPdf">&#128196; استخراج تقرير PDF الرسمي</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modification 3: Exit Confirmation Modal -->
+  <div class="modal-overlay" id="exitConfirmModal">
+    <div class="modal-dialog" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">تأكيد الخروج من المحاكي</h3>
+        <button class="modal-close-btn" id="btnCloseExitConfirmModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 14px; color: #f1f5f9; line-height: 1.6;">
+          هل تريد الخروج؟ سيتم فقدان التقدم غير المحفوظ في الحصة الحالية.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="fluent-btn fluent-btn-standard" id="btnCancelExit">إلغاء</button>
+        <button class="fluent-btn fluent-btn-danger" id="btnConfirmExit">تأكيد الخروج</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modification 2: Settings Password Modal (Ctrl+Shift+S) -->
+  <div class="modal-overlay" id="settingsPasswordModal">
+    <div class="modal-dialog" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 class="modal-title">&#128274; حماية الإعدادات (كلمة مرور الأستاذ)</h3>
+        <button class="modal-close-btn" id="btnClosePwdModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 12px;">
+          <label class="win11-label">أدخل كلمة مرور الأستاذ لفتح الإعدادات:</label>
+          <input type="password" class="win11-input" id="settingsPwdInput" placeholder="••••••">
+          <div id="settingsPwdError" style="color: #ef4444; font-size: 12px; margin-top: 6px; display: none;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="fluent-btn fluent-btn-standard" id="btnCancelSettingsPassword">إلغاء</button>
+        <button class="fluent-btn fluent-btn-accent" id="btnConfirmSettingsPassword">تأكيد الدخول</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modification 2: Settings Management Modal (inf.dll) -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-dialog" style="max-width: 600px; max-height: 90vh;">
+      <div class="modal-header">
+        <h3 class="modal-title">&#9881; إعدادات الأستاذ والمؤسسة التعليمية (Ctrl+Shift+S)</h3>
+        <button class="modal-close-btn" id="btnCloseSettingsModal">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <label class="win11-label">الاسم الكامل للأستاذ:</label>
+          <input type="text" class="win11-input" id="setTeacherFullName" placeholder="مثال: أستاذ مادة المعلوماتية">
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 12px; border-radius: 6px;">
+          <div style="font-weight: 700; font-size: 13px; color: #38bdf8; margin-bottom: 8px;">تغيير كلمة المرور (اختياري):</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label class="win11-label">كلمة المرور الجديدة:</label>
+              <input type="password" class="win11-input" id="setNewPassword" placeholder="اترك فارغاً إن لم ترغب بالتغيير">
+            </div>
+            <div>
+              <label class="win11-label">تأكيد كلمة المرور:</label>
+              <input type="password" class="win11-input" id="setConfirmPassword" placeholder="أعد كتابة كلمة المرور">
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label class="win11-label">المؤسسة التعليمية:</label>
+            <input type="text" class="win11-input" id="setInstitution" placeholder="مثال: ثانوية العقيد لطفي">
+          </div>
+          <div>
+            <label class="win11-label">السنة الدراسية:</label>
+            <input type="text" class="win11-input" id="setSchoolYear" placeholder="مثال: 2025/2026">
+          </div>
+        </div>
+
+        <div>
+          <label class="win11-label">إدارة قائمة الأفواج التربوية:</label>
+          <div class="group-chips-container" id="setGroupsChipsContainer"></div>
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <input type="text" class="win11-input" id="newGroupInput" placeholder="أدخل اسم الفوج (مثال: 1AS-04)">
+            <button type="button" class="fluent-btn fluent-btn-standard" id="btnAddGroup" style="min-width: 90px;">+ إضافة</button>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0, 120, 212, 0.08); border: 1px solid rgba(0, 120, 212, 0.2); padding: 10px 14px; border-radius: 6px;">
+          <div>
+            <strong style="color: var(--text-color, #ffffff); display: block; font-size: 13px;">تمكين اختيار نمط الحصة للتلميذ:</strong>
+            <span style="font-size: 11.5px; color: var(--text-muted, #94a3b8);">إذا تم التعطيل، تبدأ الجلسة مباشرة في نمط التدريب الحر بدون سقف 30:00 دقيقة</span>
+          </div>
+          <label class="fluent-switch">
+            <input type="checkbox" id="setSessionModeSwitch" checked>
+            <span class="fluent-slider"></span>
+          </label>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0, 120, 212, 0.08); border: 1px solid rgba(0, 120, 212, 0.2); padding: 10px 14px; border-radius: 6px;">
+          <div>
+            <strong style="color: var(--text-color, #ffffff); display: block; font-size: 13px;">إلزام كتابة أسماء التلاميذ بالحروف الفرنسية فقط:</strong>
+            <span style="font-size: 11.5px; color: var(--text-muted, #94a3b8);">فرض الحروف اللاتينية (A-Z) لمنع مشاكل تلف ونقل ملفات PDF بين أجهزة التلاميذ وحاسوب الأستاذ</span>
+          </div>
+          <label class="fluent-switch">
+            <input type="checkbox" id="setForceFrenchNamesSwitch" checked>
+            <span class="fluent-slider"></span>
+          </label>
+        </div>
+
+        <div id="settingsStatusMsg" class="settings-status-msg" style="display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="fluent-btn fluent-btn-standard" id="btnCancelSettings">إلغاء</button>
+        <button class="fluent-btn fluent-btn-accent" id="btnSaveSettings">حفظ التعديلات</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modification 2: Initial Setup Modal (Shown if inf.dll is missing) -->
+  <div class="modal-overlay" id="initialSetupModal">
+    <div class="modal-dialog" style="max-width: 600px; max-height: 90vh;">
+      <div class="modal-header">
+        <h3 class="modal-title">&#128640; التهيئة الأولية للمحاكي التعليمي (خاص بالأستاذ)</h3>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <p style="font-size: 13px; color: #38bdf8; background: rgba(56, 189, 248, 0.1); border-right: 3px solid #38bdf8; padding: 8px 12px; border-radius: 4px;">
+          مرحباً بك أستاذي الفاضل! لم يتم العثور على ملف الإعدادات inf.dll. يرجى تهيئة بيانات المؤسسة وتعيين كلمة مرور لحماية الإعدادات.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label class="win11-label">تعيين كلمة مرور الأستاذ (≥6 أحرف):</label>
+            <input type="password" class="win11-input" id="initTeacherPassword" placeholder="••••••">
+          </div>
+          <div>
+            <label class="win11-label">تأكيد كلمة المرور:</label>
+            <input type="password" class="win11-input" id="initConfirmPassword" placeholder="••••••">
+          </div>
+        </div>
+
+        <div>
+          <label class="win11-label">الاسم الكامل للأستاذ:</label>
+          <input type="text" class="win11-input" id="initTeacherFullName" placeholder="مثال: أستاذ مادة المعلوماتية" value="أستاذ مادة المعلوماتية">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label class="win11-label">المؤسسة التعليمية:</label>
+            <input type="text" class="win11-input" id="initInstitution" placeholder="مثال: ثانوية مخبر الإعلام الآلي" value="ثانوية مخبر الإعلام الآلي">
+          </div>
+          <div>
+            <label class="win11-label">السنة الدراسية:</label>
+            <input type="text" class="win11-input" id="initSchoolYear" placeholder="مثال: 2025/2026" value="2025/2026">
+          </div>
+        </div>
+
+        <div>
+          <label class="win11-label">الأفواج التربوية المعتمدة:</label>
+          <div class="group-chips-container" id="initGroupsChipsContainer"></div>
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <input type="text" class="win11-input" id="newInitGroupInput" placeholder="اسم الفوج (مثال: 1AS-04)">
+            <button type="button" class="fluent-btn fluent-btn-standard" id="btnAddInitGroup" style="min-width: 90px;">+ إضافة</button>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0, 120, 212, 0.08); border: 1px solid rgba(0, 120, 212, 0.2); padding: 10px 14px; border-radius: 6px;">
+          <div>
+            <strong style="color: var(--text-color, #ffffff); display: block; font-size: 13px;">فرض كتابة أسماء التلاميذ بالحروف الفرنسية/اللاتينية (A-Z):</strong>
+            <span style="font-size: 11.5px; color: var(--text-muted, #94a3b8);">موصى به لتفادي مشاكل تلف ترميز أسماء ملفات PDF في الشبكة المحلية ومفاتيح USB</span>
+          </div>
+          <label class="fluent-switch">
+            <input type="checkbox" id="initForceFrenchNamesSwitch" checked>
+            <span class="fluent-slider"></span>
+          </label>
+        </div>
+
+        <div id="initStatusMsg" class="settings-status-msg" style="display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="fluent-btn fluent-btn-accent" id="btnSaveInitialSetup">إنشاء وحفظ ملف الإعدادات المشفر</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts Loading -->
+  <script src="js/sound-synth.js"></script>
+  <script src="js/settings-manager.js"></script>
+  <script src="js/state-engine.js"></script>
+  <script src="js/bios-controller.js"></script>
+  <script src="js/quiz-manager.js"></script>
+  <script src="js/report-pdf.js"></script>
+  <script src="js/app-simulator.js"></script>
+
+  <!-- Main Initialization & Event Bindings -->
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Initialize Settings System from inf.dll
+      await window.settingsManager.init();
+
+      // 2. Load Quiz Banks
+      await window.quizManager.loadQuestions();
+
+      // 3. Initialize Draggable Hint Bar
+      initDraggableHintBar();
+
+      // 4. Bind HUD Buttons
+      bindHudControls();
+
+      // 5. Bind Modals
+      bindModals();
+
+      // 6. Open Session Registration Modal by default if initial setup is not pending
+      const initModal = document.getElementById('initialSetupModal');
+      const sessionModal = document.getElementById('sessionModal');
+      if (sessionModal && (!initModal || !initModal.classList.contains('modal-visible'))) {
+        sessionModal.classList.add('modal-visible');
+      }
+    });
+
+    function bindHudControls() {
+      // Theme Toggle (Default Light mode, switchable to Dark mode)
+      const btnTheme = document.getElementById('btnToggleTheme');
+      const applyTheme = (theme) => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('app_theme', theme);
+        if (btnTheme) {
+          if (theme === 'dark') {
+            btnTheme.innerHTML = '🌙 داكن';
+            btnTheme.title = 'المظهر الحالي: داكن (انقر للتبديل إلى الفاتح)';
+          } else {
+            btnTheme.innerHTML = '☀️ فاتح';
+            btnTheme.title = 'المظهر الحالي: فاتح (انقر للتبديل إلى الداكن)';
+          }
+        }
+      };
+
+      const currentTheme = localStorage.getItem('app_theme') || 'light';
+      applyTheme(currentTheme);
+
+      if (btnTheme) {
+        btnTheme.addEventListener('click', () => {
+          const activeTheme = document.documentElement.getAttribute('data-theme') || 'light';
+          const nextTheme = activeTheme === 'light' ? 'dark' : 'light';
+          applyTheme(nextTheme);
+          if (window.soundSynth) window.soundSynth.playClick();
+        });
+      }
+
+      // New Session Button
+      const btnNew = document.getElementById('btnNewSession');
+      if (btnNew) {
+        btnNew.addEventListener('click', () => {
+          if (window.soundSynth) window.soundSynth.playClick();
+          document.getElementById('sessionModal').classList.add('modal-visible');
+        });
+      }
+
+      // Expert Guide Button
+      const btnGuide = document.getElementById('btnOpenExpertGuide');
+      if (btnGuide) {
+        btnGuide.addEventListener('click', () => {
+          if (window.soundSynth) window.soundSynth.playClick();
+          document.getElementById('expertGuideModal').classList.add('modal-visible');
+        });
+      }
+
+      // Export PDF Button (Active at all times, including during MCQ)
+      const btnExport = document.getElementById('btnExportPdf');
+      if (btnExport) {
+        btnExport.addEventListener('click', () => {
+          if (window.soundSynth) window.soundSynth.playClick();
+          window.reportPdf.exportPdf();
+        });
+      }
+
+      // Sound Toggle
+      const btnSound = document.getElementById('btnToggleSound');
+      if (btnSound) {
+        btnSound.addEventListener('click', () => {
+          const isMuted = window.soundSynth.toggleMute();
+          btnSound.innerHTML = isMuted ? '&#128263; مكتوم' : '&#128266; صوت';
+          if (!isMuted) window.soundSynth.playClick();
+        });
+      }
+
+      // Fullscreen Toggle
+      const btnFs = document.getElementById('btnToggleFullscreen');
+      if (btnFs) {
+        btnFs.addEventListener('click', () => {
+          if (window.electronAPI && window.electronAPI.toggleFullscreen) {
+            window.electronAPI.toggleFullscreen();
+          } else {
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen();
+            } else {
+              document.exitFullscreen();
+            }
+          }
+        });
+      }
+
+      // About Modal Button (Opens on top of everything without losing quiz state)
+      const btnAbout = document.getElementById('btnOpenAbout');
+      if (btnAbout) {
+        btnAbout.addEventListener('click', () => {
+          if (window.soundSynth) window.soundSynth.playClick();
+          document.getElementById('aboutModal').classList.add('modal-visible');
+        });
+      }
+
+      // Quit Button (Modification 3: Shows exit confirmation if active session, exits directly if not)
+      const btnQuit = document.getElementById('btnQuitApp');
+      if (btnQuit) {
+        btnQuit.addEventListener('click', () => {
+          if (window.soundSynth) window.soundSynth.playClick();
+          if (window.stateEngine && window.stateEngine.hasActiveSession()) {
+            document.getElementById('exitConfirmModal').classList.add('modal-visible');
+          } else {
+            if (window.electronAPI && window.electronAPI.quitApp) {
+              window.electronAPI.quitApp();
+            } else {
+              window.close();
+            }
+          }
+        });
+      }
+    }
+
+    function bindModals() {
+      // Session Modal
+      const sessionModal = document.getElementById('sessionModal');
+      const btnCancelSession = document.getElementById('btnCancelSession');
+      const btnCloseSession = document.getElementById('btnCloseSessionModal');
+      const btnConfirmSession = document.getElementById('btnConfirmSession');
+
+      const closeSessionModal = () => sessionModal.classList.remove('modal-visible');
+      if (btnCancelSession) btnCancelSession.addEventListener('click', closeSessionModal);
+      if (btnCloseSession) btnCloseSession.addEventListener('click', closeSessionModal);
+
+      if (btnConfirmSession) {
+        btnConfirmSession.addEventListener('click', () => {
+          const lastNameInput = document.getElementById('regLastName');
+          const firstNameInput = document.getElementById('regFirstName');
+          const lastName = (lastNameInput ? lastNameInput.value : '').trim();
+          const firstName = (firstNameInput ? firstNameInput.value : '').trim();
+          const group = document.getElementById('regGroup').value;
+          const mode = document.getElementById('regMode').value;
+          const lastNameError = document.getElementById('lastNameError');
+          const firstNameError = document.getElementById('firstNameError');
+
+          if (!lastName || !firstName) {
+            alert('يرجى كتابة الاسم واللقب لمواصلة الجلسة.');
+            return;
+          }
+
+          const isForced = window.settingsManager && window.settingsManager.getSettings().force_french_names !== false;
+          if (isForced) {
+            const isLastValid = window.settingsManager.isFrenchNameValid(lastName);
+            const isFirstValid = window.settingsManager.isFrenchNameValid(firstName);
+
+            if (!isLastValid || !isFirstValid) {
+              if (window.soundSynth) window.soundSynth.playWarning();
+              if (!isLastValid && lastNameError) {
+                lastNameError.textContent = 'اللقب غير صالح! يرجى إدخال اللقب بالحروف الفرنسية فقط (A-Z) دون حروف عربية أو أرقام.';
+                lastNameError.style.display = 'block';
+                if (lastNameInput) lastNameInput.focus();
+              }
+              if (!isFirstValid && firstNameError) {
+                firstNameError.textContent = 'الاسم غير صالح! يرجى إدخال الاسم بالحروف الفرنسية فقط (A-Z) دون حروف عربية أو أرقام.';
+                firstNameError.style.display = 'block';
+                if (isLastValid && firstNameInput) firstNameInput.focus();
+              }
+              return;
+            }
+          }
+
+          if (lastNameError) lastNameError.style.display = 'none';
+          if (firstNameError) firstNameError.style.display = 'none';
+
+          if (window.soundSynth) window.soundSynth.playClick();
+          window.stateEngine.initSession({
+            firstName,
+            lastName,
+            group,
+            mode
+          });
+
+          closeSessionModal();
+          window.stateEngine.goToPhase(1);
+        });
+      }
+
+      // About Modal
+      const aboutModal = document.getElementById('aboutModal');
+      const btnCloseAbout = document.getElementById('btnCloseAboutModal');
+      const btnOkAbout = document.getElementById('btnOkAbout');
+      const closeAbout = () => {
+        aboutModal.classList.remove('modal-visible');
+        if (window.quizManager) window.quizManager.restoreFocus();
+      };
+      if (btnCloseAbout) btnCloseAbout.addEventListener('click', closeAbout);
+      if (btnOkAbout) btnOkAbout.addEventListener('click', closeAbout);
+
+      // Guide Modal
+      const guideModal = document.getElementById('expertGuideModal');
+      const btnCloseGuide = document.getElementById('btnCloseGuideModal');
+      const btnOkGuide = document.getElementById('btnOkGuide');
+      const closeGuide = () => {
+        guideModal.classList.remove('modal-visible');
+        if (window.quizManager) window.quizManager.restoreFocus();
+      };
+      if (btnCloseGuide) btnCloseGuide.addEventListener('click', closeGuide);
+      if (btnOkGuide) btnOkGuide.addEventListener('click', closeGuide);
+
+      // Exit Confirmation Modal
+      const exitModal = document.getElementById('exitConfirmModal');
+      const btnCancelExit = document.getElementById('btnCancelExit');
+      const btnCloseExit = document.getElementById('btnCloseExitConfirmModal');
+      const btnConfirmExit = document.getElementById('btnConfirmExit');
+
+      const closeExit = () => {
+        if (exitModal) exitModal.classList.remove('modal-visible');
+        if (window.quizManager) window.quizManager.restoreFocus();
+      };
+      if (btnCancelExit) btnCancelExit.addEventListener('click', closeExit);
+      if (btnCloseExit) btnCloseExit.addEventListener('click', closeExit);
+      if (btnConfirmExit) {
+        btnConfirmExit.addEventListener('click', () => {
+          if (window.electronAPI && window.electronAPI.quitApp) {
+            window.electronAPI.quitApp();
+          } else {
+            window.close();
+          }
+        });
+      }
+
+      // Grand Finale Modal
+      const finaleExport = document.getElementById('btnFinaleExportPdf');
+      const finaleRestart = document.getElementById('btnFinaleRestart');
+      if (finaleExport) {
+        finaleExport.addEventListener('click', () => window.reportPdf.exportPdf());
+      }
+      if (finaleRestart) {
+        finaleRestart.addEventListener('click', () => {
+          document.getElementById('grandFinaleModal').classList.remove('modal-visible');
+          sessionModal.classList.add('modal-visible');
+        });
+      }
+    }
+
+    // Draggable Hint Bar Implementation
+    function initDraggableHintBar() {
+      const bar = document.getElementById('draggableHintBar');
+      const handle = document.getElementById('hintDragHandle');
+      const btnReset = document.getElementById('btnResetHintPos');
+      if (!bar || !handle) return;
+
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
+
+      handle.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        const rect = bar.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+        bar.style.transition = 'none';
+        bar.style.transform = 'none';
+        bar.style.left = `${initialLeft}px`;
+        bar.style.top = `${initialTop}px`;
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        bar.style.left = `${initialLeft + dx}px`;
+        bar.style.top = `${initialTop + dy}px`;
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          bar.style.transition = '';
+        }
+      });
+
+      if (btnReset) {
+        btnReset.addEventListener('click', (e) => {
+          e.stopPropagation();
+          bar.style.top = '60px';
+          bar.style.left = '50%';
+          bar.style.transform = 'translateX(-50%)';
+        });
+      }
+    }
+  </script>
+</body>
+</html>

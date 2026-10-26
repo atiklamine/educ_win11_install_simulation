@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Production build artifacts (compiled executables belong in GitHub Releases)
+# Note: GitHub rejects files > 100MB during git push
+dist/
+
+# Test output artifacts
+test_output_report.pdf
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / Editor temporary files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+.idea/
+.vscode/
+*.swp
+*.tmp

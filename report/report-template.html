@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>تقرير تقييم الكفاءة - تنصيب نظام التشغيل Windows 11</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 10mm 12mm 10mm 12mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      direction: rtl;
+      text-align: right;
+      color: #0f172a;
+      background: #ffffff;
+      font-size: 10pt;
+      line-height: 1.4;
+      position: relative;
+    }
+
+    /* Watermark */
+    .watermark-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      opacity: 0.035;
+    }
+
+    .watermark-text {
+      font-size: 38pt;
+      font-weight: 900;
+      color: #000;
+      transform: rotate(-25deg);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .report-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    /* Official Ministry Header */
+    .header-table {
+      width: 100%;
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    .header-table td {
+      vertical-align: middle;
+    }
+
+    .republic-title {
+      font-size: 11.5pt;
+      font-weight: 700;
+      text-align: center;
+      color: #0f172a;
+    }
+
+    .ministry-title {
+      font-size: 12.5pt;
+      font-weight: 800;
+      text-align: center;
+      color: #1e3a8a;
+      margin-top: 2px;
+    }
+
+    .doc-badge {
+      font-size: 13.5pt;
+      font-weight: 900;
+      text-align: center;
+      background: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 6px;
+      margin-top: 6px;
+      color: #0f172a;
+    }
+
+    /* Student Meta Card */
+    .meta-box {
+      width: 100%;
+      border: 1px solid #94a3b8;
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      background: #f8fafc;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      row-gap: 6px;
+      column-gap: 12px;
+      font-size: 9.5pt;
+    }
+
+    .meta-item strong {
+      color: #334155;
+    }
+
+    /* Modification 4: Equal-Height Side-by-Side Prominent Cards */
+    .highlight-cards-container {
+      margin-bottom: 12px;
+    }
+
+    .highlight-cards-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .highlight-card {
+      border: 1.5px solid #94a3b8;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 85px;
+    }
+
+    .highlight-card-title {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 4px;
+    }
+
+    .highlight-card-value {
+      font-size: 28pt; /* >=28pt in PDF as required */
+      font-weight: 900;
+      color: #0f172a;
+      line-height: 1.1;
+      letter-spacing: 0.5px;
+    }
+
+    .tie-breaker-caption {
+      font-size: 8.5pt;
+      color: #64748b;
+      text-align: center;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    /* Score Breakdown Table */
+    .score-breakdown-section {
+      margin-bottom: 12px;
+    }
+
+    .score-breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+    }
+
+    .score-breakdown-table th, .score-breakdown-table td {
+      border: 1px solid #cbd5e1;
+      padding: 5px 8px;
+      text-align: center;
+    }
+
+    .score-breakdown-table th {
+      background: #e2e8f0;
+      font-weight: 700;
+    }
+
+    .appreciation-pill {
+      font-size: 9pt;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    .grade-excellent { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .grade-good { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
+    .grade-average { background: #fef9c3; color: #a16207; border: 1px solid #fde047; }
+    .grade-remedial { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+    /* Competencies Grid */
+    .section-title {
+      font-size: 10.5pt;
+      font-weight: 800;
+      color: #1e3a8a;
+      margin-bottom: 6px;
+      border-right: 4px solid #1e3a8a;
+      padding-right: 8px;
+    }
+
+    .competencies-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.5pt;
+      margin-bottom: 12px;
+    }
+
+    .competencies-table th, .competencies-table td {
+      border: 1px solid #cbd5e1;
+      padding: 5px 8px;
+      text-align: right;
+    }
+
+    .competencies-table th {
+      background: #f1f5f9;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* Diagnostic Misconceptions Table */
+    .diagnostic-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8pt;
+      margin-bottom: 12px;
+    }
+
+    .diagnostic-table th, .diagnostic-table td {
+      border: 1px solid #cbd5e1;
+      padding: 4px 6px;
+      text-align: right;
+    }
+
+    .diagnostic-table th {
+      background: #fee2e2;
+      color: #991b1b;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* Teacher Signature Block */
+    .signatures-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .teacher-notes-box {
+      border: 1px dashed #94a3b8;
+      border-radius: 6px;
+      padding: 8px 10px;
+      height: 70px;
+      font-size: 8.5pt;
+      color: #475569;
+    }
+
+    .teacher-stamp-box {
+      border: 1px solid #94a3b8;
+      border-radius: 6px;
+      padding: 8px;
+      text-align: center;
+      height: 70px;
+      font-size: 8.5pt;
+      color: #334155;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .report-footer {
+      border-top: 1px solid #e2e8f0;
+      margin-top: 8px;
+      padding-top: 4px;
+      font-size: 7.5pt;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Watermark -->
+  <div class="watermark-bg">
+    <div class="watermark-text">الجمهورية الجزائرية الديمقراطية الشعبية</div>
+    <div class="watermark-text">وزارة التربية الوطنية - إعلام آلي 1AS</div>
+    <div class="watermark-text">تقييم الكفاءة - Windows 11</div>
+  </div>
+
+  <div class="report-container">
+    <!-- Header -->
+    <table class="header-table">
+      <tr>
+        <td style="width: 30%; text-align: right; font-size: 8.5pt; color: #475569; line-height: 1.5;">
+          وزارة التربية الوطنية<br>
+          المؤسسة: <strong id="rHeaderInstitution" style="color: #0f172a;">ثانوية مخبر الإعلام الآلي</strong><br>
+          السنة الدراسية: <strong id="rHeaderYear" style="color: #0f172a;">2025/2026</strong>
+        </td>
+        <td style="width: 45%; text-align: center;">
+          <div class="republic-title">الجمهورية الجزائرية الديمقراطية الشعبية</div>
+          <div class="ministry-title">وزارة التربية الوطنية</div>
+          <div class="doc-badge">شهادة تقييم الكفاءة: تنصيب وتخصيص نظام التشغيل</div>
+        </td>
+        <td style="width: 25%; text-align: left; font-size: 8.5pt; color: #475569; line-height: 1.5;">
+          المستوى: 1AS (جذع مشترك)<br>
+          الوحدة: نظام التشغيل<br>
+          المنهجية: المقاربة بالكفاءات
+        </td>
+      </tr>
+    </table>
+
+    <!-- Student & Institution Metadata (Strictly NO mode mentioned) -->
+    <div class="meta-box">
+      <div class="meta-grid">
+        <div class="meta-item"><strong>اسم ولقب التلميذ:</strong> <span id="rStudentFullName">بن عيسى محمد</span></div>
+        <div class="meta-item"><strong>الفوج / القسم:</strong> <span id="rStudentGroup">1AS-02 (علوم)</span></div>
+        <div class="meta-item"><strong>الوقت المستغرق:</strong> <span id="rMetaTime" style="font-weight: 700; color: #0f172a;">00:22:15</span></div>
+        <div class="meta-item"><strong>تاريخ الإجراء:</strong> <span id="rSessionDate">24 أكتوبر 2026</span></div>
+        <div class="meta-item"><strong>توقيت الحصة:</strong> <span id="rSessionTime">14:30</span></div>
+        <div class="meta-item"><strong>المدة المفصلة:</strong> <span id="rSessionDuration">22 دقيقة و 15 ثانية</span></div>
+      </div>
+    </div>
+
+    <!-- Modification 4: Side-by-Side Score & Elapsed Time Prominent Cards -->
+    <div class="highlight-cards-container">
+      <div class="highlight-cards-row">
+        <div class="highlight-card">
+          <div class="highlight-card-title">العلامة:</div>
+          <div class="highlight-card-value" id="rFinalScore">18.50 / 20.00</div>
+        </div>
+        <div class="highlight-card">
+          <div class="highlight-card-title">الوقت المستغرق:</div>
+          <div class="highlight-card-value" id="rFinalTime">00:22:15</div>
+        </div>
+      </div>
+      <div class="tie-breaker-caption">في حالة تساوي العلامة، يُرجَّح التلميذ الأقل وقتًا.</div>
+    </div>
+
+    <!-- Detailed Score Breakdown -->
+    <div class="score-breakdown-section">
+      <table class="score-breakdown-table">
+        <thead>
+          <tr>
+            <th>المجال المقوم</th>
+            <th>النقطة المحصلة</th>
+            <th>العلامة الكاملة</th>
+            <th>الملاحظة والتقدير</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="text-align: right; font-weight: 700;">الجانب المعرفي المفاهيمي (الأسئلة التقويمية MCQs)</td>
+            <td id="rCognitiveScore">5.50</td>
+            <td>6.00</td>
+            <td>استيعاب دقيق للمفاهيم المجردة ونظم الملفات والبيوس</td>
+          </tr>
+          <tr>
+            <td style="text-align: right; font-weight: 700;">الجانب المهاري الإجرائي (التنفيذ العملي السليم)</td>
+            <td id="rPracticalScore">13.00</td>
+            <td>14.00</td>
+            <td>تحكم متقن في البيوس، التجزئة، وتأمين الخصوصية</td>
+          </tr>
+          <tr>
+            <td style="text-align: right; font-weight: 700;">مجموع الخصومات والجزاءات المسجلة</td>
+            <td id="rTotalPenalties" style="color: #b91c1c; font-weight: bold;">-1.50</td>
+            <td>0.00</td>
+            <td id="rPenaltiesSummary">محاولة غير دقيقة تم تداركها لاحقاً</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Competencies Matrix -->
+    <div class="section-title">شبكة تقويم الكفاءات المستهدفة (Competencies Matrix)</div>
+    <table class="competencies-table">
+      <thead>
+        <tr>
+          <th style="width: 35%;">الكفاءة المستهدفة</th>
+          <th style="width: 50%;">معايير ومؤشرات التحقق الإجرائي</th>
+          <th style="width: 15%; text-align: center;">التقدير / 5.00</th>
+        </tr>
+      </thead>
+      <tbody id="rCompetenciesBody">
+        <tr>
+          <td><strong>1. ضبط العتاد والبيوس (BIOS/UEFI)</strong></td>
+          <td>مقاطعة الإقلاع بـ F2/Del، تفعيل TPM 2.0 و Secure Boot، وتحديد أولوية وسيط التثبيت.</td>
+          <td style="text-align: center; font-weight: bold;">4.75</td>
+        </tr>
+        <tr>
+          <td><strong>2. التجزئة المنطقية ونظم الملفات</strong></td>
+          <td>بناء جدول GPT، تهيئة القسم الأساسي بنظام NTFS، واختيار النسخة التعليمية Pro Education.</td>
+          <td style="text-align: center; font-weight: bold;">5.00</td>
+        </tr>
+        <tr>
+          <td><strong>3. الإعداد وتأمين الخصوصية الرقمية</strong></td>
+          <td>إنشاء حساب محلي مستقل (Offline Account)، وتعطيل كافة خدمات التتبع الإعلانية السبعة.</td>
+          <td style="text-align: center; font-weight: bold;">4.50</td>
+        </tr>
+        <tr>
+          <td><strong>4. دورة الإقلاع الذاتي المستقل (Independent Boot)</strong></td>
+          <td>التحقق من استقلالية النظام والإقلاع الذاتي النظيف من القرص الصلب الداخلي SSD دون أي وسائط خارجية.</td>
+          <td style="text-align: center; font-weight: bold;">5.00</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Diagnostic & Misconceptions Log -->
+    <div class="section-title">سجل التشخيص البيداغوجي ومعالجة المفاهيم الخاطئة (Remediation Log)</div>
+    <table class="diagnostic-table">
+      <thead>
+        <tr>
+          <th style="width: 8%;">المرحلة</th>
+          <th style="width: 32%;">السؤال أو الموقف المشكل</th>
+          <th style="width: 25%;">الخيار الخاطئ المسجل</th>
+          <th style="width: 35%;">التصحيح البيداغوجي المعتمد للأستاذ</th>
+        </tr>
+      </thead>
+      <tbody id="rDiagnosticBody">
+        <tr>
+          <td colspan="4" style="text-align: center; color: #15803d; padding: 6px;">
+            ✔ لم يتم تسجيل أي أخطاء مفاهيمية أو إجرائية. أداء التلميذ مطابق تماماً للمعايير البيداغوجية المعتمدة.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Signatures & Notes -->
+    <div class="signatures-grid">
+      <div class="teacher-notes-box">
+        <strong>ملاحظات وتوجيهات أستاذ مادة الإعلام الآلي:</strong>
+        <p style="margin-top: 4px;" id="rTeacherCustomNote">
+          تلميذ متمكن، أبدى انضباطاً عالياً في اتباع خطوات التثبيت النظيف وفهم معايير الأمان ونظم الملفات.
+        </p>
+      </div>
+      <div class="teacher-stamp-box">
+        <span>توقيع وختم أستاذ المادة:</span>
+        <span style="font-weight: 700; color: #1e3a8a;" id="rTeacherSignature">أستاذ مادة المعلوماتية</span>
+      </div>
+    </div>
+
+    <!-- Official Footer -->
+    <div class="report-footer">
+      <span>تطبيق المحاكاة البيداغوجي ثنائي الأبعاد (2D) - تصميم الأستاذ: hadj.aissa.informatique@gmail.com</span>
+      <span>مستخرج آلياً ومحمي بواسطة نظام سلامة الجلسة المدرسية - معتمد وفق مقاربة الكفاءات 1AS</span>
+    </div>
+  </div>
+
+  <script>
+    // Injection function called by Electron's printWindow or browser
+    window.__injectReport = function(data) {
+      if (!data) return;
+
+      const st = data.student || {};
+      const ev = data.evaluation || {};
+      const sm = data.sessionMeta || {};
+      const inst = data.institution || {};
+
+      // Student info
+      document.getElementById('rStudentFullName').textContent = `${st.lastName || ''} ${st.firstName || ''}`.trim() || 'تلميذ (غير مسجل)';
+      document.getElementById('rStudentGroup').textContent = st.group || '1AS-01';
+
+      // Institution & Teacher info from Settings
+      if (document.getElementById('rHeaderInstitution')) {
+        document.getElementById('rHeaderInstitution').textContent = inst.name || 'ثانوية مخبر الإعلام الآلي';
+      }
+      if (document.getElementById('rHeaderYear')) {
+        document.getElementById('rHeaderYear').textContent = inst.schoolYear || '2025/2026';
+      }
+      if (document.getElementById('rTeacherSignature')) {
+        document.getElementById('rTeacherSignature').textContent = inst.teacherName || 'أستاذ مادة المعلوماتية';
+      }
+
+      // Session dates & times
+      document.getElementById('rSessionDate').textContent = sm.date || new Date().toLocaleDateString('ar-DZ');
+      document.getElementById('rSessionTime').textContent = sm.time || new Date().toLocaleTimeString('ar-DZ');
+      document.getElementById('rSessionDuration').textContent = sm.duration || 'غير محدد';
+      if (document.getElementById('rMetaTime')) {
+        document.getElementById('rMetaTime').textContent = ev.displayTime || sm.displayTime || '00:00:00';
+      }
+
+      // Modification 4: Equal-Height Score & Time Cards
+      document.getElementById('rFinalScore').textContent = `${ev.totalScore || '0.00'} / ${ev.maxScore || '20.00'}`;
+      if (document.getElementById('rFinalTime')) {
+        document.getElementById('rFinalTime').textContent = ev.displayTime || sm.displayTime || '00:00:00';
+      }
+
+      document.getElementById('rCognitiveScore').textContent = ev.cognitiveScore || '0.00';
+      document.getElementById('rPracticalScore').textContent = ev.practicalScore || '0.00';
+
+      const penalties = data.penalties || [];
+      const totalDed = penalties.reduce((sum, p) => sum + (p.deduction || 0), 0);
+      document.getElementById('rTotalPenalties').textContent = `-${totalDed.toFixed(2)}`;
+      document.getElementById('rPenaltiesSummary').textContent = penalties.length === 0 
+        ? 'أداء مثالي دون أي جزاءات مسجلة' 
+        : `تم تسجيل ${penalties.length} محاولات خاطئة تم حسم نقاطها فورياً`;
+
+      // Render Competencies
+      const compBody = document.getElementById('rCompetenciesBody');
+      if (compBody && ev.competencies && ev.competencies.length > 0) {
+        compBody.innerHTML = ev.competencies.map(c => `
+          <tr>
+            <td><strong>${c.name}</strong></td>
+            <td>${c.description}</td>
+            <td style="text-align: center; font-weight: bold;">${c.score} / ${c.max}</td>
+          </tr>
+        `).join('');
+      }
+
+      // Render Diagnostic Misconceptions Log
+      const diagBody = document.getElementById('rDiagnosticBody');
+      const diagList = data.diagnosticLog || [];
+      if (diagBody) {
+        if (diagList.length === 0) {
+          diagBody.innerHTML = `
+            <tr>
+              <td colspan="4" style="text-align: center; color: #15803d; padding: 6px; font-weight: bold;">
+                ✔ لم يتم تسجيل أي أخطاء مفاهيمية أو إجرائية. أداء التلميذ مطابق تماماً للمعايير البيداغوجية المعتمدة.
+              </td>
+            </tr>
+          `;
+        } else {
+          diagBody.innerHTML = diagList.map(d => `
+            <tr>
+              <td style="text-align: center; font-weight: bold;">م ${d.phase}</td>
+              <td><strong>${d.title}</strong></td>
+              <td style="color: #b91c1c;">${d.errorChoice}</td>
+              <td style="color: #1e3a8a;">${d.rationale}</td>
+            </tr>
+          `).join('');
+        }
+      }
+    };
+  </script>
+</body>
+</html>

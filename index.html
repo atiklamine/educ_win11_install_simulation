@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="0; url=src/index.html">
+  <title>محاكي تنصيب ويندوز 11 التعليمي - المنهاج الجزائري (1AS)</title>
+  <script>
+    window.location.replace("src/index.html");
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      direction: rtl;
+      text-align: center;
+      padding: 24px;
+    }
+    .loader-card {
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 36px 32px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .win-logo {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 24px;
+    }
+    .win-square {
+      background-color: #0078D4;
+      border-radius: 2px;
+    }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255, 255, 255, 0.15);
+      border-top-color: #0078D4;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 16px 0;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+    p {
+      font-size: 0.95rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .manual-link {
+      display: inline-block;
+      margin-top: 18px;
+      padding: 10px 22px;
+      background: #0078D4;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: background 0.2s ease;
+    }
+    .manual-link:hover {
+      background: #0063b1;
+    }
+  </style>
+</head>
+<body>
+  <div class="loader-card">
+    <div class="win-logo" aria-label="شعار Windows 11">
+      <div class="win-square"></div>
+      <div class="win-square"></div>
+      <div class="win-square"></div>
+      <div class="win-square"></div>
+    </div>
+    <h1>محاكي تنصيب نظام Windows 11 التعليمي</h1>
+    <p>جاري تشغيل بيئة المحاكاة التفاعلية مباشرة في المتصفح...</p>
+    <div class="spinner"></div>
+    <p>إذا لم يتم التحويل تلقائياً خلال ثوانٍ:</p>
+    <a href="src/index.html" class="manual-link">اضغط هنا لبدء المحاكي الآن &larr;</a>
+  </div>
+</body>
+</html>

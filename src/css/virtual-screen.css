@@ -1,0 +1,1521 @@
+/* ==========================================================================
+   Virtual Screen Styles - 100% 2D Simulation
+   POST Screen, Classic Aptio BIOS, Win11 Setup Wizard, OOBE & Desktop
+   ========================================================================== */
+
+/* Modification 8: Segoe UI font locally loaded & strictly scoped to Virtual Screen */
+@font-face {
+  font-family: 'Win11SegoeUI';
+  src: url('../assets/segoe-ui.woff2') format('woff2'),
+       url('../assets/segoe-ui.ttf') format('truetype'),
+       local('Segoe UI');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+#virtual-screen,
+.desktop-screen,
+.start-menu-popup,
+.oobe-backdrop,
+.win11-wizard {
+  font-family: 'Win11SegoeUI', 'Segoe UI', Tahoma, sans-serif;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1: Real-Life Workstation Simulation (PC Tower, Monitor & Pluggable Media)
+   -------------------------------------------------------------------------- */
+.workstation-screen {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 30%, #1e293b 0%, #090d16 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.workstation-header {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.workstation-header h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #38bdf8;
+  margin-bottom: 2px;
+}
+
+.workstation-header p {
+  font-size: 12.5px;
+  color: #94a3b8;
+}
+
+/* Desk Surface & Realistic Hardware Rig */
+.workstation-rig-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 36px;
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  position: relative;
+  border-bottom: 8px solid #262c36;
+  padding-bottom: 12px;
+}
+
+/* 1. Realistic Computer Monitor */
+.desk-monitor-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 440px;
+}
+
+.monitor-screen-bezel {
+  width: 100%;
+  height: 250px;
+  background: #14171d;
+  border: 8px solid #1e232b;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.monitor-display-area {
+  flex: 1;
+  background: #04060a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 13px;
+  text-align: center;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.monitor-display-area.powered-on {
+  background: #000000;
+  color: #ffffff;
+}
+
+.monitor-chin-bar {
+  height: 18px;
+  background: #191e24;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-top: 1px solid #252b33;
+}
+
+.monitor-brand-logo {
+  font-size: 9px;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 2px;
+}
+
+.monitor-power-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #eab308; /* Amber standby */
+  box-shadow: 0 0 6px #eab308;
+  transition: all 0.3s ease;
+}
+
+.monitor-power-led.active {
+  background: #10b981; /* Green active */
+  box-shadow: 0 0 8px #10b981;
+}
+
+.monitor-stand-neck {
+  width: 46px;
+  height: 38px;
+  background: linear-gradient(to right, #1a1e26, #2d3440, #1a1e26);
+  border: 1px solid #161a22;
+}
+
+.monitor-stand-base {
+  width: 180px;
+  height: 12px;
+  background: linear-gradient(to bottom, #2b313d, #181d24);
+  border-radius: 6px 6px 0 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  border: 1px solid #363d4a;
+}
+
+/* 2. Realistic PC Tower (Central Unit) */
+.desk-pc-tower {
+  width: 200px;
+  height: 320px;
+  background: linear-gradient(135deg, #1f242d 0%, #15181f 100%);
+  border: 3px solid #2e3542;
+  border-radius: 8px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.pc-tower-top-drive {
+  background: #0f1217;
+  border: 1.5px solid #282f3a;
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dvd-drive-tray-slot {
+  height: 14px;
+  background: #08090d;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  font-size: 8px;
+  color: #64748b;
+  position: relative;
+}
+
+.dvd-tray-indicator {
+  font-size: 8px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.dvd-inserted-disc-badge {
+  display: none;
+  font-size: 8px;
+  color: #38bdf8;
+  font-weight: bold;
+}
+
+.dvd-inserted-disc-badge.visible {
+  display: inline-block;
+}
+
+.dvd-eject-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.dvd-eject-btn {
+  width: 14px;
+  height: 8px;
+  background: #2b323d;
+  border: 1px solid #475569;
+  border-radius: 1px;
+}
+
+.dvd-activity-led {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #334155;
+}
+
+.dvd-activity-led.active {
+  background: #38bdf8;
+  box-shadow: 0 0 6px #38bdf8;
+}
+
+/* PC Tower Front I/O Panel */
+.pc-front-io-panel {
+  background: #11141a;
+  border: 1px solid #282f3a;
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.pc-power-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.power-button-tactile {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #2f3644, #12151c);
+  border: 2px solid #475569;
+  color: #94a3b8;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+
+.power-button-tactile:hover {
+  transform: scale(1.08);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.power-button-tactile.pulsing {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.7);
+  animation: powerPulse 1.5s infinite;
+}
+
+@keyframes powerPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(56, 189, 248, 0.4); }
+  50% { box-shadow: 0 0 22px rgba(56, 189, 248, 0.9); }
+}
+
+.pc-status-leds {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+.pc-led-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mini-led {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #334155;
+}
+
+.mini-led.blue.active { background: #38bdf8; box-shadow: 0 0 6px #38bdf8; }
+.mini-led.red.active { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+.mini-led.green.active { background: #10b981; box-shadow: 0 0 6px #10b981; }
+
+/* USB 3.0 Ports on Tower */
+.pc-usb-ports-cluster {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: #0a0c10;
+  border-radius: 4px;
+  padding: 6px;
+  border: 1px solid #202631;
+  position: relative;
+}
+
+.usb-port-slot {
+  width: 28px;
+  height: 14px;
+  background: #050608;
+  border: 1.5px solid #334155;
+  border-radius: 2px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.usb-port-slot::after {
+  content: "";
+  width: 16px;
+  height: 4px;
+  background: #0284c7; /* USB 3.0 Blue Contact */
+  border-radius: 1px;
+}
+
+/* Modification 1: Dedicated #usb-port element */
+#usb-port {
+  border-color: #475569;
+  position: relative;
+  overflow: visible;
+}
+
+/* Modification 1: Distinct states for #usb-drive */
+#usb-drive {
+  width: 36px;
+  height: 36px;
+  user-select: none;
+  cursor: pointer;
+  will-change: transform;
+}
+
+/* 1. Detached state (in media area) */
+#usb-drive.detached {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(0, 0);
+  transition: transform 0.4s ease, filter 0.2s ease;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+}
+
+#usb-drive.detached:hover {
+  transform: scale(1.08);
+  filter: drop-shadow(0 6px 12px rgba(56, 189, 248, 0.4));
+}
+
+/* 2. Dragging/Transitioning state */
+#usb-drive.dragging {
+  position: fixed;
+  z-index: 100;
+  pointer-events: none;
+  transition: transform 0.55s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.2s ease;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.7));
+}
+
+/* 3. Inserted state (submerged into #usb-port) */
+#usb-drive.inserted {
+  position: absolute;
+  top: -26px; /* Metallic plug enters port slot */
+  left: 50%;
+  transform: translateX(-50%) rotate(0deg);
+  z-index: 30;
+  cursor: default;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.8));
+  animation: insertSnap 0.25s ease-out;
+}
+
+#usb-drive.inserted .usb-connector-tip {
+  clip-path: inset(0 0 5px 0); /* Connector partially submerged inside slot */
+}
+
+@keyframes insertSnap {
+  0% { transform: translateX(-50%) translateY(-12px); opacity: 0.8; }
+  65% { transform: translateX(-50%) translateY(2px); opacity: 1; }
+  100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+/* Pluggable USB Drive Legacy visual backwards compatibility */
+.inserted-usb-visual {
+  display: none;
+}
+
+
+/* Pluggable Network Cable Clip */
+.inserted-lan-visual {
+  position: absolute;
+  bottom: 12px;
+  right: -10px;
+  display: none;
+  font-size: 10px;
+  background: #1e3a8a;
+  border: 1px solid #3b82f6;
+  border-radius: 3px;
+  padding: 2px 6px;
+  color: #fff;
+  z-index: 10;
+}
+
+.inserted-lan-visual.plugged {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* PC Tower Intake Vent */
+.pc-tower-intake-grille {
+  flex: 1;
+  background: repeating-linear-gradient(
+    to bottom,
+    #0c0e12,
+    #0c0e12 4px,
+    #181c24 4px,
+    #181c24 8px
+  );
+  border: 1px solid #222833;
+  border-radius: 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pc-tower-model-badge {
+  background: rgba(0, 0, 0, 0.7);
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #38bdf8;
+  letter-spacing: 1px;
+}
+
+/* Media Dock / Selection Shelf on the Desk */
+.workstation-media-shelf {
+  width: 100%;
+  max-width: 900px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 12px 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.shelf-guidance-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 250px;
+}
+
+.shelf-guidance-title strong {
+  font-size: 13.5px;
+  color: #f1f5f9;
+}
+
+.shelf-guidance-title span {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.shelf-items-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.interactive-media-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.interactive-media-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(56, 189, 248, 0.5);
+  transform: translateY(-2px);
+}
+
+.interactive-media-card.connected {
+  background: rgba(0, 120, 212, 0.18);
+  border-color: #0078d4;
+  box-shadow: 0 0 15px rgba(0, 120, 212, 0.4);
+}
+
+.interactive-media-card .card-svg-icon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.interactive-media-card .card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.interactive-media-card .card-meta strong {
+  font-size: 12.5px;
+  color: #ffffff;
+}
+
+.interactive-media-card .card-meta span {
+  font-size: 10.5px;
+  color: #94a3b8;
+}
+
+.interactive-media-card .card-plug-status {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.interactive-media-card.connected .card-plug-status {
+  color: #34d399;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1: POST Screen (Black Screen, White Monospace)
+   -------------------------------------------------------------------------- */
+.virtual-black-screen {
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  color: #f1f5f9;
+  font-family: 'Consolas', 'Courier New', monospace;
+  padding: 30px;
+  box-sizing: border-box;
+  overflow: hidden;
+  direction: ltr;
+  text-align: left;
+}
+
+.post-header-line {
+  font-size: 14px;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.post-body-text {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 15px 0;
+  color: #ffffff;
+}
+
+.post-prompt-banner {
+  background: rgba(255, 255, 255, 0.1);
+  border-left: 4px solid #38bdf8;
+  padding: 12px 18px;
+  margin-top: 30px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.post-countdown-badge {
+  background: #ef4444;
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 15px;
+}
+
+.post-interrupt-btn {
+  margin-top: 20px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 700;
+  background: #0078d4;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  direction: rtl;
+  float: right;
+}
+
+.blinking-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: #ffffff;
+  margin-left: 4px;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   Phase 2: Aptio Setup Utility (Classic Blue BIOS)
+   -------------------------------------------------------------------------- */
+.aptio-bios-wrapper {
+  width: 100%;
+  height: 100%;
+  background-color: #0000aa;
+  color: #ffffff;
+  font-family: 'Consolas', 'Courier New', monospace;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  direction: ltr;
+  text-align: left;
+}
+
+.bios-header {
+  background-color: #555555;
+  color: #ffffff;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.bios-tabs-bar {
+  display: flex;
+  background-color: #0000aa;
+  border-bottom: 2px solid #aaaaaa;
+  padding: 0 8px;
+}
+
+.bios-tab-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 14px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.bios-tab-btn:hover {
+  background-color: #000088;
+}
+
+.bios-tab-btn.active {
+  background-color: #aaaaaa;
+  color: #0000aa;
+}
+
+.bios-body-layout {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.bios-main-pane {
+  flex: 2;
+  border-right: 2px solid #aaaaaa;
+  padding: 14px 18px;
+  overflow-y: auto;
+}
+
+.bios-help-pane {
+  flex: 1;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #000088;
+}
+
+.bios-group-title {
+  color: #ffff55;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 12px;
+  text-decoration: underline;
+}
+
+.bios-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 8px;
+  font-size: 12.5px;
+  border-radius: 2px;
+}
+
+.bios-row.interactive {
+  cursor: pointer;
+}
+
+.bios-row.interactive:hover {
+  background-color: #ffffff;
+  color: #0000aa;
+}
+
+.bios-row .lbl {
+  font-weight: 600;
+}
+
+.bios-row .val {
+  color: #ffff55;
+}
+
+.bios-row.interactive:hover .val {
+  color: #0000aa;
+}
+
+.clickable-toggle.enabled {
+  color: #55ff55 !important;
+}
+
+.clickable-toggle.disabled {
+  color: #ff5555 !important;
+}
+
+.help-box-title {
+  color: #ffff55;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.help-box-text {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #ffffff;
+}
+
+.bios-keys-guide {
+  border-top: 1px solid #aaaaaa;
+  padding-top: 10px;
+  font-size: 11px;
+}
+
+.bios-keys-guide p {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+.bios-keys-guide span {
+  color: #ffff55;
+}
+
+.bios-keys-guide .highlight-key {
+  color: #55ff55;
+  font-weight: bold;
+}
+
+.bios-footer {
+  background-color: #555555;
+  color: #ffffff;
+  padding: 4px 12px;
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bios-f10-quick-btn {
+  background: #ffff55;
+  color: #000000;
+  border: none;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.bios-fatal-error {
+  text-align: center;
+  padding: 40px;
+}
+
+/* --------------------------------------------------------------------------
+   Phases 3, 4, 5, 6: Windows 11 Setup Wizard
+   -------------------------------------------------------------------------- */
+.win11-setup-backdrop {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1b0f3a 0%, #0d061f 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.win11-window {
+  width: 660px;
+  background: #202020;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #ffffff;
+  direction: ltr;
+  text-align: left;
+}
+
+.win11-titlebar {
+  height: 34px;
+  background: #181818;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #cccccc;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.win11-body {
+  padding: 24px 30px;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.win11-step-heading {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #ffffff;
+}
+
+.win11-step-desc {
+  font-size: 12.5px;
+  color: #a0a0a0;
+  margin-bottom: 20px;
+}
+
+.win11-form-group {
+  margin-bottom: 14px;
+}
+
+.win11-label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: var(--label-color, #cccccc);
+}
+
+.win11-select, .win11-input {
+  width: 100%;
+  height: 32px;
+  background: var(--input-bg, #2b2b2b);
+  border: 1px solid var(--input-border, #444444);
+  color: var(--input-text, #ffffff);
+  padding: 0 10px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.win11-select:focus, .win11-input:focus {
+  border-color: #0078d4;
+  outline: none;
+}
+
+.win11-actions-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 16px;
+  margin-top: 20px;
+}
+
+/* Partition Table UI */
+.partition-table-container {
+  border: 1px solid #444444;
+  border-radius: 4px;
+  background: #181818;
+  height: 180px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+
+.partition-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  padding: 6px 12px;
+  font-size: 12px;
+  border-bottom: 1px solid #282828;
+  cursor: pointer;
+}
+
+.partition-row:hover {
+  background: #252525;
+}
+
+.partition-row.selected {
+  background: #004d80;
+  color: #ffffff;
+}
+
+.partition-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.part-tool-btn {
+  background: #2b2b2b;
+  border: 1px solid #444444;
+  color: #ffffff;
+  padding: 5px 12px;
+  font-size: 11.5px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.part-tool-btn:hover {
+  background: #383838;
+}
+
+/* Copying Files Progress */
+.progress-list {
+  list-style: none;
+  font-size: 13px;
+  line-height: 2.2;
+}
+
+.progress-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #888888;
+}
+
+.progress-list li.done {
+  color: #34d399;
+}
+
+.progress-list li.active {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 7: OOBE Experience
+   -------------------------------------------------------------------------- */
+.oobe-backdrop {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, #1e3a8a 0%, #0f172a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.oobe-card {
+  width: 90%;
+  max-width: 640px;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 30px;
+  color: #ffffff;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+}
+
+.oobe-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.oobe-desc {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 24px;
+}
+
+.privacy-switches-list {
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-bottom: 20px;
+}
+
+.privacy-switch-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.privacy-switch-text strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.privacy-switch-text span {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 8: Authentic Windows 11 Desktop & Taskbar (Modification 8)
+   -------------------------------------------------------------------------- */
+.desktop-screen {
+  width: 100%;
+  height: 100%;
+  background-color: #0c1527;
+  background-image: url('../assets/desktop-bloom.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  user-select: none;
+}
+
+/* Desktop Icons Grid */
+.desktop-icons-area {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 5;
+  width: fit-content;
+}
+
+.desktop-icon-item {
+  width: 76px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 4px;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.desktop-icon-item:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.desktop-icon-item img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.desktop-icon-item span {
+  font-size: 11px;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 4px rgba(0, 0, 0, 0.8);
+  margin-top: 4px;
+  text-align: center;
+  line-height: 1.15;
+  font-weight: 500;
+}
+
+/* Centralized Acrylic Taskbar */
+.taskbar {
+  height: 48px;
+  background: rgba(26, 31, 44, 0.72);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  position: relative;
+  z-index: 20;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.taskbar-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.taskbar-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.taskbar-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.04);
+}
+
+.taskbar-icon-btn:active {
+  transform: scale(0.96);
+}
+
+.taskbar-icon-btn img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.taskbar-icon-btn.active {
+  background: rgba(255, 255, 255, 0.16);
+  position: relative;
+}
+
+.taskbar-icon-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  width: 6px;
+  height: 3px;
+  border-radius: 2px;
+  background: #0078d4;
+}
+
+.taskbar-tray {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: #ffffff;
+  padding: 0 6px;
+  margin-left: auto;
+}
+
+.tray-quick-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.tray-quick-icons:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tray-quick-icons img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.tray-clock {
+  text-align: right;
+  line-height: 1.15;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.tray-clock:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tray-clock .time {
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.tray-clock .date {
+  font-size: 10px;
+  color: #cbd5e1;
+}
+
+/* Start Menu Popup */
+.start-menu-popup {
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  max-width: 94%;
+  max-height: calc(100% - 70px);
+  background: rgba(26, 31, 46, 0.88);
+  backdrop-filter: blur(35px) saturate(180%);
+  -webkit-backdrop-filter: blur(35px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  padding: 22px 24px 14px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  z-index: 50;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.start-menu-popup.visible {
+  display: flex;
+}
+
+.start-search-box {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.start-search-box img {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  opacity: 0.7;
+}
+
+.start-search-input {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  color: #ffffff;
+  padding: 8px 16px 8px 36px;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.start-search-input:focus {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: #0078d4;
+}
+
+.start-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.start-pinned-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.start-app-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 2px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.start-app-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.start-app-item img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  margin-bottom: 4px;
+}
+
+.start-app-item span {
+  font-size: 11px;
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60px;
+}
+
+.start-recommended-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 12px;
+  margin-bottom: 12px;
+}
+
+.start-recommended-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.start-recommended-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.start-recommended-item img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.start-recommended-item .title {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.start-recommended-item .sub {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.start-menu-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 10px;
+  margin-top: auto;
+  position: relative;
+}
+
+.start-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.start-user-profile:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.start-user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #0078d4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.power-btn-trigger {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 17px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.power-btn-trigger:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.power-menu-dropdown {
+  position: absolute;
+  bottom: 46px;
+  right: 0;
+  background: rgba(30, 36, 52, 0.96);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 4px;
+  display: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  min-width: 190px;
+  z-index: 60;
+}
+
+.power-menu-dropdown.visible {
+  display: block;
+}
+
+.power-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.12s ease;
+}
+
+.power-menu-item:hover {
+  background: #0078d4;
+}
+
+/* Official Windows 11 Logo Styles (1:1 Ratio, Flat, No Glow) */
+.win11-official-logo {
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  display: inline-block;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* 2D Windows 11 Spinner */
+.spinner-win11 {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #38bdf8;
+  border-radius: 50%;
+  animation: spin 1s infinite linear;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
