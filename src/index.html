@@ -68,39 +68,198 @@
 
       <!-- Workstation Rig Stage (Mode: Virtual Rig on Desk) -->
       <div class="workstation-rig-stage" id="workstationRigStage">
-        <!-- Virtual Monitor Unit -->
-        <div class="rig-monitor-unit" id="rigMonitorUnit">
-          <!-- Simulated Monitor Frame with Bezel -->
-          <div class="monitor-frame" id="monitorFrame">
-            <!-- Monitor Bezel Top Bar (Webcam & Quick Toggle) -->
-            <div class="monitor-bezel-top">
-              <span class="monitor-webcam-dot" title="كاميرا الشاشة المدمجة"></span>
-              <button class="monitor-quick-toggle-btn" id="btnMonitorQuickToggle" title="تكبير الشاشة لملء مساحة العرض (F10)">
-                <span class="toggle-icon">&#9974;</span>
-                <span class="toggle-label">ملء مساحة العرض</span>
-              </button>
+        <div class="workstation-rig-layout">
+          
+          <!-- LEFT COLUMN: Central Unit (PC Tower) + Peripherals (Keyboard & Mouse) -->
+          <div class="rig-column-left" id="rigColumnLeft">
+            <!-- Realistic Central Unit / PC Tower -->
+            <div class="desk-pc-tower" id="companionPcTower">
+              <!-- DVD-RW Optical Drive Bay -->
+              <div class="pc-tower-top-drive">
+                <div class="dvd-drive-tray-slot" id="towerDvdSlot">
+                  <span class="dvd-tray-indicator">DVD-RW DRIVE</span>
+                  <span class="dvd-inserted-disc-badge" id="towerDvdDiscBadge">
+                    &#9673; Win11 DVD (محمّل)
+                  </span>
+                </div>
+                <div class="dvd-eject-controls">
+                  <span class="dvd-activity-led" id="towerDvdLed"></span>
+                  <div class="dvd-eject-btn" title="زر إخراج قارئ الأقراص"></div>
+                </div>
+              </div>
+
+              <!-- Front I/O Panel -->
+              <div class="pc-front-io-panel">
+                <div class="pc-power-section">
+                  <button class="power-button-tactile pulsing" id="btnTactilePower" title="تشغيل الوحدة المركزية">
+                    &#x23FB;
+                  </button>
+                  <div class="pc-status-leds">
+                    <div class="pc-led-item">
+                      <span class="mini-led blue" id="towerPowerLed"></span>
+                      <span>POWER</span>
+                    </div>
+                    <div class="pc-led-item">
+                      <span class="mini-led red" id="towerHddLed"></span>
+                      <span>SSD / DISK</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Front USB 3.0 Ports with dedicated #usb-port and #usb-drive -->
+                <div class="pc-usb-ports-cluster">
+                  <!-- Port 1: Target USB Port (#usb-port) -->
+                  <div class="usb-port-slot" id="usb-port" title="منفذ USB 3.0 أمامي">
+                    <!-- #usb-drive inserted dynamically here -->
+                  </div>
+                  <!-- Port 2: Additional Port -->
+                  <div class="usb-port-slot" title="منفذ USB 3.0 إضافي"></div>
+                </div>
+
+                <!-- Visible LAN cable indicator -->
+                <div class="inserted-lan-visual" id="towerPluggedLan">
+                  <span class="mini-led green active"></span>
+                  <span>RJ-45 (PXE)</span>
+                </div>
+              </div>
+
+              <!-- Intake Grille & Status Badge -->
+              <div class="pc-tower-intake-grille">
+                <div class="pc-tower-model-badge">LAB-STATION 1AS</div>
+                <div class="pc-tower-live-status" id="towerLiveStatus">متوقف (Standby)</div>
+              </div>
             </div>
 
-            <!-- Screen Display Area (Where all 8 phases render) -->
-            <div class="virtual-screen-content" id="virtualScreenContent">
-              <!-- Dynamic 2D Screens Rendered by AppSimulator -->
-            </div>
-
-            <!-- Monitor Chin Bar (Bottom Bezel) -->
-            <div class="monitor-chin-bar" id="monitorChinBar">
-              <span class="monitor-brand-logo">ALGERIA-EDU 27" IPS</span>
-              <div class="monitor-chin-controls">
-                <span class="monitor-power-led" id="monitorPowerLed" title="مؤشر تغذية الشاشة"></span>
-                <button class="monitor-chin-btn" id="btnMonitorChinToggle" title="التبديل بين وضع الحاسوب الافتراضي ووضع ملء مساحة العرض (F10)">
-                  &#9974; تكبير الشاشة
-                </button>
+            <!-- Peripherals: Realistic Compact Keyboard & Mouse Under/Beside Tower -->
+            <div class="rig-peripherals-unit" id="rigPeripheralsUnit" title="لوحة المفاتيح والفأرة المدرسية">
+              <div class="rig-mini-keyboard" title="لوحة المفاتيح">
+                <div class="kb-key-row"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="kb-key-row"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="kb-space-row"><span></span><span class="kb-spacebar"></span><span></span></div>
+              </div>
+              <div class="rig-mini-mouse" title="الفأرة الضوئية">
+                <div class="mouse-buttons-row">
+                  <span class="mouse-lbtn"></span>
+                  <span class="mouse-wheel"></span>
+                  <span class="mouse-rbtn"></span>
+                </div>
+                <div class="mouse-body-curve"></div>
               </div>
             </div>
           </div>
 
-          <!-- Monitor Stand Neck & Base (Visible in view-mode-rig) -->
-          <div class="monitor-stand-neck" id="monitorStandNeck"></div>
-          <div class="monitor-stand-base" id="monitorStandBase"></div>
+          <!-- CENTER COLUMN: Big Virtual Screen / Monitor -->
+          <div class="rig-column-center" id="rigColumnCenter">
+            <div class="rig-monitor-unit" id="rigMonitorUnit">
+              <!-- Simulated Monitor Frame with Bezel -->
+              <div class="monitor-frame" id="monitorFrame">
+                <!-- Monitor Bezel Top Bar (Webcam & Quick Toggle) -->
+                <div class="monitor-bezel-top">
+                  <span class="monitor-webcam-dot" title="كاميرا الشاشة المدمجة"></span>
+                  <button class="monitor-quick-toggle-btn" id="btnMonitorQuickToggle" title="تكبير الشاشة لملء مساحة العرض (F10)">
+                    <span class="toggle-icon">&#9974;</span>
+                    <span class="toggle-label">ملء مساحة العرض</span>
+                  </button>
+                </div>
+
+                <!-- Screen Display Area (Where all 8 phases render) -->
+                <div class="virtual-screen-content" id="virtualScreenContent">
+                  <!-- Dynamic 2D Screens Rendered by AppSimulator -->
+                </div>
+
+                <!-- Monitor Chin Bar (Bottom Bezel) -->
+                <div class="monitor-chin-bar" id="monitorChinBar">
+                  <span class="monitor-brand-logo">ALGERIA-EDU 27" IPS</span>
+                  <div class="monitor-chin-controls">
+                    <span class="monitor-power-led" id="monitorPowerLed" title="مؤشر تغذية الشاشة"></span>
+                    <button class="monitor-chin-btn" id="btnMonitorChinToggle" title="التبديل بين وضع الحاسوب الافتراضي ووضع ملء مساحة العرض (F10)">
+                      &#9974; تكبير الشاشة
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Monitor Stand Neck & Base (Visible in view-mode-rig) -->
+              <div class="monitor-stand-neck" id="monitorStandNeck"></div>
+              <div class="monitor-stand-base" id="monitorStandBase"></div>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: Installation Media Shelf / Rack -->
+          <div class="rig-column-right" id="rigColumnRight">
+            <div class="workstation-media-shelf" id="rigMediaShelf">
+              <div class="shelf-guidance-title">
+                <strong>وسائط التثبيت:</strong>
+                <span id="shelfConnectionMsg">○ اختر وسيط التثبيت</span>
+              </div>
+
+              <div class="shelf-items-vertical">
+                <!-- Media 1: Kingston USB Flash Drive -->
+                <div class="interactive-media-card" data-media="usb" id="mediaCardUsb" title="مفتاح USB ووميضي Kingston 32GB (انقر للتوصيل بالمنفذ الأمامي)">
+                  <div class="card-svg-icon" id="usbShelfSlot">
+                    <!-- Detached USB drive representation -->
+                    <div id="usb-drive" class="detached" title="مفتاح Kingston 32GB (انقر للتوصيل بالمنفذ)">
+                      <svg viewBox="0 0 32 32" width="28" height="28">
+                        <rect class="usb-connector-tip" x="10" y="2" width="12" height="10" fill="#cbd5e1" stroke="#475569" stroke-width="1" rx="1"/>
+                        <rect x="12.5" y="4" width="2" height="3" fill="#0284c7"/>
+                        <rect x="17.5" y="4" width="2" height="3" fill="#0284c7"/>
+                        <rect class="usb-drive-body" x="6" y="10" width="20" height="20" fill="#dc2626" rx="3" stroke="#991b1b" stroke-width="1.5"/>
+                        <line x1="9" y1="15" x2="23" y2="15" stroke="#fca5a5" stroke-width="1" />
+                        <line x1="9" y1="19" x2="23" y2="19" stroke="#fca5a5" stroke-width="1" />
+                        <circle cx="16" cy="24" r="1.5" fill="#38bdf8"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="card-meta">
+                    <strong>مفتاح USB ووميضي</strong>
+                    <span>Kingston DT 32GB</span>
+                    <span class="card-plug-status" id="usbPlugStatus">○ انقر للتوصيل</span>
+                  </div>
+                </div>
+
+                <!-- Media 2: Windows 11 DVD Disc -->
+                <div class="interactive-media-card" data-media="dvd" id="mediaCardDvd" title="قرص ضوئي DVD لنظام Windows 11 (انقر للإدخال بالقارئ)">
+                  <div class="card-svg-icon">
+                    <svg viewBox="0 0 40 40" width="30" height="30">
+                      <circle cx="20" cy="20" r="18" fill="url(#dvdGradRight)" stroke="#64748b" stroke-width="1"/>
+                      <defs>
+                        <radialGradient id="dvdGradRight" cx="50%" cy="50%" r="50%">
+                          <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
+                          <stop offset="40%" stop-color="#a855f7" stop-opacity="0.8"/>
+                          <stop offset="70%" stop-color="#f59e0b" stop-opacity="0.8"/>
+                          <stop offset="100%" stop-color="#0284c7" stop-opacity="0.9"/>
+                        </radialGradient>
+                      </defs>
+                      <circle cx="20" cy="20" r="7" fill="#1e293b" stroke="#94a3b8" stroke-width="1"/>
+                      <circle cx="20" cy="20" r="3" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+                    </svg>
+                  </div>
+                  <div class="card-meta">
+                    <strong>قرص ضوئي DVD</strong>
+                    <span>Win11 Setup ISO</span>
+                    <span class="card-plug-status" id="dvdPlugStatus">○ انقر للإدخال</span>
+                  </div>
+                </div>
+
+                <!-- Media 3: Network PXE Cable -->
+                <div class="interactive-media-card" data-media="pxe" id="mediaCardPxe" title="إقلاع الشبكة PXE عبر كابل RJ-45 (خادم المخبر)">
+                  <div class="card-svg-icon">
+                    <svg viewBox="0 0 40 40" width="30" height="30">
+                      <path d="M 6 34 Q 16 34 20 26 L 20 18" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+                      <rect x="14" y="6" width="12" height="12" fill="#93c5fd" opacity="0.8" rx="2" stroke="#1d4ed8" stroke-width="1.5"/>
+                      <rect x="17" y="2" width="6" height="5" fill="#fbbf24" rx="1"/>
+                    </svg>
+                  </div>
+                  <div class="card-meta">
+                    <strong>إقلاع الشبكة PXE</strong>
+                    <span>RJ-45 (خادم المخبر)</span>
+                    <span class="card-plug-status" id="pxePlugStatus">○ انقر للتوصيل</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- Desk Surface Underneath Rig -->

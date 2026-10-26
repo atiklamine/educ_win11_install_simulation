@@ -51,36 +51,91 @@
 .workstation-header {
   text-align: center;
   margin-bottom: 6px;
+  flex-shrink: 0;
 }
 
 .workstation-header h2 {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 800;
   color: var(--workstation-title);
-  margin-bottom: 2px;
+  margin-bottom: 3px;
   transition: color 0.3s ease;
 }
 
 .workstation-header p {
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--workstation-subtitle);
   transition: color 0.3s ease;
 }
 
-/* Desk Surface & Realistic Hardware Rig */
-.workstation-rig-container {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 32px;
+/* Authentic Standby Display inside Big Monitor */
+.standby-screen-center {
   flex: 1;
-  width: 100%;
-  max-width: 1040px;
-  position: relative;
-  border-bottom: 8px solid var(--desk-border);
-  box-shadow: var(--desk-surface-shadow);
-  padding-bottom: 12px;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+  padding: 24px;
+}
+
+.standby-pulse-ring {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(2, 132, 199, 0.25) 0%, rgba(2, 132, 199, 0.05) 70%, transparent 100%);
+  border: 2px solid rgba(56, 189, 248, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: standbyPulse 2.6s infinite ease-in-out;
+}
+
+@keyframes standbyPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.35);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 24px 6px rgba(56, 189, 248, 0.3);
+  }
+}
+
+.standby-power-glyph {
+  font-size: 42px;
+  color: #38bdf8;
+  text-shadow: 0 0 16px rgba(56, 189, 248, 0.7);
+}
+
+.standby-headline {
+  font-size: 22px;
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.standby-status-pill {
+  padding: 6px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+}
+
+.standby-instruction-hint {
+  max-width: 600px;
+  font-size: 13.5px;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+/* Compatibility container for tests */
+.workstation-rig-container {
+  display: none;
 }
 
 /* 1. Realistic Computer Monitor */

@@ -46,270 +46,238 @@ function renderPhase1Workstation(container) {
   // If not previously selected, start with detached state (null)
   let currentSelected = window.stateEngine.selectedMedia || null;
 
-  function redraw() {
+  function updateCompanionTowerAndShelf() {
+    const portEl = document.getElementById('usb-port'); // id="usb-port" located on the left PC Tower
+    const dvdBadge = document.getElementById('towerDvdDiscBadge');
+    const dvdLed = document.getElementById('towerDvdLed');
+    const lanVisual = document.getElementById('towerPluggedLan');
+    const towerStatus = document.getElementById('towerLiveStatus');
+    const shelfMsg = document.getElementById('shelfConnectionMsg');
+    const usbStatus = document.getElementById('usbPlugStatus');
+    const dvdStatus = document.getElementById('dvdPlugStatus');
+    const pxeStatus = document.getElementById('pxePlugStatus');
+    const usbShelfSlot = document.getElementById('usbShelfSlot');
+    const powerBtn = document.getElementById('btnTactilePower');
+
+    // Update active highlight on media shelf cards
+    document.querySelectorAll('#rigMediaShelf .interactive-media-card').forEach(c => {
+      c.classList.toggle('connected', c.getAttribute('data-media') === currentSelected);
+    });
+
+    if (currentSelected === 'usb') {
+      if (portEl) {
+        portEl.innerHTML = `
+          <div id="usb-drive" class="inserted" title="مفتاح USB موصول فعلياً">
+            <svg viewBox="0 0 32 32" width="28" height="28">
+              <rect class="usb-connector-tip" x="10" y="20" width="12" height="10" fill="#cbd5e1" stroke="#475569" stroke-width="1" rx="1"/>
+              <rect x="12.5" y="23" width="2" height="3" fill="#0284c7"/>
+              <rect x="17.5" y="23" width="2" height="3" fill="#0284c7"/>
+              <rect class="usb-drive-body" x="6" y="2" width="20" height="20" fill="#dc2626" rx="3" stroke="#991b1b" stroke-width="1.5" />
+              <line x1="9" y1="7" x2="23" y2="7" stroke="#fca5a5" stroke-width="1" />
+              <line x1="9" y1="11" x2="23" y2="11" stroke="#fca5a5" stroke-width="1" />
+              <circle cx="16" cy="16" r="1.5" fill="#38bdf8" />
+            </svg>
+          </div>
+        `;
+      }
+      if (usbShelfSlot) {
+        usbShelfSlot.innerHTML = `<span style="font-size: 11px; color: #38bdf8; font-weight: 700;">✔ بالمنفذ</span>`;
+      }
+      if (usbStatus) usbStatus.textContent = '● موصول بالمنفذ الأمامي';
+      if (dvdStatus) dvdStatus.textContent = '○ انقر للإدخال';
+      if (pxeStatus) pxeStatus.textContent = '○ انقر للتوصيل';
+      if (dvdBadge) dvdBadge.classList.remove('visible');
+      if (dvdLed) dvdLed.classList.remove('active');
+      if (lanVisual) lanVisual.classList.remove('plugged');
+      if (towerStatus) towerStatus.textContent = 'جاهز (USB 32GB)';
+      if (shelfMsg) shelfMsg.textContent = '✔ تم توصيل مفتاح USB 3.0 في المنفذ الأمامي';
+    } else if (currentSelected === 'dvd') {
+      if (portEl) portEl.innerHTML = '';
+      if (usbShelfSlot) {
+        usbShelfSlot.innerHTML = `
+          <div id="usb-drive" class="detached" title="مفتاح Kingston 32GB">
+            <svg viewBox="0 0 32 32" width="28" height="28">
+              <rect class="usb-connector-tip" x="10" y="2" width="12" height="10" fill="#cbd5e1" stroke="#475569" stroke-width="1" rx="1"/>
+              <rect x="12.5" y="4" width="2" height="3" fill="#0284c7"/>
+              <rect x="17.5" y="4" width="2" height="3" fill="#0284c7"/>
+              <rect class="usb-drive-body" x="6" y="10" width="20" height="20" fill="#dc2626" rx="3" stroke="#991b1b" stroke-width="1.5"/>
+              <line x1="9" y1="15" x2="23" y2="15" stroke="#fca5a5" stroke-width="1" />
+              <line x1="9" y1="19" x2="23" y2="19" stroke="#fca5a5" stroke-width="1" />
+              <circle cx="16" cy="24" r="1.5" fill="#38bdf8"/>
+            </svg>
+          </div>
+        `;
+      }
+      if (usbStatus) usbStatus.textContent = '○ انقر للتوصيل';
+      if (dvdStatus) dvdStatus.textContent = '● مدخل في القارئ';
+      if (pxeStatus) pxeStatus.textContent = '○ انقر للتوصيل';
+      if (dvdBadge) dvdBadge.classList.add('visible');
+      if (dvdLed) dvdLed.classList.add('active');
+      if (lanVisual) lanVisual.classList.remove('plugged');
+      if (towerStatus) towerStatus.textContent = 'جاهز (DVD Win11)';
+      if (shelfMsg) shelfMsg.textContent = '✔ تم إدخال قرص DVD في قارئ الأقراص';
+    } else if (currentSelected === 'pxe') {
+      if (portEl) portEl.innerHTML = '';
+      if (usbShelfSlot) {
+        usbShelfSlot.innerHTML = `
+          <div id="usb-drive" class="detached" title="مفتاح Kingston 32GB">
+            <svg viewBox="0 0 32 32" width="28" height="28">
+              <rect class="usb-connector-tip" x="10" y="2" width="12" height="10" fill="#cbd5e1" stroke="#475569" stroke-width="1" rx="1"/>
+              <rect x="12.5" y="4" width="2" height="3" fill="#0284c7"/>
+              <rect x="17.5" y="4" width="2" height="3" fill="#0284c7"/>
+              <rect class="usb-drive-body" x="6" y="10" width="20" height="20" fill="#dc2626" rx="3" stroke="#991b1b" stroke-width="1.5"/>
+              <line x1="9" y1="15" x2="23" y2="15" stroke="#fca5a5" stroke-width="1" />
+              <line x1="9" y1="19" x2="23" y2="19" stroke="#fca5a5" stroke-width="1" />
+              <circle cx="16" cy="24" r="1.5" fill="#38bdf8"/>
+            </svg>
+          </div>
+        `;
+      }
+      if (usbStatus) usbStatus.textContent = '○ انقر للتوصيل';
+      if (dvdStatus) dvdStatus.textContent = '○ انقر للإدخال';
+      if (pxeStatus) pxeStatus.textContent = '● موصول بمنفذ LAN';
+      if (dvdBadge) dvdBadge.classList.remove('visible');
+      if (dvdLed) dvdLed.classList.remove('active');
+      if (lanVisual) lanVisual.classList.add('plugged');
+      if (towerStatus) towerStatus.textContent = 'جاهز (PXE LAN)';
+      if (shelfMsg) shelfMsg.textContent = '✔ تم توصيل كابل الشبكة RJ-45 بالخادم';
+    } else {
+      if (portEl) portEl.innerHTML = '';
+      if (usbShelfSlot) {
+        usbShelfSlot.innerHTML = `
+          <div id="usb-drive" class="detached" title="مفتاح Kingston 32GB">
+            <svg viewBox="0 0 32 32" width="28" height="28">
+              <rect class="usb-connector-tip" x="10" y="2" width="12" height="10" fill="#cbd5e1" stroke="#475569" stroke-width="1" rx="1"/>
+              <rect x="12.5" y="4" width="2" height="3" fill="#0284c7"/>
+              <rect x="17.5" y="4" width="2" height="3" fill="#0284c7"/>
+              <rect class="usb-drive-body" x="6" y="10" width="20" height="20" fill="#dc2626" rx="3" stroke="#991b1b" stroke-width="1.5"/>
+              <line x1="9" y1="15" x2="23" y2="15" stroke="#fca5a5" stroke-width="1" />
+              <line x1="9" y1="19" x2="23" y2="19" stroke="#fca5a5" stroke-width="1" />
+              <circle cx="16" cy="24" r="1.5" fill="#38bdf8"/>
+            </svg>
+          </div>
+        `;
+      }
+      if (usbStatus) usbStatus.textContent = '○ انقر للتوصيل';
+      if (dvdStatus) dvdStatus.textContent = '○ انقر للإدخال';
+      if (pxeStatus) pxeStatus.textContent = '○ انقر للتوصيل';
+      if (dvdBadge) dvdBadge.classList.remove('visible');
+      if (dvdLed) dvdLed.classList.remove('active');
+      if (lanVisual) lanVisual.classList.remove('plugged');
+      if (towerStatus) towerStatus.textContent = 'متوقف (Standby)';
+      if (shelfMsg) shelfMsg.textContent = '○ يرجى اختيار الوسيط أولاً';
+    }
+
+    if (powerBtn) {
+      if (currentSelected) {
+        powerBtn.classList.add('pulsing');
+      } else {
+        powerBtn.classList.remove('pulsing');
+      }
+    }
+  }
+
+  function redrawScreen() {
     container.innerHTML = `
       <div class="workstation-screen">
         <div class="workstation-header">
           <h2>المرحلة 1: تجهيز محطة العمل ووسيط التثبيت في مخبر الإعلام الآلي</h2>
-          <p>انقر على وسيط التثبيت المادي ليتم توصيله في المنفذ المناسب بالوحدة المركزية، ثم اضغط زر التشغيل (Power):</p>
+          <p>اختر وسيط التثبيت المناسب من الرف الموجود على اليمين، ليتم توصيله بالوحدة المركزية على اليسار، ثم اضغط زر التشغيل (Power):</p>
         </div>
 
-        <!-- Realistic Rig: Computer Monitor + PC Tower -->
-        <div class="workstation-rig-container">
-          
-          <!-- Realistic Monitor -->
-          <div class="desk-monitor-unit">
-            <div class="monitor-screen-bezel">
-              <div class="monitor-display-area" id="deskMonitorScreen">
-                <div style="font-size: 32px; color: #475569; margin-bottom: 8px;">&#128187;</div>
-                <div style="font-weight: 700; color: #94a3b8; margin-bottom: 4px;">الشاشة في وضع الاستعداد (Standby)</div>
-                <div style="font-size: 11.5px; color: #64748b;">في انتظار تشغيل الوحدة المركزية عبر زر الطاقة (Power)</div>
-              </div>
-              <div class="monitor-chin-bar">
-                <span class="monitor-brand-logo">ALGERIA-EDU 24"</span>
-                <span class="monitor-power-led" id="monitorPowerLed"></span>
-              </div>
-            </div>
-            <div class="monitor-stand-neck"></div>
-            <div class="monitor-stand-base"></div>
+        <div class="standby-screen-center">
+          <div class="standby-pulse-ring">
+            <span class="standby-power-glyph">&#x23FB;</span>
           </div>
-
-          <!-- Realistic PC Tower (Central Unit) -->
-          <div class="desk-pc-tower">
-            <!-- DVD-RW Optical Drive Bay -->
-            <div class="pc-tower-top-drive">
-              <div class="dvd-drive-tray-slot" id="towerDvdSlot">
-                <span class="dvd-tray-indicator">DVD-RW DRIVE</span>
-                <span class="dvd-inserted-disc-badge ${currentSelected === 'dvd' ? 'visible' : ''}" id="towerDvdDiscBadge">
-                  &#9673; Win11 DVD (محمّل)
-                </span>
-              </div>
-              <div class="dvd-eject-controls">
-                <span class="dvd-activity-led ${currentSelected === 'dvd' ? 'active' : ''}"></span>
-                <div class="dvd-eject-btn"></div>
-              </div>
-            </div>
-
-            <!-- Front I/O Panel -->
-            <div class="pc-front-io-panel">
-              <div class="pc-power-section">
-                <button class="power-button-tactile ${currentSelected ? 'pulsing' : ''}" id="btnTactilePower" title="تشغيل الوحدة المركزية">
-                  &#x23FB;
-                </button>
-                <div class="pc-status-leds">
-                  <div class="pc-led-item">
-                    <span class="mini-led blue" id="towerPowerLed"></span>
-                    <span>POWER</span>
-                  </div>
-                  <div class="pc-led-item">
-                    <span class="mini-led red" id="towerHddLed"></span>
-                    <span>HDD / SSD</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Modification 1: Front USB 3.0 Ports with dedicated #usb-port and #usb-drive -->
-              <div class="pc-usb-ports-cluster">
-                <!-- Port 1: Target USB Port (#usb-port) -->
-                <div class="usb-port-slot" id="usb-port" title="منفذ USB 3.0 أمامي">
-                  ${currentSelected === 'usb' ? `
-                    <div id="usb-drive" class="inserted" title="مفتاح USB موصول فعلياً">
-                      <svg viewBox="0 0 32 32" width="30" height="30">
-                        <!-- Connector tip partially submerged inside the port -->
-                        <rect class="usb-connector-tip" x="10" y="20" width="12" height="10" fill="#cbd5e1" stroke="#475569" stroke-width="1" rx="1"/>
-                        <rect x="12.5" y="23" width="2" height="3" fill="#0284c7"/>
-                        <rect x="17.5" y="23" width="2" height="3" fill="#0284c7"/>
-                        <!-- Kingston Red body -->
-                        <rect class="usb-drive-body" x="6" y="2" width="20" height="20" fill="#dc2626" rx="3" stroke="#991b1b" stroke-width="1.5" />
-                        <!-- Texture lines & activity LED -->
-                        <line x1="9" y1="7" x2="23" y2="7" stroke="#fca5a5" stroke-width="1" />
-                        <line x1="9" y1="11" x2="23" y2="11" stroke="#fca5a5" stroke-width="1" />
-                        <circle cx="16" cy="16" r="1.5" fill="#38bdf8" />
-                      </svg>
-                    </div>
-                  ` : ''}
-                </div>
-
-                <!-- Port 2: Additional Port -->
-                <div class="usb-port-slot" title="منفذ USB 3.0 إضافي"></div>
-              </div>
-
-              <!-- Visible LAN cable indicator -->
-              <div class="inserted-lan-visual ${currentSelected === 'pxe' ? 'plugged' : ''}" id="towerPluggedLan">
-                <span class="mini-led green active"></span>
-                <span>RJ-45 (PXE متصل)</span>
-              </div>
-            </div>
-
-            <!-- Intake Grille & Brand Badge -->
-            <div class="pc-tower-intake-grille">
-              <div class="pc-tower-model-badge">LAB-STATION 1AS</div>
-            </div>
+          <h3 class="standby-headline">الشاشة في وضع الاستعداد (Standby Mode)</h3>
+          <div class="standby-status-pill" id="standbyMediaStatusPill">
+            ${currentSelected === 'usb' ? '✔ تم توصيل مفتاح Kingston 32GB في المنفذ الأمامي' : 
+              currentSelected === 'dvd' ? '✔ تم تحميل قرص Windows 11 DVD في القارئ' : 
+              currentSelected === 'pxe' ? '✔ تم توصيل كابل الشبكة RJ-45 (PXE)' :
+              '○ في انتظار اختيار وسيط التثبيت من الرف الأيمن'}
           </div>
-
-        </div>
-
-        <!-- Media Selection Shelf on the Desk -->
-        <div class="workstation-media-shelf">
-          <div class="shelf-guidance-title">
-            <strong>وسائط التثبيت المتاحة على طاولة المخبر:</strong>
-            <span id="shelfConnectionMsg">
-              ${currentSelected === 'usb' ? '✔ تم توصيل مفتاح USB 3.0 في المنفذ الأمامي' : 
-                currentSelected === 'dvd' ? '✔ تم إدخال قرص DVD في قارئ الأقراص' : 
-                currentSelected === 'pxe' ? '✔ تم توصيل كابل الشبكة RJ-45 بالخادم' :
-                '○ يرجى اختيار وتوصيل وسيط التثبيت أولاً'}
-            </span>
-          </div>
-
-          <div class="shelf-items-row">
-            <!-- Media 1: Kingston USB Flash Drive (#usb-drive when detached) -->
-            <div class="interactive-media-card ${currentSelected === 'usb' ? 'connected' : ''}" data-media="usb">
-              <div class="card-svg-icon" id="usbShelfSlot">
-                ${currentSelected !== 'usb' ? `
-                  <div id="usb-drive" class="detached" title="مفتاح Kingston 32GB (انقر للإدخال في المنفذ)">
-                    <svg viewBox="0 0 32 32" width="32" height="32">
-                      <rect class="usb-connector-tip" x="10" y="2" width="12" height="10" fill="#cbd5e1" stroke="#475569" stroke-width="1" rx="1"/>
-                      <rect x="12.5" y="4" width="2" height="3" fill="#0284c7"/>
-                      <rect x="17.5" y="4" width="2" height="3" fill="#0284c7"/>
-                      <rect class="usb-drive-body" x="6" y="10" width="20" height="20" fill="#dc2626" rx="3" stroke="#991b1b" stroke-width="1.5"/>
-                      <line x1="9" y1="15" x2="23" y2="15" stroke="#fca5a5" stroke-width="1" />
-                      <line x1="9" y1="19" x2="23" y2="19" stroke="#fca5a5" stroke-width="1" />
-                      <circle cx="16" cy="24" r="1.5" fill="#38bdf8"/>
-                    </svg>
-                  </div>
-                ` : `
-                  <div class="usb-docked-indicator" style="font-size: 11px; color: #38bdf8; font-weight: 700;">
-                    &#10004; في المنفذ
-                  </div>
-                `}
-              </div>
-              <div class="card-meta">
-                <strong>مفتاح USB ووميضي</strong>
-                <span>Kingston DT 32GB (موصى به)</span>
-                <span class="card-plug-status">${currentSelected === 'usb' ? '● موصول بالمنفذ الأمامي' : '○ انقر للتوصيل'}</span>
-              </div>
-            </div>
-
-            <!-- Media 2: Windows 11 DVD Disc -->
-            <div class="interactive-media-card ${currentSelected === 'dvd' ? 'connected' : ''}" data-media="dvd">
-              <div class="card-svg-icon">
-                <svg viewBox="0 0 40 40" width="38" height="38">
-                  <circle cx="20" cy="20" r="18" fill="url(#dvdGrad)" stroke="#64748b" stroke-width="1"/>
-                  <defs>
-                    <radialGradient id="dvdGrad" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
-                      <stop offset="40%" stop-color="#a855f7" stop-opacity="0.8"/>
-                      <stop offset="70%" stop-color="#f59e0b" stop-opacity="0.8"/>
-                      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.9"/>
-                    </radialGradient>
-                  </defs>
-                  <circle cx="20" cy="20" r="8" fill="#1e293b" stroke="#94a3b8" stroke-width="1"/>
-                  <circle cx="20" cy="20" r="3.5" fill="#0f172a" stroke="#475569" stroke-width="1"/>
-                </svg>
-              </div>
-              <div class="card-meta">
-                <strong>قرص ضوئي DVD</strong>
-                <span>Windows 11 Setup ISO</span>
-                <span class="card-plug-status">${currentSelected === 'dvd' ? '● مدخل في القارئ' : '○ انقر للإدخال'}</span>
-              </div>
-            </div>
-
-            <!-- Media 3: Network PXE Cable -->
-            <div class="interactive-media-card ${currentSelected === 'pxe' ? 'connected' : ''}" data-media="pxe">
-              <div class="card-svg-icon">
-                <svg viewBox="0 0 40 40" width="38" height="38">
-                  <path d="M 6 34 Q 16 34 20 26 L 20 18" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round"/>
-                  <rect x="14" y="6" width="12" height="12" fill="#93c5fd" opacity="0.8" rx="2" stroke="#1d4ed8" stroke-width="1.5"/>
-                  <rect x="17" y="2" width="6" height="5" fill="#fbbf24" rx="1"/>
-                  <line x1="16" y1="7" x2="24" y2="7" stroke="#b45309" stroke-width="1"/>
-                  <line x1="16" y1="9" x2="24" y2="9" stroke="#b45309" stroke-width="1"/>
-                </svg>
-              </div>
-              <div class="card-meta">
-                <strong>إقلاع الشبكة PXE</strong>
-                <span>كابل RJ-45 (خادم المخبر)</span>
-                <span class="card-plug-status">${currentSelected === 'pxe' ? '● موصول بمنفذ LAN' : '○ انقر للتوصيل'}</span>
-              </div>
-            </div>
+          <div class="standby-instruction-hint" id="standbyInstructionHint">
+            ${currentSelected ? 'اضغط الآن على زر الطاقة (Power) بالوحدة المركزية على اليسار لبدء الإقلاع الذاتي (POST).' : 'انقر على وسيط التثبيت المناسب على اليمين ليتم توصيله بالوحدة المركزية.'}
           </div>
         </div>
       </div>
     `;
 
-    // Interactive Media Card Clicks with CSS Transition animation for USB drive
-    container.querySelectorAll('.interactive-media-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const mediaType = card.getAttribute('data-media');
-
-        if (mediaType === 'usb') {
-          if (currentSelected === 'usb') return; // already inserted
-
-          const driveEl = container.querySelector('#usb-drive');
-          const portEl = container.querySelector('#usb-port');
-
-          if (driveEl && portEl) {
-            const driveRect = driveEl.getBoundingClientRect();
-            const portRect = portEl.getBoundingClientRect();
-            const dx = portRect.left + (portRect.width - driveRect.width) / 2 - driveRect.left;
-            const dy = portRect.top - driveRect.top - 18;
-
-            driveEl.className = 'dragging';
-            driveEl.style.left = `${driveRect.left}px`;
-            driveEl.style.top = `${driveRect.top}px`;
-            driveEl.style.transform = `translate(${dx}px, ${dy}px) rotate(180deg) scale(0.95)`;
-
-            if (window.soundSynth) window.soundSynth.playClick();
-
-            setTimeout(() => {
-              currentSelected = 'usb';
-              window.stateEngine.selectedMedia = 'usb';
-              redraw();
-              if (window.soundSynth) window.soundSynth.playSuccess();
-            }, 520);
-            return;
-          }
-        }
-
-        if (window.soundSynth) window.soundSynth.playClick();
-        currentSelected = mediaType;
-        window.stateEngine.selectedMedia = currentSelected;
-        redraw();
-      });
-    });
-
-
-    // Tactile Power Button Click on PC Tower
-    const powerBtn = container.querySelector('#btnTactilePower');
-    if (powerBtn) {
-      powerBtn.addEventListener('click', () => {
-        if (window.soundSynth) window.soundSynth.playPower();
-
-        // Turn on power lights on tower and monitor
-        const towerLed = container.querySelector('#towerPowerLed');
-        const hddLed = container.querySelector('#towerHddLed');
-        const monLed = container.querySelector('#monitorPowerLed');
-        const monScreen = container.querySelector('#deskMonitorScreen');
-
-        if (towerLed) towerLed.classList.add('active');
-        if (hddLed) hddLed.classList.add('active');
-        if (monLed) monLed.classList.add('active');
-        if (window.syncMonitorPowerLed) window.syncMonitorPowerLed(true);
-        if (monScreen) {
-          monScreen.classList.add('powered-on');
-          monScreen.innerHTML = `
-            <div class="spinner-win11"></div>
-            <div style="color: #38bdf8; font-weight: 700; margin-top: 15px;">Power On Self-Test (POST)...</div>
-          `;
-        }
-
-        setTimeout(() => {
-          renderPhase1POST(container);
-        }, 700);
-      });
-    }
+    updateCompanionTowerAndShelf();
   }
 
-  redraw();
+  redrawScreen();
+
+  // Bind Shelf Card clicks
+  document.querySelectorAll('#rigMediaShelf .interactive-media-card').forEach(card => {
+    card.onclick = () => {
+      const mediaType = card.getAttribute('data-media');
+
+      if (mediaType === 'usb') {
+        if (currentSelected === 'usb') return;
+
+        const driveEl = document.getElementById('usb-drive');
+        const portEl = document.getElementById('usb-port');
+
+        if (driveEl && portEl) {
+          const driveRect = driveEl.getBoundingClientRect();
+          const portRect = portEl.getBoundingClientRect();
+          const dx = portRect.left + (portRect.width - driveRect.width) / 2 - driveRect.left;
+          const dy = portRect.top - driveRect.top - 18;
+
+          driveEl.className = 'dragging';
+          driveEl.style.left = `${driveRect.left}px`;
+          driveEl.style.top = `${driveRect.top}px`;
+          driveEl.style.transform = `translate(${dx}px, ${dy}px) rotate(180deg) scale(0.95)`;
+
+          if (window.soundSynth) window.soundSynth.playClick();
+
+          setTimeout(() => {
+            currentSelected = 'usb';
+            window.stateEngine.selectedMedia = 'usb';
+            redrawScreen();
+            if (window.soundSynth) window.soundSynth.playSuccess();
+          }, 520);
+          return;
+        }
+      }
+
+      if (window.soundSynth) window.soundSynth.playClick();
+      currentSelected = mediaType;
+      window.stateEngine.selectedMedia = currentSelected;
+      redrawScreen();
+    };
+  });
+
+  // Bind Tactile Power Button click on the Tower (Left Column)
+  const powerBtn = document.getElementById('btnTactilePower');
+  if (powerBtn) {
+    powerBtn.onclick = () => {
+      if (window.soundSynth) window.soundSynth.playPower();
+
+      const towerLed = document.getElementById('towerPowerLed');
+      const hddLed = document.getElementById('towerHddLed');
+      const monLed = document.getElementById('monitorPowerLed');
+      const towerStatus = document.getElementById('towerLiveStatus');
+
+      if (towerLed) towerLed.classList.add('active');
+      if (hddLed) hddLed.classList.add('active');
+      if (monLed) monLed.classList.add('active');
+      if (window.syncMonitorPowerLed) window.syncMonitorPowerLed(true);
+      if (towerStatus) towerStatus.textContent = '● قيد التشغيل (Running)';
+
+      container.innerHTML = `
+        <div class="virtual-black-screen flex-center" style="flex-direction: column;">
+          <div class="spinner-win11"></div>
+          <div style="color: #38bdf8; font-weight: 700; font-size: 18px; margin-top: 18px;">Power On Self-Test (POST)...</div>
+        </div>
+      `;
+
+      setTimeout(() => {
+        renderPhase1POST(container);
+      }, 700);
+    };
+  }
 }
 
 function renderPhase1POST(container) {

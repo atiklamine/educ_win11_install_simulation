@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "test": "node test_simulator.js && electron test_electron_runtime.js",
+    "test": "node test_simulator.js && electron test_electron_runtime.js && node test_six_modifications.js && node test_modifications_7_8.js && node test_theme_and_french_names.js && node test_user_reported_fixes.js && node test_layout_3column_workstation.js",
     "test:pdf": "electron test_pdf_export.js",
     "build:portable": "electron-builder --win portable --ia32 --x64",
     "build:portable64": "electron-builder --win portable --x64",
