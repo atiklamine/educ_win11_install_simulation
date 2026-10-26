@@ -336,6 +336,14 @@
   color: #ffffff;
 }
 
+.quiz-prompt-text {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--modal-title-text);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
 .quiz-feedback {
   margin-top: 14px;
   padding: 12px;
@@ -348,15 +356,128 @@
 }
 
 .quiz-feedback.success {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #065f46;
+}
+
+[data-theme="dark"] .quiz-feedback.success {
   background: rgba(16, 185, 129, 0.15);
   border: 1px solid rgba(16, 185, 129, 0.3);
   color: #a7f3d0;
 }
 
 .quiz-feedback.warning {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #991b1b;
+}
+
+[data-theme="dark"] .quiz-feedback.warning {
   background: rgba(239, 68, 68, 0.15);
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: #fca5a5;
+}
+
+/* Modal Helper Cards & Rows */
+.guide-card {
+  padding: 10px 14px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.guide-card strong {
+  display: block;
+  font-size: 13.5px;
+  margin-bottom: 2px;
+}
+
+.guide-card span {
+  font-size: 12.5px;
+  color: var(--modal-text);
+  line-height: 1.5;
+}
+
+.guide-card-blue {
+  background: rgba(0, 120, 212, 0.08);
+  border-right: 4px solid #0078d4;
+}
+.guide-card-blue strong { color: var(--accent-color); }
+
+.guide-card-amber {
+  background: rgba(245, 158, 11, 0.08);
+  border-right: 4px solid #f59e0b;
+}
+.guide-card-amber strong { color: #b45309; }
+[data-theme="dark"] .guide-card-amber strong { color: #f59e0b; }
+
+.guide-card-green {
+  background: rgba(16, 185, 129, 0.08);
+  border-right: 4px solid #10b981;
+}
+.guide-card-green strong { color: #047857; }
+[data-theme="dark"] .guide-card-green strong { color: #34d399; }
+
+.guide-card-red {
+  background: rgba(239, 68, 68, 0.08);
+  border-right: 4px solid #ef4444;
+}
+.guide-card-red strong { color: #b91c1c; }
+[data-theme="dark"] .guide-card-red strong { color: #fca5a5; }
+
+.guide-card-purple {
+  background: rgba(168, 85, 247, 0.08);
+  border-right: 4px solid #a855f7;
+}
+.guide-card-purple strong { color: #7e22ce; }
+[data-theme="dark"] .guide-card-purple strong { color: #d8b4fe; }
+
+.settings-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 120, 212, 0.06);
+  border: 1px solid rgba(0, 120, 212, 0.18);
+  padding: 10px 14px;
+  border-radius: 6px;
+}
+
+.settings-switch-row strong {
+  color: var(--modal-title-text);
+  display: block;
+  font-size: 13px;
+}
+
+.settings-switch-row span {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.initial-setup-banner {
+  font-size: 13px;
+  color: var(--accent-color);
+  background: rgba(0, 120, 212, 0.08);
+  border-right: 3px solid var(--accent-color);
+  padding: 8px 12px;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+.about-info-box {
+  background: rgba(0, 120, 212, 0.06);
+  border: 1px solid rgba(0, 120, 212, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.about-info-box h4 {
+  color: var(--accent-color);
+  font-size: 13.5px;
+  margin-bottom: 8px;
+  font-weight: 700;
 }
 
 /* Modification 4: Side-by-Side Score & Time Cards for Grand Finale */
