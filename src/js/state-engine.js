@@ -128,6 +128,12 @@ class StateEngine {
       this.timerSeconds = 0;
     }
 
+    // Hide reopen finale button on new session
+    const btnOpenFinale = document.getElementById('btnOpenFinaleResults');
+    if (btnOpenFinale) {
+      btnOpenFinale.classList.add('hidden');
+    }
+
     this.startTimer();
     this.updateHUD();
     this.updateStepper();
@@ -366,6 +372,10 @@ class StateEngine {
     }
 
     modal.classList.add('modal-visible');
+    const btnOpenFinale = document.getElementById('btnOpenFinaleResults');
+    if (btnOpenFinale) {
+      btnOpenFinale.classList.remove('hidden');
+    }
     if (window.soundSynth) window.soundSynth.playSuccess();
   }
 }

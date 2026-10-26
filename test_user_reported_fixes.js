@@ -78,6 +78,26 @@ assert(appSim.includes("'محاولة المتابعة على قسم غير مه
 assert(appSim.includes("window.stateEngine.recordPenalty(8, 0.50, 'اختيار إيقاف التشغيل"), 'Phase 8 Shutdown must record penalty');
 console.log('  ✓ PASS: All student mistakes actively reduce final mark and update HUD in real time.');
 
+// 6. Verify Fullscreen Startup in main.js
+console.log('\n[Fix 6] Verifying Full-screen Mode on Startup in main.js...');
+const mainJs = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
+assert(mainJs.includes('fullscreen: true'), 'BrowserWindow must configure fullscreen: true by default');
+assert(mainJs.includes('mainWindow.setFullScreen(true)'), 'createMainWindow must call setFullScreen(true)');
+assert(mainJs.includes("ipcMain.handle('toggle-fullscreen'"), 'main.js must handle toggle-fullscreen');
+assert(mainJs.includes("ipcMain.handle('quit-app'"), 'main.js must handle quit-app');
+console.log('  ✓ PASS: Application is configured to launch in full-screen mode by default with F11 toggle.');
+
+// 7. Verify End-of-Program Navigation & UI/UX Options
+console.log('\n[Fix 7] Verifying End-of-Program Navigation (Exit, Return, Re-open, New Session)...');
+assert(indexHtml.includes('id="btnCloseFinaleModal"'), 'grandFinaleModal must have #btnCloseFinaleModal');
+assert(indexHtml.includes('id="btnFinaleReturn"'), 'grandFinaleModal must have #btnFinaleReturn');
+assert(indexHtml.includes('id="btnFinaleExit"'), 'grandFinaleModal must have #btnFinaleExit');
+assert(indexHtml.includes('id="btnFinaleRestart"'), 'grandFinaleModal must have #btnFinaleRestart');
+assert(indexHtml.includes('id="btnFinaleExportPdf"'), 'grandFinaleModal must have #btnFinaleExportPdf');
+assert(indexHtml.includes('id="btnOpenFinaleResults"'), 'HUD must have #btnOpenFinaleResults to re-open modal');
+assert(stateEngine.includes("document.getElementById('btnOpenFinaleResults')"), 'stateEngine must toggle btnOpenFinaleResults visibility');
+console.log('  ✓ PASS: End-of-program modal provides complete navigation: Return to desktop, Clean Exit, New Session, and Export PDF.');
+
 console.log('\n================================================================');
 console.log('ALL FIXES VERIFIED SUCCESSFULLY WITH 100% PASS RATE!');
 console.log('================================================================');

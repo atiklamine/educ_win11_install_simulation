@@ -196,6 +196,7 @@ ipcMain.handle('settings:createInitial', async (_event, initialData) => {
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
+    fullscreen: true,
     width: 1280,
     height: 800,
     minWidth: 1024,
@@ -212,6 +213,9 @@ function createMainWindow() {
       webSecurity: false
     }
   });
+
+  mainWindow.maximize();
+  mainWindow.setFullScreen(true);
 
   mainWindow.loadFile(path.join(__dirname, 'src', 'index.html'));
 
