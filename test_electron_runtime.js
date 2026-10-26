@@ -21,6 +21,8 @@ ipcMain.handle('settings:load', async () => ({
     session_mode_enabled: true
   }
 }));
+ipcMain.handle('toggle-fullscreen', async () => true);
+ipcMain.handle('is-fullscreen', async () => true);
 
 let win;
 let hasError = false;

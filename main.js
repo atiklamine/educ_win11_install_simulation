@@ -226,8 +226,22 @@ function createMainWindow() {
   // F11 fullscreen shortcut
   mainWindow.webContents.on('before-input-event', (event, input) => {
     if (input.key === 'F11' && input.type === 'keyDown') {
-      mainWindow.setFullScreen(!mainWindow.isFullScreen());
+      const isFull = mainWindow.isFullScreen();
+      mainWindow.setFullScreen(!isFull);
+      mainWindow.webContents.send('window-fullscreen-changed', !isFull);
       event.preventDefault();
+    }
+  });
+
+  mainWindow.on('enter-full-screen', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('window-fullscreen-changed', true);
+    }
+  });
+
+  mainWindow.on('leave-full-screen', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('window-fullscreen-changed', false);
     }
   });
 }
@@ -374,7 +388,16 @@ ipcMain.handle('toggle-fullscreen', () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     const isFull = mainWindow.isFullScreen();
     mainWindow.setFullScreen(!isFull);
+    mainWindow.webContents.send('window-fullscreen-changed', !isFull);
     return !isFull;
+  }
+  return false;
+});
+
+// IPC: Get Fullscreen State
+ipcMain.handle('is-fullscreen', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    return mainWindow.isFullScreen();
   }
   return false;
 });

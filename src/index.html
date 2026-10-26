@@ -41,13 +41,13 @@
 
       <div class="hud-actions-section">
         <button class="hud-btn hidden" id="btnOpenFinaleResults" title="عرض بطاقة التقييم والتقرير النهائي" style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #4ade80; font-weight: 700;">&#127881; النتيجة والتقرير</button>
-        <button class="hud-btn" id="btnToggleViewMode" title="التبديل بين وضع الحاسوب الافتراضي ووضع ملء مساحة العرض (F10)">&#9974; ملء مساحة العرض</button>
+        <button class="hud-btn" id="btnToggleViewMode" title="التبديل بين وضع محطة العمل الكاملة وتكبير شاشة العرض [F10]">🖥️ تكبير شاشة المحاكاة (F10)</button>
+        <button class="hud-btn" id="btnToggleFullscreen" title="ملء شاشة التطبيق / نافذة البرنامج ككل [F11]">&#9974; ملء نافذة التطبيق (F11)</button>
         <button class="hud-btn" id="btnToggleTheme" title="التبديل بين المظهر الفاتح والمظلم (Light / Dark Mode)">☀️ فاتح</button>
         <button class="hud-btn" id="btnNewSession" title="بدء جلسة تقييم جديدة">&#10010; جلسة جديدة</button>
-        <button class="hud-btn" id="btnOpenExpertGuide" title="دليل النظام الخبير للتثبيت">&#128218; دليل النظام الخبير</button>
+        <button class="hud-btn" id="btnOpenExpertGuide" title="دليل النظام الخبير والتوجيهات البيداغوجية">&#128218; دليل النظام الخبير</button>
         <button class="hud-btn hud-btn-accent" id="btnExportPdf" title="استخراج شهادة تقييم الكفاءة PDF">&#128196; تصدير PDF</button>
         <button class="hud-btn" id="btnToggleSound" title="كتم / تفعيل المؤثرات الصوتية">&#128266; صوت</button>
-        <button class="hud-btn" id="btnToggleFullscreen" title="ملء الشاشة [F11]">&#9974; F11</button>
         <button class="hud-btn" id="btnOpenAbout" title="معلومات المطور والأستاذ والمؤسسة">&#8505; حول البرنامج</button>
         <button class="hud-btn hud-btn-danger" id="btnQuitApp" title="خروج من التطبيق">&times;</button>
       </div>
@@ -272,11 +272,11 @@
       <div class="stepper-phases-container">
         <div class="stepper-item active" id="stepperPhase1">
           <span class="step-num">1</span>
-          <span>الإقلاع والعتاد</span>
+          <span>المحطة والإقلاع</span>
         </div>
         <div class="stepper-item" id="stepperPhase2">
           <span class="step-num">2</span>
-          <span>ضبط البيوس</span>
+          <span>إعدادات البيوس</span>
         </div>
         <div class="stepper-item" id="stepperPhase3">
           <span class="step-num">3</span>
@@ -288,19 +288,19 @@
         </div>
         <div class="stepper-item" id="stepperPhase5">
           <span class="step-num">5</span>
-          <span>التجزئة والتهيئة</span>
+          <span>التجزئة والتهيئة NTFS</span>
         </div>
         <div class="stepper-item" id="stepperPhase6">
           <span class="step-num">6</span>
-          <span>التثبيت والنسخ</span>
+          <span>التثبيت وفصل الفلاشة</span>
         </div>
         <div class="stepper-item" id="stepperPhase7">
           <span class="step-num">7</span>
-          <span>إعدادات OOBE</span>
+          <span>OOBE والخصوصية</span>
         </div>
         <div class="stepper-item" id="stepperPhase8">
           <span class="step-num">8</span>
-          <span>الإقلاع المستقل</span>
+          <span>سطح المكتب المستقل</span>
         </div>
       </div>
 
@@ -435,40 +435,40 @@
 
   <!-- Modal 4: Expert System Simulation Guide -->
   <div class="modal-overlay" id="expertGuideModal">
-    <div class="modal-dialog" style="max-width: 680px;">
+    <div class="modal-dialog" style="max-width: 720px;">
       <div class="modal-header">
-        <h3 class="modal-title">&#128218; دليل النظام الخبير للمحاكاة (The Expert Guide)</h3>
+        <h3 class="modal-title">&#128218; دليل النظام الخبير للمحاكاة (The Expert System Guide)</h3>
         <button class="modal-close-btn" id="btnCloseGuideModal">&times;</button>
       </div>
       <div class="modal-body">
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
-          دليل إرشادي استباقي يطابق الكود البرمجي للمحاكاة، ويقدم تنبيهات تنبؤية للخطوات الحاسمة:
+          دليل إرشادي تقني استباقي يطابق البنية الفيزيائية لمحطة العمل وكود المحاكاة، ويقدم تنبيهات تنبؤية للخطوات الحاسمة:
         </p>
 
         <div style="display: flex; flex-direction: column; gap: 12px;">
           <div class="guide-card guide-card-blue">
-            <strong>1. مقاطعة الإقلاع الأولي (POST):</strong>
-            <span>تنبيه: إذا انقضت مهلة الـ 10 ثوانٍ دون الضغط على F2 أو Del، ستفقد فرصة دخول البيوس وسيخصم -1.00 نقطة.</span>
+            <strong>1. تجهيز المحطة ومقاطعة الإقلاع الأولي (POST):</strong>
+            <span>اختر وسيط التثبيت من الرف الأيمن، ثم شغّل الحاسوب حصراً عبر <strong>زر الطاقة (Power) الحقيقي بالوحدة المركزية على اليسار</strong>. اضغط سريعاً على <strong>[F2 أو Del]</strong> خلال 10 ثوانٍ لدخول البيوس لتفادي خصم (-1.00 نقطة).</span>
           </div>
 
           <div class="guide-card guide-card-amber">
-            <strong>2. إعدادات البيوس ووسيط الإقلاع:</strong>
-            <span>تنبيه: إذا تركت القرص الداخلي الفارغ كإقلاع أول، سيظهر لك خطأ (No bootable device found). يجب اختيار USB وتفعيل TPM 2.0 و Secure Boot ثم الضغط حصراً على F10.</span>
+            <strong>2. إعدادات البيوس ووسيط الإقلاع (UEFI BIOS):</strong>
+            <span>فعّل <strong>TPM 2.0</strong> و <strong>Secure Boot</strong>، واجعل وسيط التثبيت كجهاز إقلاع أول، ثم اضغط حصراً على <strong>[F10]</strong> للحفظ وإعادة التشغيل. ترك القرص الداخلي الفارغ كإقلاع أول يؤدي إلى خطأ الإقلاع.</span>
           </div>
 
           <div class="guide-card guide-card-green">
-            <strong>3. التجزئة والتهيئة بنظام NTFS:</strong>
-            <span>تنبيه: إذا حاولت الضغط على Next دون تهيئة القسم الأساسي (Primary) بنظام NTFS، سيتوقف التثبيت مع خصم نقطي. اضغط New ثم Format.</span>
+            <strong>3. التجزئة المنطقية والتهيئة بنظام NTFS:</strong>
+            <span>قسّم مساحة القرص غير المخصصة (New) لإنشاء أقسام GPT الأربعة، ثم حدد القسم الرابع الأساسي (Primary) واضغط <strong>Format</strong> لتهيئته بنظام NTFS قبل النقر على Next.</span>
           </div>
 
           <div class="guide-card guide-card-red">
-            <strong>4. كسر حلقة الإقلاع الثاني وفصل الفلاشة:</strong>
-            <span>تنبيه: بعد انتهاء نسخ الملفات، اضغط F2 لإعادة القرص الصلب كإقلاع أول ثم انزع مفتاح USB لمرة واحدة لمنع تكرار شاشة التثبيت الأولى.</span>
+            <strong>4. كسر حلقة الإقلاع ونزع الفلاش ديسك فيزيائياً:</strong>
+            <span>بعد اكتمال نسخ الملفات وبدء العد التنازلي لإعادة التشغيل، اضغط F2/Del لإعادة SSD كإقلاع أول، ثم <strong>انقر مباشرة على مفتاح USB في منفذ الوحدة المركزية على اليسار لنزعه فيزيائياً</strong> لمنع تكرار شاشة التثبيت.</span>
           </div>
 
           <div class="guide-card guide-card-purple">
-            <strong>5. حماية الخصوصية الرقمية (OOBE):</strong>
-            <span>تنبيه: في مرحلة OOBE، يجب تعطيل كافة خيارات التتبع الإعلانية السبعة (Turn All OFF) لضمان حماية بيانات التلميذ.</span>
+            <strong>5. حماية الخصوصية الرقمية والتحكم في العرض:</strong>
+            <span>في شاشة OOBE، عطّل كافة خيارات التتبع الإعلاني السبعة (Turn All OFF). يمكنك التبديل بين محطة العمل الكاملة وتكبير شاشة المحاكاة عبر <strong>[F10]</strong>، وملء نافذة التطبيق بالكامل عبر <strong>[F11]</strong>.</span>
           </div>
         </div>
       </div>
@@ -822,20 +822,49 @@
         });
       }
 
-      // Fullscreen Toggle
+      // Application Window Fullscreen Toggle (F11)
       const btnFs = document.getElementById('btnToggleFullscreen');
+      function updateFullscreenButtonState(isFull) {
+        if (!btnFs) return;
+        if (isFull) {
+          btnFs.innerHTML = '&#128471; استعادة نافذة التطبيق (F11)';
+          btnFs.title = 'الخروج من وضع ملء الشاشة واستعادة نافذة التطبيق [F11]';
+          btnFs.classList.add('active');
+        } else {
+          btnFs.innerHTML = '&#9974; ملء نافذة التطبيق (F11)';
+          btnFs.title = 'ملء شاشة التطبيق / نافذة البرنامج ككل [F11]';
+          btnFs.classList.remove('active');
+        }
+      }
+
       if (btnFs) {
-        btnFs.addEventListener('click', () => {
+        btnFs.addEventListener('click', async () => {
+          if (window.soundSynth) window.soundSynth.playClick();
           if (window.electronAPI && window.electronAPI.toggleFullscreen) {
-            window.electronAPI.toggleFullscreen();
+            const isFull = await window.electronAPI.toggleFullscreen();
+            updateFullscreenButtonState(isFull);
           } else {
             if (!document.fullscreenElement) {
-              document.documentElement.requestFullscreen();
+              await document.documentElement.requestFullscreen();
+              updateFullscreenButtonState(true);
             } else {
-              document.exitFullscreen();
+              await document.exitFullscreen();
+              updateFullscreenButtonState(false);
             }
           }
         });
+
+        // Initialize state on launch and listen for window state changes
+        if (window.electronAPI && window.electronAPI.isFullscreen) {
+          window.electronAPI.isFullscreen().then(updateFullscreenButtonState).catch(() => {});
+          if (window.electronAPI.onFullscreenChanged) {
+            window.electronAPI.onFullscreenChanged(updateFullscreenButtonState);
+          }
+        } else {
+          document.addEventListener('fullscreenchange', () => {
+            updateFullscreenButtonState(!!document.fullscreenElement);
+          });
+        }
       }
 
       // About Modal Button (Opens on top of everything without losing quiz state)
@@ -1097,34 +1126,34 @@
           wrapper.classList.add('view-mode-expanded');
 
           if (btnHud) {
-            btnHud.innerHTML = '&#128187; وضع الحاسوب';
-            btnHud.title = 'العودة إلى وضع الحاسوب الافتراضي في المخبر (F10)';
+            btnHud.innerHTML = '🖥️ وضع محطة العمل (F10)';
+            btnHud.title = 'العودة إلى وضع محطة العمل الكاملة (البرج والشاشة والرف) [F10]';
             btnHud.classList.add('active');
           }
           if (btnQuick) {
-            btnQuick.innerHTML = '<span class="toggle-icon">&#128187;</span><span class="toggle-label">وضع الحاسوب</span>';
-            btnQuick.title = 'العودة إلى وضع الحاسوب الافتراضي (F10)';
+            btnQuick.innerHTML = '<span class="toggle-icon">🖥️</span><span class="toggle-label">محطة العمل</span>';
+            btnQuick.title = 'العودة إلى وضع محطة العمل الكاملة (F10)';
           }
           if (btnChin) {
-            btnChin.innerHTML = '&#128187; استعادة وضع الحاسوب';
-            btnChin.title = 'العودة إلى وضع الحاسوب الافتراضي (F10)';
+            btnChin.innerHTML = '🖥️ استعادة وضع محطة العمل';
+            btnChin.title = 'العودة إلى وضع محطة العمل الكاملة (F10)';
           }
         } else {
           wrapper.classList.remove('view-mode-expanded');
           wrapper.classList.add('view-mode-rig');
 
           if (btnHud) {
-            btnHud.innerHTML = '&#9974; ملء مساحة العرض';
-            btnHud.title = 'تكبير الشاشة لملء مساحة العرض بالكامل (F10)';
+            btnHud.innerHTML = '🖥️ تكبير شاشة المحاكاة (F10)';
+            btnHud.title = 'تكبير شاشة المحاكاة لملء مساحة العرض بالكامل [F10]';
             btnHud.classList.remove('active');
           }
           if (btnQuick) {
-            btnQuick.innerHTML = '<span class="toggle-icon">&#9974;</span><span class="toggle-label">ملء مساحة العرض</span>';
-            btnQuick.title = 'تكبير الشاشة لملء مساحة العرض (F10)';
+            btnQuick.innerHTML = '<span class="toggle-icon">&#9974;</span><span class="toggle-label">تكبير الشاشة</span>';
+            btnQuick.title = 'تكبير شاشة المحاكاة لملء مساحة العرض (F10)';
           }
           if (btnChin) {
-            btnChin.innerHTML = '&#9974; تكبير الشاشة';
-            btnChin.title = 'تكبير الشاشة لملء مساحة العرض (F10)';
+            btnChin.innerHTML = '&#9974; تكبير شاشة المحاكاة';
+            btnChin.title = 'تكبير شاشة المحاكاة لملء مساحة العرض (F10)';
           }
         }
       }

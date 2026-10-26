@@ -20,6 +20,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   savePdfReport: (payload) => ipcRenderer.invoke('save-pdf-report', payload),
   showInFolder: (filePath) => ipcRenderer.invoke('show-in-folder', filePath),
   toggleFullscreen: () => ipcRenderer.invoke('toggle-fullscreen'),
+  isFullscreen: () => ipcRenderer.invoke('is-fullscreen'),
+  onFullscreenChanged: (callback) => ipcRenderer.on('window-fullscreen-changed', (event, isFull) => callback(isFull)),
   quitApp: () => ipcRenderer.invoke('quit-app'),
   getDesktopPath: () => ipcRenderer.invoke('get-desktop-path')
 });
