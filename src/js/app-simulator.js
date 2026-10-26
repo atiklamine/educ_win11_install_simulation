@@ -438,6 +438,20 @@ function renderPhase3Regional(container) {
   const nextBtn = container.querySelector('#btnP3Next');
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
+      const timeVal = container.querySelector('#p3Time') ? container.querySelector('#p3Time').value : 'dz';
+      const kbVal = container.querySelector('#p3Keyboard') ? container.querySelector('#p3Keyboard').value : 'azerty';
+      if (timeVal !== 'dz' && timeVal !== 'fr-dz') {
+        window.soundSynth.playErrorBeep();
+        window.stateEngine.recordPenalty(3, 0.50, 'عدم ضبط تنسيق الوقت والعملة على الجزائر (Algeria)', 'المعيار الجزائري المعتمد يقتضي ضبط تنسيق الوقت والعملة بما يوافق الجزائر.');
+        alert('تنبيه: يجب اختيار تنسيق الوقت والعملة الخاص بالجزائر: Arabic (Algeria) أو Français (Algérie).');
+        return;
+      }
+      if (kbVal !== 'azerty') {
+        window.soundSynth.playErrorBeep();
+        window.stateEngine.recordPenalty(3, 0.50, 'عدم اختيار تخطيط لوحة المفاتيح المعتمد في المخابر (French AZERTY)', 'لوحات المفاتيح بالمخابر الجزائرية تعتمد التخطيط الفرنسي AZERTY.');
+        alert('تنبيه: يجب اختيار لوحة المفاتيح French (AZERTY) المعتمدة في المخابر التعليمية الجزائرية.');
+        return;
+      }
       if (window.soundSynth) window.soundSynth.playClick();
       renderPhase3InstallNow(container);
     });
@@ -472,6 +486,16 @@ function renderPhase3InstallNow(container) {
     </div>
   `;
 
+  const repairBtn = container.querySelector('#btnRepairPc');
+  if (repairBtn) {
+    repairBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.soundSynth.playErrorBeep();
+      window.stateEngine.recordPenalty(3, 0.50, 'محاولة فتح إصلاح الحاسوب بدلاً من التثبيت النظيف (Install Now)');
+      alert('تنبيه: محطة العمل جديدة ولا يوجد نظام سابق لإصلاحه. اضغط على Install Now لتنصيب النظام.');
+    });
+  }
+
   const installBtn = container.querySelector('#btnInstallNow');
   if (installBtn) {
     installBtn.addEventListener('click', () => {
@@ -489,30 +513,34 @@ function renderPhase4License(container) {
     <div class="win11-setup-backdrop">
       <div class="win11-window">
         <div class="win11-titlebar">
-          <span>Activate Windows</span>
+          <span>Windows Setup</span>
           <span style="color: #888;">&times;</span>
         </div>
 
         <div class="win11-body">
           <div>
-            <h2 class="win11-step-heading">تنشيط ويندوز (Product Key)</h2>
-            <p class="win11-step-desc">في بيئة المخابر التعليمية، يتم تجاوز إدخال المفتاح أثناء التنصيب ليتم تنشيطه لاحقاً عبر الخادم المدرسي:</p>
+            <h2 class="win11-step-heading">Activate Windows</h2>
+            <p class="win11-step-desc">If this is the first time you're installing Windows on this PC, you need to enter a valid Windows product key. The product key should be in the confirmation email you received or on a card in the box Windows came in.</p>
 
-            <div class="win11-form-group">
-              <label class="win11-label">Product key:</label>
-              <input type="text" class="win11-input" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" disabled style="opacity: 0.6;">
+            <div class="win11-form-group" style="max-width: 440px;">
+              <label class="win11-label">Product key</label>
+              <input type="text" class="win11-input" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" disabled style="opacity: 0.7; letter-spacing: 2px;">
             </div>
 
-            <p style="font-size: 11px; color: #888; margin-top: 8px;">
-              إذا كنت تعيد تثبيت Windows، اختر خيار التجاوز لمتابعة الإعداد.
+            <div style="margin-top: 18px; margin-bottom: 12px;">
+              <a href="javascript:void(0)" id="btnSkipKey" class="win11-setup-link">
+                <span style="font-size: 15px;">&#128273;</span>
+                <span style="text-decoration: underline;">I don't have a product key (ليس لدي مفتاح منتج)</span>
+              </a>
+            </div>
+
+            <p style="font-size: 11.5px; color: #888888; margin-top: 12px;">
+              إذا كنت تعيد تثبيت Windows على جهاز المخبـر، اختر خيار التجاوز لتنشيط النسخة لاحقاً عبر ترخيص المؤسسة.
             </p>
           </div>
 
-          <div class="win11-actions-bar" style="justify-content: space-between;">
-            <button class="fluent-btn fluent-btn-standard" id="btnSkipKey" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">
-              I don't have a product key (ليس لدي مفتاح منتج)
-            </button>
-            <button class="fluent-btn fluent-btn-accent" disabled id="btnKeyNext">Next</button>
+          <div class="win11-actions-bar">
+            <button class="fluent-btn fluent-btn-accent" disabled id="btnKeyNext">Next &gt;</button>
           </div>
         </div>
       </div>
@@ -708,6 +736,7 @@ function renderPhase4InstallType(container) {
 }
 
 // ==========================================================================
+// ==========================================================================
 // PHASE 5: Advanced Partitioning & Mandatory NTFS Formatting
 // ==========================================================================
 function renderPhase5Partitioning(container) {
@@ -718,62 +747,80 @@ function renderPhase5Partitioning(container) {
   function redraw() {
     container.innerHTML = `
       <div class="win11-setup-backdrop">
-        <div class="win11-window" style="width: 720px;">
+        <div class="win11-window" style="width: 740px;">
           <div class="win11-titlebar">
-            <span>Where do you want to install Windows?</span>
+            <span>Windows Setup</span>
             <span style="color: #888;">&times;</span>
           </div>
 
           <div class="win11-body">
             <div>
-              <h2 class="win11-step-heading">التجزئة المتقدمة والتهيئة المنطقية للأقراص</h2>
-              <p class="win11-step-desc">
-                ${gptCreated 
-                  ? 'تم بناء جدول أقسام GPT. حدد القسم الأساسي (Primary) واضغط Format لتهيئته بنظام NTFS:' 
-                  : 'القرص التخزيني خام (Unallocated Space). اضغط New لإنشاء جدول أقسام GPT تلقائي:'}
+              <h2 class="win11-step-heading">Where do you want to install Windows?</h2>
+              <p class="win11-step-desc" style="margin-bottom: 12px; font-size: 11.5px; color: #a0a0a0;">
+                Select the unallocated drive or partition where you want to install Windows.
               </p>
 
               <div class="partition-table-container">
+                <div class="partition-table-header">
+                  <span>Name</span>
+                  <span>Total size</span>
+                  <span>Free space</span>
+                  <span>Type</span>
+                </div>
                 ${!gptCreated ? `
                   <div class="partition-row ${selectedPartId === 'part0' ? 'selected' : ''}" data-id="part0">
                     <span>Drive 0 Unallocated Space</span>
                     <span>512.0 GB</span>
                     <span>512.0 GB</span>
-                    <span>Free Space</span>
+                    <span></span>
                   </div>
                 ` : `
                   <div class="partition-row ${selectedPartId === 'part1' ? 'selected' : ''}" data-id="part1">
-                    <span>Drive 0 Partition 1: System (EFI)</span>
+                    <span>Drive 0 Partition 1: System</span>
                     <span>100.0 MB</span>
-                    <span>70.0 MB</span>
+                    <span>100.0 MB</span>
                     <span>System</span>
                   </div>
                   <div class="partition-row ${selectedPartId === 'part2' ? 'selected' : ''}" data-id="part2">
                     <span>Drive 0 Partition 2: MSR (Reserved)</span>
                     <span>16.0 MB</span>
-                    <span>0.0 MB</span>
-                    <span>MSR</span>
+                    <span>16.0 MB</span>
+                    <span>MSR (Reserved)</span>
                   </div>
                   <div class="partition-row ${selectedPartId === 'part3' ? 'selected' : ''}" data-id="part3">
                     <span>Drive 0 Partition 3: Recovery</span>
                     <span>650.0 MB</span>
-                    <span>150.0 MB</span>
+                    <span>650.0 MB</span>
                     <span>Recovery</span>
                   </div>
                   <div class="partition-row ${selectedPartId === 'part4' ? 'selected' : ''}" data-id="part4">
-                    <span><strong>Drive 0 Partition 4: Primary</strong></span>
+                    <span><strong>Drive 0 Partition 4</strong></span>
                     <span>511.2 GB</span>
-                    <span>${primaryFormatted ? '511.2 GB (NTFS ✔)' : '511.2 GB (RAW)'}</span>
-                    <span><strong>Primary</strong></span>
+                    <span>511.2 GB</span>
+                    <span><strong>${primaryFormatted ? 'Primary (NTFS)' : 'Unallocated'}</strong></span>
                   </div>
                 `}
               </div>
 
               <div class="partition-toolbar">
-                <button class="part-tool-btn" id="btnPartNew" ${gptCreated ? 'disabled' : ''}>+ New (جديد)</button>
-                <button class="part-tool-btn" id="btnPartFormat" ${!gptCreated ? 'disabled' : ''}>&#128472; Format (تهيئة)</button>
-                <button class="part-tool-btn" id="btnPartDelete" ${!gptCreated ? 'disabled' : ''}>&#128465; Delete (حذف)</button>
-                <button class="part-tool-btn" id="btnPartRefresh">&#8635; Refresh</button>
+                <button class="part-tool-btn" id="btnPartRefresh" title="Refresh">
+                  <span style="font-size: 13px;">&#8635;</span> Refresh
+                </button>
+                <button class="part-tool-btn" id="btnPartDelete" ${!gptCreated ? 'disabled' : ''} title="Delete">
+                  <span style="font-size: 13px;">&#10006;</span> Delete
+                </button>
+                <button class="part-tool-btn" id="btnPartFormat" ${!gptCreated ? 'disabled' : ''} title="Format">
+                  <span style="font-size: 13px;">&#128472;</span> Format
+                </button>
+                <button class="part-tool-btn" id="btnPartLoadDriver" title="Load driver">
+                  <span style="font-size: 13px;">&#128194;</span> Load driver
+                </button>
+                <button class="part-tool-btn" id="btnPartNew" ${gptCreated ? 'disabled' : ''} title="New">
+                  <span style="font-size: 13px;">&#10010;</span> New
+                </button>
+                <button class="part-tool-btn" id="btnPartExtend" disabled title="Extend">
+                  <span style="font-size: 13px;">&#8596;</span> Extend
+                </button>
               </div>
             </div>
 
@@ -794,30 +841,55 @@ function renderPhase5Partitioning(container) {
       });
     });
 
-    // New Partition Button (Creates GPT Structure)
-    const btnNew = container.querySelector('#btnPartNew');
-    if (btnNew) {
-      btnNew.addEventListener('click', () => {
-        if (window.soundSynth) window.soundSynth.playSuccess();
-        gptCreated = true;
-        window.stateEngine.partitionConfig.gptCreated = true;
-        selectedPartId = 'part4'; // auto select Primary
+    // Refresh Button
+    const btnRefresh = container.querySelector('#btnPartRefresh');
+    if (btnRefresh) {
+      btnRefresh.addEventListener('click', () => {
+        if (window.soundSynth) window.soundSynth.playClick();
         redraw();
       });
     }
 
-    // Format Button (Mandatory NTFS)
+    // Load Driver Button
+    const btnLoadDriver = container.querySelector('#btnPartLoadDriver');
+    if (btnLoadDriver) {
+      btnLoadDriver.addEventListener('click', () => {
+        if (window.soundSynth) window.soundSynth.playClick();
+        alert('No signed device drivers were found. Make sure that the installation media contains the correct drivers.');
+      });
+    }
+
+    // New Partition Button (Creates GPT Structure with authentic Windows prompt)
+    const btnNew = container.querySelector('#btnPartNew');
+    if (btnNew) {
+      btnNew.addEventListener('click', () => {
+        const confirmNew = confirm('To ensure that all Windows features work correctly, Windows might create additional partitions for system files.\n\nClick OK to proceed with creating partitions.');
+        if (confirmNew) {
+          if (window.soundSynth) window.soundSynth.playSuccess();
+          gptCreated = true;
+          window.stateEngine.partitionConfig.gptCreated = true;
+          selectedPartId = 'part4'; // auto select Primary partition 4
+          redraw();
+        }
+      });
+    }
+
+    // Format Button (Mandatory NTFS with authentic Windows confirmation)
     const btnFormat = container.querySelector('#btnPartFormat');
     if (btnFormat) {
       btnFormat.addEventListener('click', () => {
         if (selectedPartId === 'part4') {
-          if (window.soundSynth) window.soundSynth.playSuccess();
-          primaryFormatted = true;
-          window.stateEngine.partitionConfig.primaryFormattedNTFS = true;
-          alert('تمت تهيئة القسم الأساسي بنجاح بنظام الملفات NTFS المعتمد.');
-          redraw();
+          const confirmFormat = confirm('The partition might contain recovery files, system files, or important software from your computer manufacturer. If you format this partition, any data stored on it will be lost.\n\nClick OK to format.');
+          if (confirmFormat) {
+            if (window.soundSynth) window.soundSynth.playSuccess();
+            primaryFormatted = true;
+            window.stateEngine.partitionConfig.primaryFormattedNTFS = true;
+            redraw();
+          }
         } else {
-          alert('يرجى تحديد القسم الأساسي الرابع (Drive 0 Partition 4: Primary) لتهيئته بنظام NTFS.');
+          window.soundSynth.playErrorBeep();
+          window.stateEngine.recordPenalty(5, 0.50, 'محاولة تهيئة قسم نظام محجوز بدلاً من القسم الأساسي');
+          alert('Windows cannot format a system partition. Please select Drive 0 Partition 4 to format with NTFS.');
         }
       });
     }
@@ -841,14 +913,15 @@ function renderPhase5Partitioning(container) {
       btnNext.addEventListener('click', () => {
         if (!gptCreated) {
           window.soundSynth.playErrorBeep();
-          window.stateEngine.recordPenalty(5, 1.00, 'محاولة المتابعة على قرص خام دون إنشاء جدول أقسام GPT');
-          alert('خطأ: لا يمكن تثبيت Windows على مساحة غير مخصصة! اضغط New أولاً.');
+          window.stateEngine.recordPenalty(5, 1.00, 'محاولة المتابعة على مساحة غير مخصصة دون إنشاء الأقسام', 'يجب إنشاء جدول الأقسام أولاً بالضغط على New.');
+          alert('Windows cannot be installed to this disk. The drive is unallocated space. Please click New to create partitions.');
           return;
         }
 
         if (selectedPartId !== 'part4') {
           window.soundSynth.playErrorBeep();
-          alert('تنبيه: يجب تثبيت نظام التشغيل على القسم الأساسي (Partition 4: Primary)، وليس أقسام النظام المحجوزة.');
+          window.stateEngine.recordPenalty(5, 0.50, 'محاولة تثبيت النظام على قسم نظام محجوز بدلاً من القسم الأساسي');
+          alert('Windows cannot be installed to this partition. Windows must be installed on the primary partition (Drive 0 Partition 4).');
           return;
         }
 
@@ -857,10 +930,10 @@ function renderPhase5Partitioning(container) {
           window.stateEngine.recordPenalty(
             5,
             1.00,
-            'محاولة المتابعة دون تهيئة القسم الأساسي بنظام الملفات NTFS',
+            'محاولة المتابعة على قسم غير مهيأ دون تهيئته بنظام NTFS',
             'يشترط Windows 11 تهيئة القسم الأساسي بنظام NTFS لضمان الأمان والصلاحيات وموثوقية التخزين.'
           );
-          alert('خطأ بيداغوجي صارم: يجب الضغط على Format لتهيئة القسم الأساسي بنظام NTFS قبل المتابعة!');
+          alert('The selected partition is unallocated. You must click Format to format it with the NTFS file system before Windows can be installed.');
           return;
         }
 
@@ -1485,10 +1558,20 @@ function renderPhase8Desktop(container) {
     powerMenu.classList.toggle('visible');
   });
 
+  const sleepBtn = container.querySelector('#btnSleepOS');
+  if (sleepBtn) {
+    sleepBtn.addEventListener('click', () => {
+      window.soundSynth.playErrorBeep();
+      window.stateEngine.recordPenalty(8, 0.50, 'اختيار السكون (Sleep) بدلاً من إعادة التشغيل (Restart) لاختبار الإقلاع الذاتي', 'الهدف البيداغوجي هو الضغط على Restart للتحقق الفوري من إقلاع النظام ذاتياً من القرص الداخلي.');
+      alert('تنبيه: لاختبار الإقلاع الذاتي والمستقل من القرص الصلب الداخلي، يجب الضغط على Restart (إعادة التشغيل).');
+    });
+  }
+
   if (shutdownBtn) {
     shutdownBtn.addEventListener('click', () => {
-      if (window.soundSynth) window.soundSynth.playClick();
-      alert('تم النقر على إيقاف التشغيل. لمتابعة التحقق البيداغوجي النهائي من إقلاع الويندوز المستقل، اختر: Restart (إعادة التشغيل).');
+      window.soundSynth.playErrorBeep();
+      window.stateEngine.recordPenalty(8, 0.50, 'اختيار إيقاف التشغيل بدلاً من إعادة التشغيل (Restart) لاختبار الإقلاع الذاتي', 'الهدف البيداغوجي هو الضغط على Restart للتحقق الفوري من إقلاع النظام ذاتياً من القرص الداخلي.');
+      alert('تم النقر على إيقاف التشغيل (Shut down). لمتابعة التحقق البيداغوجي النهائي من إقلاع الويندوز المستقل، اختر: Restart (إعادة التشغيل).');
     });
   }
 

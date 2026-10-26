@@ -960,23 +960,54 @@
   margin-top: 20px;
 }
 
+/* Authentic Windows Setup Link */
+.win11-setup-link {
+  color: #60cdff;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.15s ease;
+}
+
+.win11-setup-link:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
 /* Partition Table UI */
 .partition-table-container {
   border: 1px solid #444444;
   border-radius: 4px;
   background: #181818;
-  height: 180px;
+  height: 200px;
   overflow-y: auto;
   margin-bottom: 12px;
 }
 
+.partition-table-header {
+  display: grid;
+  grid-template-columns: 2.2fr 1.1fr 1.1fr 1.6fr;
+  padding: 7px 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #a0a0a0;
+  background: #222222;
+  border-bottom: 1px solid #383838;
+  user-select: none;
+}
+
 .partition-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  padding: 6px 12px;
+  grid-template-columns: 2.2fr 1.1fr 1.1fr 1.6fr;
+  padding: 7px 12px;
   font-size: 12px;
   border-bottom: 1px solid #282828;
   cursor: pointer;
+  align-items: center;
 }
 
 .partition-row:hover {
@@ -990,22 +1021,36 @@
 
 .partition-toolbar {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 14px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .part-tool-btn {
-  background: #2b2b2b;
-  border: 1px solid #444444;
+  background: transparent;
+  border: 1px solid transparent;
   color: #ffffff;
-  padding: 5px 12px;
-  font-size: 11.5px;
+  padding: 4px 8px;
+  font-size: 12px;
   border-radius: 4px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
 }
 
-.part-tool-btn:hover {
-  background: #383838;
+.part-tool-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.part-tool-btn:disabled {
+  color: #666666;
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 /* Copying Files Progress */
@@ -1304,7 +1349,9 @@
   z-index: 50;
   display: none;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
+  direction: ltr;
+  text-align: left;
 }
 
 .start-menu-popup.visible {
@@ -1435,9 +1482,10 @@
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  padding-top: 10px;
+  padding-top: 12px;
   margin-top: auto;
   position: relative;
+  direction: ltr;
 }
 
 .start-user-profile {
@@ -1488,18 +1536,22 @@
 
 .power-menu-dropdown {
   position: absolute;
-  bottom: 46px;
+  bottom: 44px;
   right: 0;
-  background: rgba(30, 36, 52, 0.96);
+  left: auto;
+  background: rgba(30, 36, 52, 0.98);
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 8px;
-  padding: 4px;
+  padding: 6px;
   display: none;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-  min-width: 190px;
-  z-index: 60;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85);
+  width: 220px;
+  min-width: 200px;
+  z-index: 100;
+  direction: ltr;
+  text-align: left;
 }
 
 .power-menu-dropdown.visible {
@@ -1509,21 +1561,24 @@
 .power-menu-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  padding: 8px 12px;
+  padding: 9px 12px;
   background: transparent;
   border: none;
   color: #ffffff;
-  font-size: 12px;
+  font-size: 12.5px;
+  font-weight: 500;
   text-align: left;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 5px;
   transition: background 0.12s ease;
+  white-space: nowrap;
 }
 
 .power-menu-item:hover {
   background: #0078d4;
+  color: #ffffff;
 }
 
 /* Official Windows 11 Logo Styles (1:1 Ratio, Flat, No Glow) */

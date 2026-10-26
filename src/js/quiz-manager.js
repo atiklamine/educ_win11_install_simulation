@@ -280,12 +280,13 @@ class QuizManager {
         };
       }
     } else {
-      // Incorrect! Apply penalty and misconception recording
-      const penalty = 0.35;
+      // Incorrect! Apply strict penalty and misconception recording
+      const penalty = 0.50;
       window.stateEngine.recordPenalty(
         window.stateEngine.currentPhase,
         penalty,
-        `إجابة خاطئة في السؤال التقويمي (${this.currentQuestion.prompt.slice(0, 30)}...)`
+        `إجابة خاطئة في السؤال التقويمي: "${chosen.text.slice(0, 35)}..."`,
+        `الإجابة الصحيحة هي: "${this.currentQuestion.correct}". التعليل: ${this.currentQuestion.rationale}`
       );
 
       window.stateEngine.recordDiagnosticError({
@@ -302,12 +303,13 @@ class QuizManager {
         feedbackBox.className = 'quiz-feedback warning';
         if (this.attempts >= 3) {
           feedbackBox.innerHTML = `
-            <strong>إجابة خاطئة (استنفدت المحاولات - نلت 0.00 نقطة)</strong>
+            <strong>إجابة خاطئة (استنفدت كافة المحاولات - تم خصم -${penalty.toFixed(2)} نقطة ونلت 0.00 في هذا السؤال).</strong>
             <p><strong>الإجابة الصحيحة:</strong> ${this.currentQuestion.correct}</p>
             <p>${this.currentQuestion.rationale}</p>
           `;
           if (submitBtn) {
-            submitBtn.textContent = 'متابعة';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'مواصلة المحاكاة';
             submitBtn.onclick = () => {
               this.closeQuizModal();
               if (typeof this.onQuizCompleteCallback === 'function') {
@@ -317,8 +319,8 @@ class QuizManager {
           }
         } else {
           feedbackBox.innerHTML = `
-            <strong>إجابة خاطئة (خصم -${penalty.toFixed(2)} نقطة).</strong>
-            <p>حاول مجدداً للتعرف على المفهوم الدقيق، مع العلم أن أقصى علامة ممكنة الآن هي 0.50 نقطة.</p>
+            <strong>إجابة خاطئة (تم خصم -${penalty.toFixed(2)} نقطة من العلامة النهائية).</strong>
+            <p>حاول مجدداً للتعرف على المفهوم الدقيق، مع العلم أن أقصى علامة ممكنة في هذا السؤال الآن هي ${this.attempts === 1 ? '0.50' : '0.25'} نقطة.</p>
           `;
           this.selectedOptionIndex = null;
           if (submitBtn) submitBtn.disabled = true;
