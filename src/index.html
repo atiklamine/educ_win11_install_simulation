@@ -45,7 +45,7 @@
         <button class="hud-btn" id="btnToggleFullscreen" title="ملء شاشة التطبيق / نافذة البرنامج ككل [F11]">&#9974; ملء نافذة التطبيق (F11)</button>
         <button class="hud-btn" id="btnToggleTheme" title="التبديل بين المظهر الفاتح والمظلم (Light / Dark Mode)">☀️ فاتح</button>
         <button class="hud-btn" id="btnNewSession" title="بدء جلسة تقييم جديدة">&#10010; جلسة جديدة</button>
-        <button class="hud-btn" id="btnOpenExpertGuide" title="دليل النظام الخبير والتوجيهات البيداغوجية">&#128218; دليل النظام الخبير</button>
+        <button class="hud-btn" id="btnOpenExpertGuide" title="دليل النظام الخبير وإرشادات التثبيت">&#128218; دليل النظام الخبير</button>
         <button class="hud-btn hud-btn-accent" id="btnExportPdf" title="استخراج شهادة تقييم الكفاءة PDF">&#128196; تصدير PDF</button>
         <button class="hud-btn" id="btnToggleSound" title="كتم / تفعيل المؤثرات الصوتية">&#128266; صوت</button>
         <button class="hud-btn" id="btnOpenAbout" title="معلومات المطور والأستاذ والمؤسسة">&#8505; حول البرنامج</button>
@@ -55,23 +55,139 @@
 
     <!-- 2. Virtual Monitor Container -->
     <main class="virtual-monitor-wrapper view-mode-rig" id="virtualMonitorWrapper">
-      <!-- Draggable Hint Bar -->
-      <div class="draggable-hint-bar" id="draggableHintBar">
+      <!-- Draggable Hint Bar (نافذة مساعدة مرحلية موحدة) -->
+      <div class="draggable-hint-bar" id="draggableHintBar" title="اسحب من أي مكان لتحريك نافذة المساعدة">
         <div class="hint-handle" id="hintDragHandle">
-          <span>&#10024; الهدف البيداغوجي:</span>
+          <span>💡 مساعدة مرحلية:</span>
         </div>
         <div class="hint-text" id="hintBarText">
-          المرحلة 1: اختر وسيط التثبيت المناسب، اضغط زر تشغيل الحاسوب، ثم اضغط سريعاً على F2 أو Del لدخول البيوس قبل انقضاء 10 ثوانٍ.
+          المرحلة 1: اختر وسيط التثبيت من الرف على اليسار، واضغط زر التشغيل بالوحدة المركزية على اليمين، ثم اضغط على [F2 أو Del] في لوحة المفاتيح الحقيقية قبل انقضاء المهلة.
         </div>
-        <button class="hint-reset-btn" id="btnResetHintPos">استرجاع الموضع</button>
+        <div class="virtual-keyboard-hint-display" id="vkbHintDisplay" title="تلميح بصري فقط: اضغط المفتاح الفعلي على لوحة المفاتيح الحقيقية">
+          <span class="vkb-label">مفتاح المرحلة:</span>
+          <span class="vkb-key" id="vkbKeyHint" data-key="F2">F2 / Del</span>
+        </div>
+        <button class="hint-reset-btn" id="btnResetHintPos" title="استرجاع الموضع الافتراضي أسفل الشاشة">استرجاع الموضع</button>
       </div>
 
       <!-- Workstation Rig Stage (Mode: Virtual Rig on Desk) -->
       <div class="workstation-rig-stage" id="workstationRigStage">
         <div class="workstation-rig-layout">
           
-          <!-- LEFT COLUMN: Central Unit (PC Tower) + Peripherals (Keyboard & Mouse) -->
+          <!-- LEFT COLUMN: Installation Media Shelf / Rack -->
           <div class="rig-column-left" id="rigColumnLeft">
+            <div class="workstation-media-shelf" id="rigMediaShelf">
+              <div class="shelf-guidance-title">
+                <strong>وسائط التثبيت:</strong>
+                <span id="shelfConnectionMsg">○ اختر وسيط التثبيت</span>
+              </div>
+
+              <div class="shelf-items-vertical">
+                <!-- Media 1: Kingston USB Flash Drive -->
+                <div class="interactive-media-card" data-media="usb" id="mediaCardUsb" title="مفتاح USB ووميضي Kingston 32GB (انقر للتوصيل بالمنفذ الأمامي)">
+                  <div class="card-svg-icon" id="usbShelfSlot">
+                    <!-- Detached USB drive representation -->
+                    <div id="usb-drive" class="detached" title="مفتاح Kingston 32GB (انقر للتوصيل بالمنفذ)">
+                      <svg viewBox="0 0 32 32" width="28" height="28">
+                        <rect class="usb-connector-tip" x="10" y="2" width="12" height="10" fill="#cbd5e1" stroke="#475569" stroke-width="1" rx="1"/>
+                        <rect x="12.5" y="4" width="2" height="3" fill="#0284c7"/>
+                        <rect x="17.5" y="4" width="2" height="3" fill="#0284c7"/>
+                        <rect class="usb-drive-body" x="6" y="10" width="20" height="20" fill="#dc2626" rx="3" stroke="#991b1b" stroke-width="1.5"/>
+                        <line x1="9" y1="15" x2="23" y2="15" stroke="#fca5a5" stroke-width="1" />
+                        <line x1="9" y1="19" x2="23" y2="19" stroke="#fca5a5" stroke-width="1" />
+                        <circle cx="16" cy="24" r="1.5" fill="#38bdf8"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="card-meta">
+                    <strong>مفتاح USB ووميضي</strong>
+                    <span>Kingston DT 32GB</span>
+                    <span class="card-plug-status" id="usbPlugStatus">○ انقر للتوصيل</span>
+                  </div>
+                </div>
+
+                <!-- Media 2: Windows 11 DVD Disc -->
+                <div class="interactive-media-card" data-media="dvd" id="mediaCardDvd" title="قرص ضوئي DVD لنظام Windows 11 (انقر للإدخال بالقارئ)">
+                  <div class="card-svg-icon">
+                    <svg viewBox="0 0 40 40" width="30" height="30">
+                      <circle cx="20" cy="20" r="18" fill="url(#dvdGradRight)" stroke="#64748b" stroke-width="1"/>
+                      <defs>
+                        <radialGradient id="dvdGradRight" cx="50%" cy="50%" r="50%">
+                          <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
+                          <stop offset="40%" stop-color="#a855f7" stop-opacity="0.8"/>
+                          <stop offset="70%" stop-color="#f59e0b" stop-opacity="0.8"/>
+                          <stop offset="100%" stop-color="#0284c7" stop-opacity="0.9"/>
+                        </radialGradient>
+                      </defs>
+                      <circle cx="20" cy="20" r="7" fill="#1e293b" stroke="#94a3b8" stroke-width="1"/>
+                      <circle cx="20" cy="20" r="3" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+                    </svg>
+                  </div>
+                  <div class="card-meta">
+                    <strong>قرص ضوئي DVD</strong>
+                    <span>Win11 Setup ISO</span>
+                    <span class="card-plug-status" id="dvdPlugStatus">○ انقر للإدخال</span>
+                  </div>
+                </div>
+
+                <!-- Media 3: Network PXE Cable -->
+                <div class="interactive-media-card" data-media="pxe" id="mediaCardPxe" title="إقلاع الشبكة PXE عبر كابل RJ-45 (خادم المخبر)">
+                  <div class="card-svg-icon">
+                    <svg viewBox="0 0 40 40" width="30" height="30">
+                      <path d="M 6 34 Q 16 34 20 26 L 20 18" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+                      <rect x="14" y="6" width="12" height="12" fill="#93c5fd" opacity="0.8" rx="2" stroke="#1d4ed8" stroke-width="1.5"/>
+                      <rect x="17" y="2" width="6" height="5" fill="#fbbf24" rx="1"/>
+                    </svg>
+                  </div>
+                  <div class="card-meta">
+                    <strong>إقلاع الشبكة PXE</strong>
+                    <span>RJ-45 (خادم المخبر)</span>
+                    <span class="card-plug-status" id="pxePlugStatus">○ انقر للتوصيل</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CENTER COLUMN: Big Virtual Screen / Monitor -->
+          <div class="rig-column-center" id="rigColumnCenter">
+            <div class="rig-monitor-unit" id="rigMonitorUnit">
+              <!-- Simulated Monitor Frame with Bezel -->
+              <div class="monitor-frame" id="monitorFrame">
+                <!-- Monitor Bezel Top Bar (Webcam & Quick Toggle) -->
+                <div class="monitor-bezel-top">
+                  <span class="monitor-webcam-dot" title="كاميرا الشاشة المدمجة"></span>
+                  <button class="monitor-quick-toggle-btn" id="btnMonitorQuickToggle" title="تكبير الشاشة لملء مساحة العرض (F10)">
+                    <span class="toggle-icon">&#9974;</span>
+                    <span class="toggle-label">ملء مساحة العرض</span>
+                  </button>
+                </div>
+
+                <!-- Screen Display Area (Where all 8 phases render) -->
+                <div class="virtual-screen-content" id="virtualScreenContent">
+                  <!-- Dynamic 2D Screens Rendered by AppSimulator -->
+                </div>
+
+                <!-- Monitor Chin Bar (Bottom Bezel) -->
+                <div class="monitor-chin-bar" id="monitorChinBar">
+                  <span class="monitor-brand-logo">ALGERIA-EDU 27" IPS</span>
+                  <div class="monitor-chin-controls">
+                    <span class="monitor-power-led" id="monitorPowerLed" title="مؤشر تغذية الشاشة"></span>
+                    <button class="monitor-chin-btn" id="btnMonitorChinToggle" title="التبديل بين وضع الحاسوب الافتراضي ووضع ملء مساحة العرض (F10)">
+                      &#9974; تكبير الشاشة
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Monitor Stand Neck & Base (Visible in view-mode-rig) -->
+              <div class="monitor-stand-neck" id="monitorStandNeck"></div>
+              <div class="monitor-stand-base" id="monitorStandBase"></div>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: Central Unit (PC Tower) + Peripherals (Keyboard & Mouse) -->
+          <div class="rig-column-right" id="rigColumnRight">
             <!-- Realistic Central Unit / PC Tower -->
             <div class="desk-pc-tower" id="companionPcTower">
               <!-- DVD-RW Optical Drive Bay -->
@@ -144,118 +260,6 @@
                   <span class="mouse-rbtn"></span>
                 </div>
                 <div class="mouse-body-curve"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- CENTER COLUMN: Big Virtual Screen / Monitor -->
-          <div class="rig-column-center" id="rigColumnCenter">
-            <div class="rig-monitor-unit" id="rigMonitorUnit">
-              <!-- Simulated Monitor Frame with Bezel -->
-              <div class="monitor-frame" id="monitorFrame">
-                <!-- Monitor Bezel Top Bar (Webcam & Quick Toggle) -->
-                <div class="monitor-bezel-top">
-                  <span class="monitor-webcam-dot" title="كاميرا الشاشة المدمجة"></span>
-                  <button class="monitor-quick-toggle-btn" id="btnMonitorQuickToggle" title="تكبير الشاشة لملء مساحة العرض (F10)">
-                    <span class="toggle-icon">&#9974;</span>
-                    <span class="toggle-label">ملء مساحة العرض</span>
-                  </button>
-                </div>
-
-                <!-- Screen Display Area (Where all 8 phases render) -->
-                <div class="virtual-screen-content" id="virtualScreenContent">
-                  <!-- Dynamic 2D Screens Rendered by AppSimulator -->
-                </div>
-
-                <!-- Monitor Chin Bar (Bottom Bezel) -->
-                <div class="monitor-chin-bar" id="monitorChinBar">
-                  <span class="monitor-brand-logo">ALGERIA-EDU 27" IPS</span>
-                  <div class="monitor-chin-controls">
-                    <span class="monitor-power-led" id="monitorPowerLed" title="مؤشر تغذية الشاشة"></span>
-                    <button class="monitor-chin-btn" id="btnMonitorChinToggle" title="التبديل بين وضع الحاسوب الافتراضي ووضع ملء مساحة العرض (F10)">
-                      &#9974; تكبير الشاشة
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Monitor Stand Neck & Base (Visible in view-mode-rig) -->
-              <div class="monitor-stand-neck" id="monitorStandNeck"></div>
-              <div class="monitor-stand-base" id="monitorStandBase"></div>
-            </div>
-          </div>
-
-          <!-- RIGHT COLUMN: Installation Media Shelf / Rack -->
-          <div class="rig-column-right" id="rigColumnRight">
-            <div class="workstation-media-shelf" id="rigMediaShelf">
-              <div class="shelf-guidance-title">
-                <strong>وسائط التثبيت:</strong>
-                <span id="shelfConnectionMsg">○ اختر وسيط التثبيت</span>
-              </div>
-
-              <div class="shelf-items-vertical">
-                <!-- Media 1: Kingston USB Flash Drive -->
-                <div class="interactive-media-card" data-media="usb" id="mediaCardUsb" title="مفتاح USB ووميضي Kingston 32GB (انقر للتوصيل بالمنفذ الأمامي)">
-                  <div class="card-svg-icon" id="usbShelfSlot">
-                    <!-- Detached USB drive representation -->
-                    <div id="usb-drive" class="detached" title="مفتاح Kingston 32GB (انقر للتوصيل بالمنفذ)">
-                      <svg viewBox="0 0 32 32" width="28" height="28">
-                        <rect class="usb-connector-tip" x="10" y="2" width="12" height="10" fill="#cbd5e1" stroke="#475569" stroke-width="1" rx="1"/>
-                        <rect x="12.5" y="4" width="2" height="3" fill="#0284c7"/>
-                        <rect x="17.5" y="4" width="2" height="3" fill="#0284c7"/>
-                        <rect class="usb-drive-body" x="6" y="10" width="20" height="20" fill="#dc2626" rx="3" stroke="#991b1b" stroke-width="1.5"/>
-                        <line x1="9" y1="15" x2="23" y2="15" stroke="#fca5a5" stroke-width="1" />
-                        <line x1="9" y1="19" x2="23" y2="19" stroke="#fca5a5" stroke-width="1" />
-                        <circle cx="16" cy="24" r="1.5" fill="#38bdf8"/>
-                      </svg>
-                    </div>
-                  </div>
-                  <div class="card-meta">
-                    <strong>مفتاح USB ووميضي</strong>
-                    <span>Kingston DT 32GB</span>
-                    <span class="card-plug-status" id="usbPlugStatus">○ انقر للتوصيل</span>
-                  </div>
-                </div>
-
-                <!-- Media 2: Windows 11 DVD Disc -->
-                <div class="interactive-media-card" data-media="dvd" id="mediaCardDvd" title="قرص ضوئي DVD لنظام Windows 11 (انقر للإدخال بالقارئ)">
-                  <div class="card-svg-icon">
-                    <svg viewBox="0 0 40 40" width="30" height="30">
-                      <circle cx="20" cy="20" r="18" fill="url(#dvdGradRight)" stroke="#64748b" stroke-width="1"/>
-                      <defs>
-                        <radialGradient id="dvdGradRight" cx="50%" cy="50%" r="50%">
-                          <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
-                          <stop offset="40%" stop-color="#a855f7" stop-opacity="0.8"/>
-                          <stop offset="70%" stop-color="#f59e0b" stop-opacity="0.8"/>
-                          <stop offset="100%" stop-color="#0284c7" stop-opacity="0.9"/>
-                        </radialGradient>
-                      </defs>
-                      <circle cx="20" cy="20" r="7" fill="#1e293b" stroke="#94a3b8" stroke-width="1"/>
-                      <circle cx="20" cy="20" r="3" fill="#0f172a" stroke="#475569" stroke-width="1"/>
-                    </svg>
-                  </div>
-                  <div class="card-meta">
-                    <strong>قرص ضوئي DVD</strong>
-                    <span>Win11 Setup ISO</span>
-                    <span class="card-plug-status" id="dvdPlugStatus">○ انقر للإدخال</span>
-                  </div>
-                </div>
-
-                <!-- Media 3: Network PXE Cable -->
-                <div class="interactive-media-card" data-media="pxe" id="mediaCardPxe" title="إقلاع الشبكة PXE عبر كابل RJ-45 (خادم المخبر)">
-                  <div class="card-svg-icon">
-                    <svg viewBox="0 0 40 40" width="30" height="30">
-                      <path d="M 6 34 Q 16 34 20 26 L 20 18" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
-                      <rect x="14" y="6" width="12" height="12" fill="#93c5fd" opacity="0.8" rx="2" stroke="#1d4ed8" stroke-width="1.5"/>
-                      <rect x="17" y="2" width="6" height="5" fill="#fbbf24" rx="1"/>
-                    </svg>
-                  </div>
-                  <div class="card-meta">
-                    <strong>إقلاع الشبكة PXE</strong>
-                    <span>RJ-45 (خادم المخبر)</span>
-                    <span class="card-plug-status" id="pxePlugStatus">○ انقر للتوصيل</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -355,7 +359,7 @@
         </div>
         <!-- Modification 6: Session mode container toggled via session_mode_enabled -->
         <div id="regModeContainer" style="margin-bottom: 14px;">
-          <label class="win11-label">نمط الحصة البيداغوجية:</label>
+          <label class="win11-label">نمط الحصة التعليمية:</label>
           <select class="win11-select" id="regMode">
             <option value="exam" selected>نمط الامتحان الصارم (مؤقت تنازلي 30:00 دقيقة مع خصم الجزاءات)</option>
             <option value="practice">نمط التدريب الحر (مؤقت منقضي مفتوح وتوجيه إرشادي مرن)</option>
@@ -447,13 +451,13 @@
 
         <div style="display: flex; flex-direction: column; gap: 12px;">
           <div class="guide-card guide-card-blue">
-            <strong>1. تجهيز المحطة ومقاطعة الإقلاع الأولي (POST):</strong>
-            <span>اختر وسيط التثبيت من الرف الأيمن، ثم شغّل الحاسوب حصراً عبر <strong>زر الطاقة (Power) الحقيقي بالوحدة المركزية على اليسار</strong>. اضغط سريعاً على <strong>[F2 أو Del]</strong> خلال 10 ثوانٍ لدخول البيوس لتفادي خصم (-1.00 نقطة).</span>
+            <strong>1. تجهيز المحطة والإقلاع الأولي (POST):</strong>
+            <span>شاشة العرض تبدأ سوداء 100%. اختر وسيط التثبيت من <strong>الرف على اليسار</strong> (مفتاح USB أو قرص DVD)، ثم شغّل الحاسوب عبر <strong>زر الطاقة الحقيقي بالوحدة المركزية على اليمين</strong>. اضغط سريعاً على <strong>[F2 أو Del]</strong> في لوحة المفاتيح الحقيقية خلال 10 ثوانٍ لدخول البيوس (لتفادي خصم -1.00 نقطة). تنبيه: تشغيل الحاسوب دون وسيط يوقف الإقلاع برسالة No bootable device found.</span>
           </div>
 
           <div class="guide-card guide-card-amber">
             <strong>2. إعدادات البيوس ووسيط الإقلاع (UEFI BIOS):</strong>
-            <span>فعّل <strong>TPM 2.0</strong> و <strong>Secure Boot</strong>، واجعل وسيط التثبيت كجهاز إقلاع أول، ثم اضغط حصراً على <strong>[F10]</strong> للحفظ وإعادة التشغيل. ترك القرص الداخلي الفارغ كإقلاع أول يؤدي إلى خطأ الإقلاع.</span>
+            <span>فعّل <strong>TPM 2.0</strong> و <strong>Secure Boot</strong> في تبويب Security، واجعل وسيط التثبيت كجهاز إقلاع أول في تبويب Boot، ثم اضغط حصراً على <strong>[F10]</strong> في لوحة المفاتيح الحقيقية للحفظ وإعادة التشغيل. ترك القرص الداخلي الفارغ كإقلاع أول يؤدي لرسالة فشل الإقلاع.</span>
           </div>
 
           <div class="guide-card guide-card-green">
@@ -462,13 +466,13 @@
           </div>
 
           <div class="guide-card guide-card-red">
-            <strong>4. كسر حلقة الإقلاع ونزع الفلاش ديسك فيزيائياً:</strong>
-            <span>بعد اكتمال نسخ الملفات وبدء العد التنازلي لإعادة التشغيل، اضغط F2/Del لإعادة SSD كإقلاع أول، ثم <strong>انقر مباشرة على مفتاح USB في منفذ الوحدة المركزية على اليسار لنزعه فيزيائياً</strong> لمنع تكرار شاشة التثبيت.</span>
+            <strong>4. كسر حلقة الإقلاع ونزع الوسيط وإعادة ترتيب الإقلاع:</strong>
+            <span>بعد اكتمال نسخ الملفات وبدء إعادة التشغيل، اضغط <strong>[F2 أو Del]</strong> في لوحة المفاتيح لدخول البيوس وإعادة القرص الداخلي <strong>SSD</strong> كإقلاع أول والحفظ بـ <strong>F10</strong>، ثم <strong>انقر مباشرة على وسيط التثبيت في الوحدة المركزية على اليمين لنزعه فيزيائياً</strong> لمنع الوقوع في حلقة التثبيت اللانهائية.</span>
           </div>
 
           <div class="guide-card guide-card-purple">
             <strong>5. حماية الخصوصية الرقمية والتحكم في العرض:</strong>
-            <span>في شاشة OOBE، عطّل كافة خيارات التتبع الإعلاني السبعة (Turn All OFF). يمكنك التبديل بين محطة العمل الكاملة وتكبير شاشة المحاكاة عبر <strong>[F10]</strong>، وملء نافذة التطبيق بالكامل عبر <strong>[F11]</strong>.</span>
+            <span>في شاشة OOBE، عطّل كافة خيارات التتبع الإعلاني السبعة (Turn All OFF). يمكنك التبديل بين محطة العمل الكاملة وتكبير شاشة المحاكاة عبر <strong>[F10]</strong>، وملء نافذة التطبيق بالكامل عبر <strong>[F11]</strong>. نافذة «مساعدة مرحلية» أسفل الشاشة توفر الإرشاد خطوة بخطوة وقابلة للسحب بالكامل.</span>
           </div>
         </div>
       </div>
@@ -1060,17 +1064,19 @@
       }
     }
 
-    // Draggable Hint Bar Implementation
+    // Draggable Phase-based Assistance Window Implementation
     function initDraggableHintBar() {
       const bar = document.getElementById('draggableHintBar');
-      const handle = document.getElementById('hintDragHandle');
       const btnReset = document.getElementById('btnResetHintPos');
-      if (!bar || !handle) return;
+      const vkbHint = document.getElementById('vkbKeyHint');
+      if (!bar) return;
 
       let isDragging = false;
       let startX, startY, initialLeft, initialTop;
 
-      handle.addEventListener('mousedown', (e) => {
+      bar.addEventListener('mousedown', (e) => {
+        // Drag from anywhere on the window except interactive buttons or the vkb hint key
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('.vkb-key')) return;
         isDragging = true;
         startX = e.clientX;
         startY = e.clientY;
@@ -1081,6 +1087,8 @@
         bar.style.transform = 'none';
         bar.style.left = `${initialLeft}px`;
         bar.style.top = `${initialTop}px`;
+        bar.style.bottom = 'auto';
+        bar.classList.add('is-dragging');
         e.preventDefault();
       });
 
@@ -1095,6 +1103,7 @@
       document.addEventListener('mouseup', () => {
         if (isDragging) {
           isDragging = false;
+          bar.classList.remove('is-dragging');
           bar.style.transition = '';
         }
       });
@@ -1102,9 +1111,19 @@
       if (btnReset) {
         btnReset.addEventListener('click', (e) => {
           e.stopPropagation();
-          bar.style.top = '60px';
+          bar.style.top = 'auto';
+          bar.style.bottom = '12px';
           bar.style.left = '50%';
           bar.style.transform = 'translateX(-50%)';
+        });
+      }
+
+      // Visual Keyboard hint interaction: clicking reminds that real keyboard is strictly required
+      if (vkbHint) {
+        vkbHint.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (window.soundSynth) window.soundSynth.playWarning();
+          alert('هذا تلميح بصري فقط يوضح الزر المطلوب!\nيجب عليك الضغط على المفتاح الفعلي في لوحة المفاتيح الحقيقية لحاسوبك.');
         });
       }
     }

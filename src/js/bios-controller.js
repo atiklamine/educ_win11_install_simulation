@@ -60,9 +60,11 @@ class BiosController {
       }
     }, 1000);
 
-    // Global Key Listener for F2 or Delete
+    // Global Key Listener for F2, Delete, Suppr from real physical keyboard
     const handleKey = (e) => {
-      if (e.key === 'F2' || e.key === 'Delete' || e.code === 'F2' || e.code === 'Delete') {
+      const isF2 = e.key === 'F2' || e.code === 'F2' || e.keyCode === 113;
+      const isDel = e.key === 'Delete' || e.key === 'Del' || e.key === 'Suppr' || e.key === 'Supp' || e.code === 'Delete' || e.keyCode === 46;
+      if (isF2 || isDel) {
         e.preventDefault();
         window.removeEventListener('keydown', handleKey);
         this.interruptPost(onSuccessInterrupt);

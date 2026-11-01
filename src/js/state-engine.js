@@ -65,16 +65,27 @@ class StateEngine {
       }
     };
 
-    // Phase hint definitions for Draggable Hint Bar
+    // Phase hint definitions for Draggable Phase-based Assistance Window
     this.phaseHints = {
-      1: 'المرحلة 1: اختر وسيط التثبيت من الرف الأيمن، اضغط زر الطاقة (Power) الحقيقي بالوحدة المركزية على اليسار، ثم اضغط سريعاً على [F2 أو Del] لدخول البيوس قبل انقضاء 10 ثوانٍ.',
-      2: 'المرحلة 2: في واجهة البيوس، فعّل TPM 2.0 و Secure Boot، واجعل وسيط التثبيت كجهاز إقلاع أول، ثم اضغط حصراً على F10 للحفظ.',
+      1: 'المرحلة 1: شاشة العرض سوداء. اختر وسيط التثبيت من الرف على اليسار، واضغط زر التشغيل بالوحدة المركزية على اليمين، ثم اضغط سريعاً على [F2 أو Del] في لوحة المفاتيح الحقيقية لدخول البيوس قبل انقضاء المهلة.',
+      2: 'المرحلة 2: في واجهة البيوس، فعّل TPM 2.0 و Secure Boot في تبويب Security، واجعل وسيط التثبيت كجهاز إقلاع أول في تبويب Boot، ثم اضغط حصراً على [F10] في لوحة المفاتيح الحقيقية للحفظ.',
       3: 'المرحلة 3: اضبط الإعدادات الإقليمية للجزائر: لغة العرض، تنسيق الوقت (Algeria)، ولوحة المفاتيح (AZERTY)، ثم اضغط Install Now.',
-      4: 'المرحلة 4: اختر تجاوز المفتاح (I do not have a product key)، وحدد النسخة التعليمية Windows 11 Pro Education، واختر التثبيت المخصص (Custom).',
-      5: 'المرحلة 5: قسّم القرص الفارغ (New) لإنشاء جدول GPT، ثم حدد القسم الأساسي الرابع (Primary) واضغط Format لتهيئته بنظام NTFS.',
-      6: 'المرحلة 6: بعد انتهاء نسخ الملفات، اضغط [F2/Del] لإعادة القرص الصلب SSD كإقلاع أول، ثم انقر على مفتاح USB بالوحدة المركزية لنزعه فيزيائياً لكسر حلقة التثبيت.',
-      7: 'المرحلة 7: في شاشة OOBE، اختر الجزائر، سمّ الحاسوب، أنشئ حساباً محلياً، وقم بتعطيل كافة خيارات الخصوصية السبعة (OFF).',
+      4: 'المرحلة 4: اختر تجاوز المفتاح (I do not have a product key)، وحدد النسخة المخصصة للتعليم Windows 11 Pro Education، واختر التثبيت المخصص (Custom).',
+      5: 'المرحلة 5: قسّم القرص الفارغ (New) لإنشاء جدول GPT وأقسامه الأربعة، ثم حدد القسم الرابع الأساسي (Primary) واضغط Format لتهيئته بنظام NTFS قبل المتابعة.',
+      6: 'المرحلة 6: بعد انتهاء نسخ الملفات، اضغط [F2 أو Del] لدخول البيوس وإعادة القرص الصلب SSD كإقلاع أول وحفظه بـ F10، ثم انقر مباشرة على وسيط التثبيت بالوحدة المركزية على اليمين لنزعه فيزيائياً.',
+      7: 'المرحلة 7: في شاشة OOBE، اختر الجزائر، سمّ الحاسوب، أنشئ حساباً محلياً، وقم بتعطيل كافة خيارات الخصوصية السبعة (Turn All OFF).',
       8: 'المرحلة 8: من سطح مكتب ويندوز 11، افتح قائمة ابدأ واضغط Restart لاختبار الإقلاع الذاتي النظيف والمستقل من القرص الصلب الداخلي دون أي وسائط خارجية.'
+    };
+
+    this.phaseVkbHints = {
+      1: 'F2 / Del',
+      2: 'F10',
+      3: 'Enter',
+      4: 'Tab / Enter',
+      5: 'Enter',
+      6: 'F2 / Del ➔ F10',
+      7: 'Tab / Space',
+      8: 'Restart'
     };
   }
 
@@ -194,7 +205,7 @@ class StateEngine {
         phase: phaseNum,
         title: `خطأ إجرائي في المرحلة ${phaseNum}`,
         errorChoice: reason,
-        expectedChoice: 'الإجراء البيداغوجي الصحيح وفق المعايير',
+        expectedChoice: 'الإجراء الصحيح وفق المعايير التقنية',
         rationale: pedagogicalRemediation,
         timestamp: new Date().toLocaleTimeString()
       });
@@ -210,7 +221,7 @@ class StateEngine {
       title: entry.title || `سؤال تقويمي في المرحلة ${this.currentPhase}`,
       errorChoice: entry.errorChoice || 'إجابة غير صحيحة',
       expectedChoice: entry.expectedChoice || 'الإجابة المعتمدة في المنهاج',
-      rationale: entry.rationale || 'مفهوم يحتاج لمعالجة بيداغوجية',
+      rationale: entry.rationale || 'مفهوم تقني يحتاج لمراجعة وتوضيح',
       timestamp: new Date().toLocaleTimeString()
     });
   }
@@ -331,6 +342,10 @@ class StateEngine {
     const hintTextEl = document.getElementById('hintBarText');
     if (hintTextEl) {
       hintTextEl.textContent = this.phaseHints[this.currentPhase] || 'تابع تنفيذ الخطوة الحالية بدقة.';
+    }
+    const vkbKeyEl = document.getElementById('vkbKeyHint');
+    if (vkbKeyEl && this.phaseVkbHints) {
+      vkbKeyEl.textContent = this.phaseVkbHints[this.currentPhase] || 'لوحة المفاتيح';
     }
   }
 

@@ -179,64 +179,18 @@ function renderPhase1Workstation(container) {
 
   function redrawScreen() {
     container.innerHTML = `
-      <div class="workstation-screen">
-        <div class="workstation-header">
-          <h2>المرحلة 1: تجهيز محطة العمل ووسيط التثبيت في مخبر الإعلام الآلي</h2>
-          <p>اختر وسيط التثبيت المناسب من الرف الموجود على اليمين، ليتم توصيله بالوحدة المركزية على اليسار، ثم اضغط زر التشغيل (Power):</p>
-        </div>
-
-        <div class="standby-screen-center" id="standbyScreenCenter" title="شاشة العرض (في وضع الاستعداد)">
-          <!-- Realistic Monitor On-Screen Display (OSD) Banner when PC has no video signal -->
-          <div class="monitor-osd-panel">
-            <div class="osd-header">
-              <span class="osd-port-tag">DisplayPort 1.4</span>
-              <span class="osd-resolution">2560 × 1440 @ 144Hz</span>
-            </div>
-            <div class="osd-body">
-              <div class="osd-icon-warning">&#9888;</div>
-              <div class="osd-text-block">
-                <strong class="osd-signal-status">No Signal Detected</strong>
-                <span class="osd-subtext">Check video cable or power on the PC</span>
-              </div>
-            </div>
-            <div class="osd-footer-timer">
-              <span>Auto Power Saving Standby</span>
-              <span>[ ALGERIA-EDU IPS ]</span>
-            </div>
-          </div>
-
-          <!-- Pedagogical Lab Guidance underneath Monitor OSD -->
-          <div class="standby-lab-guide">
-            <h3 class="standby-headline">محطة العمل في وضع الاستعداد (Workstation Standby)</h3>
-            <div class="standby-status-pill" id="standbyMediaStatusPill">
-              ${currentSelected === 'usb' ? '✔ تم توصيل مفتاح Kingston 32GB في المنفذ الأمامي' : 
-                currentSelected === 'dvd' ? '✔ تم تحميل قرص Windows 11 DVD في القارئ' : 
-                currentSelected === 'pxe' ? '✔ تم توصيل كابل الشبكة RJ-45 (PXE)' :
-                '○ الخطوة 1: اختر وسيط التثبيت المناسب من الرف على اليمين'}
-            </div>
-            <div class="standby-instruction-hint" id="standbyInstructionHint">
-              ${currentSelected ? 
-                '<div class="guide-callout-power"><span class="guide-arrow-left">&#8592;</span> الخطوة 2: اضغط على <strong>زر الطاقة (Power) الحقيقي</strong> الموجود بالوحدة المركزية على اليسار لبدء الإقلاع الذاتي (POST).</div>' : 
-                'انقر أولاً على وسيط التثبيت المناسب على اليمين ليتم توصيله بالوحدة المركزية.'}
-            </div>
-          </div>
-        </div>
-      </div>
+      <div class="workstation-screen virtual-black-screen screen-off" id="virtualScreenOff" title="شاشة العرض (في وضع الاستعداد)"></div>
     `;
 
-    // Click on monitor glass gives educational guidance: power button is on the tower, not the screen!
-    const standbyCenter = container.querySelector('.standby-screen-center');
-    if (standbyCenter) {
-      standbyCenter.onclick = () => {
+    // Click on monitor glass: power button is on the Central Unit (on the right), not the screen!
+    const screenOff = container.querySelector('#virtualScreenOff');
+    if (screenOff) {
+      screenOff.onclick = () => {
         const pBtn = document.getElementById('btnTactilePower');
         if (pBtn) {
           pBtn.classList.remove('pulsing');
           void pBtn.offsetWidth;
           pBtn.classList.add('pulsing');
-        }
-        const hint = document.getElementById('standbyInstructionHint');
-        if (hint && currentSelected) {
-          hint.innerHTML = '<div class="guide-callout-power" style="border-color: #f59e0b; background: rgba(245, 158, 11, 0.15);"><span class="guide-arrow-left" style="color: #f59e0b;">&#8592;</span> <strong>تنبيه:</strong> هذه شاشة عرض وليست زراً للتشغيل! اضغط على <strong>زر الطاقة بالوحدة المركزية</strong> على اليسار.</div>';
         }
       };
     }
@@ -287,7 +241,7 @@ function renderPhase1Workstation(container) {
     };
   });
 
-  // Bind Tactile Power Button click on the Tower (Left Column)
+  // Bind Tactile Power Button click on the Tower (Right Column)
   const powerBtn = document.getElementById('btnTactilePower');
   if (powerBtn) {
     powerBtn.onclick = () => {
@@ -304,6 +258,28 @@ function renderPhase1Workstation(container) {
       if (window.syncMonitorPowerLed) window.syncMonitorPowerLed(true);
       if (towerStatus) towerStatus.textContent = '● قيد التشغيل (Running)';
 
+      // Modification 2 & 5: If powered on WITHOUT media inserted, show realistic literal English POST error & penalty
+      if (!window.stateEngine.selectedMedia) {
+        window.stateEngine.recordPenalty(
+          1,
+          1.00,
+          'تشغيل الحاسوب دون إدخال وسيط التثبيت في مكانه',
+          'يجب إدخال مفتاح USB أو قرص DVD في مكانه بالوحدة المركزية قبل تشغيل الجهاز لبدء تثبيت النظام.'
+        );
+
+        container.innerHTML = `
+          <div class="virtual-black-screen flex-center" style="flex-direction: column;">
+            <div class="spinner-win11"></div>
+            <div style="color: #38bdf8; font-weight: 700; font-size: 18px; margin-top: 18px;">Power On Self-Test (POST)...</div>
+          </div>
+        `;
+
+        setTimeout(() => {
+          renderPhase1NoMediaPOST(container);
+        }, 700);
+        return;
+      }
+
       container.innerHTML = `
         <div class="virtual-black-screen flex-center" style="flex-direction: column;">
           <div class="spinner-win11"></div>
@@ -318,10 +294,39 @@ function renderPhase1Workstation(container) {
   }
 }
 
+function renderPhase1NoMediaPOST(container) {
+  window.stateEngine.isPowerOn = true;
+  if (window.syncMonitorPowerLed) window.syncMonitorPowerLed(true);
+
+  container.innerHTML = `
+    <div class="virtual-black-screen" style="font-family: 'Consolas', 'Courier New', monospace; font-size: 13.5px; line-height: 1.6; padding: 24px; color: #cbd5e1; user-select: none;">
+      <div class="post-header-line" style="color: #ffffff; font-weight: bold; margin-bottom: 4px;">American Megatrends, Inc. (AMI) BIOS Core v2.22</div>
+      <div class="post-header-line" style="color: #94a3b8; margin-bottom: 16px;">Copyright (C) 2026 American Megatrends, Inc. All Rights Reserved.</div>
+
+      <div class="post-body-text">
+        CPU: Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz (6 Cores, 12 Threads)<br>
+        Speed: 2900 MHz &nbsp;&nbsp;&nbsp; L3 Cache: 12 MB<br>
+        Memory Test: 8192 MB OK (DDR4-2666 Dual Channel)<br>
+        Detecting IDE drives...<br>
+        SATA 0: CT500MX500SSD1 (500.1 GB Solid State Drive)<br>
+        SATA 1: None<br>
+        USB Devices: 0 Drive, 1 Keyboard, 1 Mouse<br>
+        Network Controller: Realtek RTL8111 Gigabit Ethernet
+      </div>
+
+      <div style="margin-top: 24px; color: #f87171; font-weight: bold; font-size: 14.5px; line-height: 1.7;">
+        Reboot and Select proper Boot device<br>
+        or Insert Boot Media in selected Boot device and press a key<span class="blinking-cursor">_</span>
+      </div>
+    </div>
+  `;
+}
+
 function renderPhase1POST(container) {
   window.stateEngine.isPowerOn = true;
   if (window.syncMonitorPowerLed) window.syncMonitorPowerLed(true);
 
+  const curMedia = window.stateEngine.selectedMedia;
   container.innerHTML = `
     <div class="virtual-black-screen">
       <div class="post-header-line">American Megatrends, Inc. (AMI) BIOS Core v2.22</div>
@@ -333,7 +338,7 @@ function renderPhase1POST(container) {
         Speed: 2900 MHz &nbsp;&nbsp;&nbsp; L3 Cache: 12 MB<br>
         Memory Test: 8192 MB OK (DDR4-2666 Dual Channel)<br>
         SATA 0: CT500MX500SSD1 (500.1 GB Solid State Drive)<br>
-        USB Port 1: Kingston DataTraveler 3.0 (32.0 GB Partition 1)<br>
+        ${curMedia === 'dvd' ? 'SATA 1: ATAPI iHAS124 DVD-RW Drive (Win11 Setup ISO)' : 'USB Port 1: Kingston DataTraveler 3.0 (32.0 GB Partition 1)'}<br>
         Keyboard ... Detected &nbsp;&nbsp;&nbsp; Mouse ... Detected
       </div>
 
@@ -347,14 +352,10 @@ function renderPhase1POST(container) {
       <div style="margin-top: 15px; color: #94a3b8; font-size: 13px;" id="postStatusMsg">
         Checking NVRAM ... OK <span class="blinking-cursor"></span>
       </div>
-
-      <button class="post-interrupt-btn" id="btnClickF2Interrupt">
-        الضغط على [F2 / Del] لمقاطعة الإقلاع والدخول للبيوس
-      </button>
     </div>
   `;
 
-  // Start 10-second countdown in BiosController
+  // Start 10-second countdown in BiosController (Real physical keyboard entry ONLY)
   window.biosController.startPostCountdown(
     // On interrupt success:
     () => {
@@ -364,23 +365,11 @@ function renderPhase1POST(container) {
     },
     // On interrupt timeout fail:
     () => {
-      alert('تحذير أمني: لقد انقضت مهلة الـ 10 ثوانٍ دون مقاطعة الإقلاع. تم خصم نقطة وإيقاف تشغيل الحاسوب.');
+      alert('تحذير: لقد انقضت مهلة الـ 10 ثوانٍ دون مقاطعة الإقلاع عبر لوحة المفاتيح الحقيقية. تم خصم نقطة وإعادة ضبط الإقلاع.');
       window.stateEngine.selectedMedia = null;
       renderPhase1Workstation(container);
     }
-
   );
-
-  const interruptBtn = container.querySelector('#btnClickF2Interrupt');
-  if (interruptBtn) {
-    interruptBtn.addEventListener('click', () => {
-      window.biosController.interruptPost(() => {
-        window.quizManager.showQuizForBank('bank_first_boot', () => {
-          window.stateEngine.completePhase(1);
-        });
-      });
-    });
-  }
 }
 
 // ==========================================================================
@@ -578,7 +567,7 @@ function renderPhase4SelectEdition(container) {
         <div class="win11-body">
           <div>
             <h2 class="win11-step-heading">اختر النسخة المخصصة لقطاع التعليم</h2>
-            <p class="win11-step-desc">حدد النسخة التي تتضمن السياسات البيداغوجية وحماية بيئة التعلم:</p>
+            <p class="win11-step-desc">حدد النسخة التي تتضمن سياسات المؤسسات التعليمية وحماية بيئة التعلم:</p>
 
             <div class="partition-table-container" style="height: 150px;">
               <div class="partition-row edition-row" data-edition="Windows 11 Home">
@@ -1044,42 +1033,50 @@ function renderPhase6RebootCountdown(container) {
       </p>
 
       <div style="background: rgba(255, 255, 255, 0.08); border-left: 4px solid #f59e0b; padding: 14px 20px; border-radius: 4px; max-width: 580px; margin-bottom: 24px; font-size: 13.5px; line-height: 1.6;">
-        <strong style="color: #f59e0b;">تنبيه بيداغوجي حاسم:</strong><br>
-        أثناء عملية إعادة التشغيل الحالية، يجب عليك مقاطعة الإقلاع بالضغط على <strong>[F2 أو Delete]</strong> لدخول البيوس وإعادة القرص الداخلي <strong>SSD</strong> كجهاز إقلاع أول، يعقبه نزع مفتاح USB لمرة واحدة لمنع الوقوع في حلقة التثبيت اللانهائية!
+        <strong style="color: #f59e0b;">تنبيه هام لمقاطعة الإقلاع:</strong><br>
+        أثناء عملية إعادة التشغيل الحالية، اضغط فوراً على <strong>[F2 أو Delete]</strong> من لوحة المفاتيح الحقيقية لدخول البيوس وإعادة القرص الداخلي <strong>SSD</strong> كإقلاع أول، يعقبه نزع وسيط التثبيت لمنع الوقوع في حلقة التثبيت اللانهائية!
       </div>
 
-      <button class="fluent-btn fluent-btn-accent" id="btnInterruptSecondBoot">
-        الضغط على [F2 / Del] لمقاطعة الإقلاع الثاني ودخول البيوس
-      </button>
+      <div class="post-countdown-badge" style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; padding: 8px 18px; border-radius: 20px; color: #38bdf8; font-weight: bold;">
+        اضغط [F2 أو Del] في لوحة المفاتيح الحقيقية قبل انقضاء المهلة
+      </div>
     </div>
   `;
 
   const span = container.querySelector('#rebootCountdownSpan');
+  let secondBootKeyHandler = null;
+
   const timer = setInterval(() => {
     seconds--;
     if (span) span.textContent = seconds;
     if (seconds <= 0) {
       clearInterval(timer);
+      if (secondBootKeyHandler) window.removeEventListener('keydown', secondBootKeyHandler);
       // Student failed to interrupt second boot!
       window.stateEngine.recordPenalty(
         6,
         1.00,
         'فاتتك فرصة مقاطعة الإقلاع الثاني (انقضت المهلة وعاد الجهاز للإقلاع من الفلاشة)',
-        'يجب دائماً مقاطعة الإقلاع الثاني لإعادة القرص الصلب الداخلي كإقلاع أول لتفادي إعادة التثبيت.'
+        'يجب دائماً مقاطعة الإقلاع الثاني بالضغط على F2 أو Del لإعادة القرص الصلب الداخلي كإقلاع أول لتفادي إعادة التثبيت.'
       );
-      alert('تحذير: لم تقم بمقاطعة الإقلاع الثاني! تم خصم نقطة واحدة. انقر لدخول البيوس الآن.');
+      alert('تحذير: انقضت المهلة دون مقاطعة الإقلاع الثاني عبر لوحة المفاتيح الحقيقية! تم خصم نقطة واحدة.');
       enterSecondBootBios(container);
     }
   }, 1000);
 
-  const interruptBtn = container.querySelector('#btnInterruptSecondBoot');
-  if (interruptBtn) {
-    interruptBtn.addEventListener('click', () => {
+  // Global Keydown Listener for real physical keyboard
+  secondBootKeyHandler = (e) => {
+    const isF2 = e.key === 'F2' || e.code === 'F2' || e.keyCode === 113;
+    const isDel = e.key === 'Delete' || e.key === 'Del' || e.key === 'Suppr' || e.key === 'Supp' || e.code === 'Delete' || e.keyCode === 46;
+    if (isF2 || isDel) {
+      e.preventDefault();
       clearInterval(timer);
+      window.removeEventListener('keydown', secondBootKeyHandler);
       if (window.soundSynth) window.soundSynth.playBeep(880, 0.1);
       enterSecondBootBios(container);
-    });
-  }
+    }
+  };
+  window.addEventListener('keydown', secondBootKeyHandler);
 }
 
 function enterSecondBootBios(container) {
@@ -1139,20 +1136,20 @@ function renderPhase6UnplugUsb(container) {
           <strong style="color: #f8fafc;">لتفادي الوقوع في حلقة الإقلاع وإعادة تشغيل برنامج التثبيت مجدداً (Boot Loop)، يجب الآن نزع مفتاح USB مباشرة من منفذ الوحدة المركزية.</strong>
         </p>
 
-        <!-- Directional Physical Callout to Left Tower -->
+        <!-- Directional Physical Callout to Right Tower -->
         <div class="physical-tower-callout-panel" id="physicalTowerCallout" title="انقر لنزع الفلاشة من الوحدة المركزية">
-          <div class="callout-arrow-pointer">&#8592;</div>
+          <div class="callout-arrow-pointer guide-arrow-right">&#8594;</div>
           <div class="callout-text-content">
             <strong style="color: #38bdf8; font-size: 15px;">الإجراء المادي المطلوب:</strong>
             <p style="margin: 4px 0 0 0; color: #e2e8f0; font-size: 13.5px; line-height: 1.6;">
-              توجه بمؤشر الفأرة إلى <strong>الوحدة المركزية (على يسار الشاشة)</strong>، وانقر مباشرة على <strong>مفتاح USB الأحمر</strong> الموجود بالمنفذ الأمامي لنزعه فيزيائياً من مكانه.
+              توجه بمؤشر الفأرة إلى <strong>الوحدة المركزية (على يمين الشاشة)</strong>، وانقر مباشرة على <strong>مفتاح USB الأحمر</strong> الموجود بالمنفذ الأمامي لنزعه فيزيائياً من مكانه.
             </p>
           </div>
         </div>
 
         <div class="unplug-live-status-card" id="unplugLiveStatusCard" style="margin-top: 14px;">
           <span class="status-indicator-dot amber-blink" id="unplugStatusDot"></span>
-          <span id="unplugStatusMsg">في انتظار قيامك بنزع مفتاح USB من منفذ الوحدة المركزية على اليسار...</span>
+          <span id="unplugStatusMsg">في انتظار قيامك بنزع مفتاح USB من منفذ الوحدة المركزية على اليمين...</span>
         </div>
       </div>
     `;
@@ -1237,16 +1234,25 @@ function renderPhase6UnplugUsb(container) {
       }, 450);
     }
 
-    // Attach click events to the real physical elements on the Left Tower
+    // Attach click events to the real physical elements on the Central Unit (Right Column)
     const pEl = document.getElementById('usb-port');
     if (pEl) pEl.onclick = handlePhysicalRemoval;
 
     const tDrive = document.getElementById('usb-drive');
     if (tDrive) tDrive.onclick = handlePhysicalRemoval;
 
-    // Accessibility / touchscreen fallback: clicking the callout panel also triggers the physical removal
+    // Clicking the guide panel pulses the physical USB on the tower to guide the student directly
     const calloutPanel = container.querySelector('#physicalTowerCallout');
-    if (calloutPanel) calloutPanel.onclick = handlePhysicalRemoval;
+    if (calloutPanel) {
+      calloutPanel.onclick = () => {
+        const d = document.getElementById('usb-drive');
+        if (d) {
+          d.classList.remove('tower-unplug-target');
+          void d.offsetWidth;
+          d.classList.add('tower-unplug-target');
+        }
+      };
+    }
   }
 
   redraw();
@@ -1445,7 +1451,7 @@ function renderPhase7PrivacySwitches(container) {
           'ترك خيارات التتبع والتشخيص مفعلة في شاشة الخصوصية OOBE',
           'يجب تعطيل خيارات التتبع والتشخيص لحماية سرية بيانات المتعلمين في البيئة التربوية.'
         );
-        alert('تنبيه بيداغوجي: لقد تركت بعض خيارات التتبع مفعلة! تم خصم نقطة واحدة. يرجى تعطيل كافة المفاتيح السبعة.');
+        alert('تنبيه: لقد تركت بعض خيارات التتبع مفعلة! تم خصم نقطة واحدة. يرجى تعطيل كافة المفاتيح السبعة لحماية الخصوصية.');
         return;
       }
 
@@ -1655,7 +1661,7 @@ function renderPhase8Desktop(container) {
   if (sleepBtn) {
     sleepBtn.addEventListener('click', () => {
       window.soundSynth.playErrorBeep();
-      window.stateEngine.recordPenalty(8, 0.50, 'اختيار السكون (Sleep) بدلاً من إعادة التشغيل (Restart) لاختبار الإقلاع الذاتي', 'الهدف البيداغوجي هو الضغط على Restart للتحقق الفوري من إقلاع النظام ذاتياً من القرص الداخلي.');
+      window.stateEngine.recordPenalty(8, 0.50, 'اختيار السكون (Sleep) بدلاً من إعادة التشغيل (Restart) لاختبار الإقلاع الذاتي', 'المطلوب هو الضغط على Restart للتحقق الفوري من إقلاع النظام ذاتياً من القرص الداخلي.');
       alert('تنبيه: لاختبار الإقلاع الذاتي والمستقل من القرص الصلب الداخلي، يجب الضغط على Restart (إعادة التشغيل).');
     });
   }
@@ -1663,8 +1669,8 @@ function renderPhase8Desktop(container) {
   if (shutdownBtn) {
     shutdownBtn.addEventListener('click', () => {
       window.soundSynth.playErrorBeep();
-      window.stateEngine.recordPenalty(8, 0.50, 'اختيار إيقاف التشغيل بدلاً من إعادة التشغيل (Restart) لاختبار الإقلاع الذاتي', 'الهدف البيداغوجي هو الضغط على Restart للتحقق الفوري من إقلاع النظام ذاتياً من القرص الداخلي.');
-      alert('تم النقر على إيقاف التشغيل (Shut down). لمتابعة التحقق البيداغوجي النهائي من إقلاع الويندوز المستقل، اختر: Restart (إعادة التشغيل).');
+      window.stateEngine.recordPenalty(8, 0.50, 'اختيار إيقاف التشغيل بدلاً من إعادة التشغيل (Restart) لاختبار الإقلاع الذاتي', 'المطلوب هو الضغط على Restart للتحقق الفوري من إقلاع النظام ذاتياً من القرص الداخلي.');
+      alert('تم النقر على إيقاف التشغيل (Shut down). لمتابعة التحقق العملي النهائي من إقلاع الويندوز المستقل، اختر: Restart (إعادة التشغيل).');
     });
   }
 

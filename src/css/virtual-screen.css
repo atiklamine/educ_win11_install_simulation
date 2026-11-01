@@ -226,9 +226,22 @@
   animation: bounceLeft 1.2s infinite ease-in-out;
 }
 
+.guide-arrow-right {
+  font-size: 22px;
+  color: #38bdf8;
+  font-weight: 900;
+  display: inline-block;
+  animation: bounceRight 1.2s infinite ease-in-out;
+}
+
 @keyframes bounceLeft {
   0%, 100% { transform: translateX(0); }
   50% { transform: translateX(-8px); }
+}
+
+@keyframes bounceRight {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(8px); }
 }
 
 /* Phase 6 Physical Tower Callout & Detachment Animations */
@@ -265,7 +278,7 @@
   font-size: 34px;
   color: #38bdf8;
   font-weight: 900;
-  animation: bounceLeft 1.2s infinite ease-in-out;
+  animation: bounceRight 1.2s infinite ease-in-out;
   flex-shrink: 0;
 }
 
@@ -859,6 +872,15 @@
   overflow: hidden;
   direction: ltr;
   text-align: left;
+}
+
+.virtual-black-screen.screen-off {
+  background-color: #000000 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: default;
 }
 
 .post-header-line {
@@ -1856,4 +1878,18 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Modification 1: 100% Pitch Black Standby Screen (No OSD, No Text, No Cursor) */
+.workstation-screen.screen-off,
+.virtual-black-screen.screen-off {
+  background: #000000 !important;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
 }
