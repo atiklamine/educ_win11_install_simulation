@@ -1,22 +1,43 @@
-# Dependencies
+# Node dependencies
 node_modules/
+package-lock.json
 
-# Production build artifacts (compiled executables belong in GitHub Releases)
-# Note: GitHub rejects files > 100MB during git push
-dist/
+# Environment and sensitive keys
+.env
+.env.local
+.env.*.local
 
-# Test output artifacts
+# Production build outputs (Binaries belong in GitHub Releases)
+dist/*.exe
+dist/win-unpacked/
+dist/win-ia32-unpacked/
+dist/builder-debug.yml
+dist/builder-effective-config.yaml
+!dist/inf.dll
+
+# Cache and temporary folders
+.cache/
+temp/
+tmp/
+*.tmp
+*.swp
+
+# Test output artifacts & logs
 test_output_report.pdf
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# OS / Editor temporary files
+# Operating System specific files
 .DS_Store
+.DS_Store?
+._*
 Thumbs.db
 ehthumbs.db
+
+# IDE and Editor configurations
 .idea/
 .vscode/
-*.swp
-*.tmp
+*.sublime-project
+*.sublime-workspace

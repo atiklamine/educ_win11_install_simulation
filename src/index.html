@@ -207,8 +207,11 @@
               <!-- Front I/O Panel -->
               <div class="pc-front-io-panel">
                 <div class="pc-power-section">
-                  <button class="power-button-tactile pulsing" id="btnTactilePower" title="تشغيل الوحدة المركزية">
-                    &#x23FB;
+                  <button class="power-button-tactile pulsing" id="btnTactilePower" title="تشغيل الوحدة المركزية" aria-label="Power Button">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
+                      <line x1="12" y1="2" x2="12" y2="12"/>
+                    </svg>
                   </button>
                   <div class="pc-status-leds">
                     <div class="pc-led-item">
@@ -310,7 +313,7 @@
 
       <div class="stepper-score-container">
         <div class="stepper-score-box">
-          <span class="stepper-score-label">العلامة الحية:</span>
+          <span class="stepper-score-label">العلمامة الحالية:</span>
           <span class="stepper-score-value" id="stepperScoreValue">14.00 / 20.00</span>
         </div>
         <div class="stepper-penalties-box">
@@ -336,7 +339,7 @@
       <div class="modal-body">
         <div style="margin-bottom: 14px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label class="win11-label" style="margin-bottom: 0;">اللقب (Nom de famille):</label>
+            <label for="regLastName" class="win11-label" style="margin-bottom: 0; cursor: pointer;">اللقب (Nom de famille):</label>
             <span class="name-lang-badge forced-french" id="nameLangBadgeNom">حروف فرنسية فقط (FR)</span>
           </div>
           <input type="text" class="win11-input" id="regLastName" placeholder="Ex: MOHAMMEDI" value="MOHAMMEDI" autocomplete="off" spellcheck="false">
@@ -344,14 +347,14 @@
         </div>
         <div style="margin-bottom: 14px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label class="win11-label" style="margin-bottom: 0;">الاسم (Prénom):</label>
+            <label for="regFirstName" class="win11-label" style="margin-bottom: 0; cursor: pointer;">الاسم (Prénom):</label>
             <span class="name-lang-badge forced-french" id="nameLangBadgePrenom">حروف فرنسية فقط (FR)</span>
           </div>
           <input type="text" class="win11-input" id="regFirstName" placeholder="Ex: Abdellah" value="Abdellah" autocomplete="off" spellcheck="false">
           <div class="name-validation-msg" id="firstNameError" style="display: none;"></div>
         </div>
         <div style="margin-bottom: 14px;">
-          <label class="win11-label">القسم / الفوج التربوي:</label>
+          <label for="regGroup" class="win11-label" style="cursor: pointer;">القسم / الفوج التربوي:</label>
           <select class="win11-select" id="regGroup">
             <!-- Populated exclusively from settings groups -->
           </select>
@@ -359,7 +362,7 @@
         </div>
         <!-- Modification 6: Session mode container toggled via session_mode_enabled -->
         <div id="regModeContainer" style="margin-bottom: 14px;">
-          <label class="win11-label">نمط الحصة التعليمية:</label>
+          <label for="regMode" class="win11-label" style="cursor: pointer;">نمط الحصة التعليمية:</label>
           <select class="win11-select" id="regMode">
             <option value="exam" selected>نمط الامتحان الصارم (مؤقت تنازلي 30:00 دقيقة مع خصم الجزاءات)</option>
             <option value="practice">نمط التدريب الحر (مؤقت منقضي مفتوح وتوجيه إرشادي مرن)</option>
@@ -531,7 +534,10 @@
           <button class="fluent-btn fluent-btn-standard" id="btnFinaleReturn" title="العودة لمعاينة سطح المكتب ومراجعة العمل">&#128065; استعراض الواجهة</button>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="fluent-btn fluent-btn-standard" id="btnFinaleRestart">&#8635; جلسة جديدة</button>
+          <button class="fluent-btn fluent-btn-standard" id="btnFinaleRestart" style="display: inline-flex; align-items: center; gap: 6px;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            <span>جلسة جديدة</span>
+          </button>
           <button class="fluent-btn fluent-btn-accent" id="btnFinaleExportPdf">&#128196; استخراج تقرير PDF الرسمي</button>
         </div>
       </div>
@@ -566,7 +572,7 @@
       </div>
       <div class="modal-body">
         <div style="margin-bottom: 12px;">
-          <label class="win11-label">أدخل كلمة مرور الأستاذ لفتح الإعدادات:</label>
+          <label for="settingsPwdInput" class="win11-label" style="cursor: pointer;">أدخل كلمة مرور الأستاذ لفتح الإعدادات:</label>
           <input type="password" class="win11-input" id="settingsPwdInput" placeholder="••••••">
           <div id="settingsPwdError" style="color: #ef4444; font-size: 12px; margin-top: 6px; display: none;"></div>
         </div>
@@ -587,7 +593,7 @@
       </div>
       <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
         <div>
-          <label class="win11-label">الاسم الكامل للأستاذ:</label>
+          <label for="setTeacherFullName" class="win11-label" style="cursor: pointer;">الاسم الكامل للأستاذ:</label>
           <input type="text" class="win11-input" id="setTeacherFullName" placeholder="مثال: أستاذ مادة المعلوماتية">
         </div>
 
@@ -595,11 +601,11 @@
           <div style="font-weight: 700; font-size: 13px; color: var(--accent-color); margin-bottom: 8px;">تغيير كلمة المرور (اختياري):</div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div>
-              <label class="win11-label">كلمة المرور الجديدة:</label>
+              <label for="setNewPassword" class="win11-label" style="cursor: pointer;">كلمة المرور الجديدة:</label>
               <input type="password" class="win11-input" id="setNewPassword" placeholder="اترك فارغاً إن لم ترغب بالتغيير">
             </div>
             <div>
-              <label class="win11-label">تأكيد كلمة المرور:</label>
+              <label for="setConfirmPassword" class="win11-label" style="cursor: pointer;">تأكيد كلمة المرور:</label>
               <input type="password" class="win11-input" id="setConfirmPassword" placeholder="أعد كتابة كلمة المرور">
             </div>
           </div>
@@ -607,17 +613,17 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div>
-            <label class="win11-label">المؤسسة التعليمية:</label>
+            <label for="setInstitution" class="win11-label" style="cursor: pointer;">المؤسسة التعليمية:</label>
             <input type="text" class="win11-input" id="setInstitution" placeholder="مثال: ثانوية العقيد لطفي">
           </div>
           <div>
-            <label class="win11-label">السنة الدراسية:</label>
+            <label for="setSchoolYear" class="win11-label" style="cursor: pointer;">السنة الدراسية:</label>
             <input type="text" class="win11-input" id="setSchoolYear" placeholder="مثال: 2025/2026">
           </div>
         </div>
 
         <div>
-          <label class="win11-label">إدارة قائمة الأفواج التربوية:</label>
+          <label for="newGroupInput" class="win11-label" style="cursor: pointer;">إدارة قائمة الأفواج التربوية:</label>
           <div class="group-chips-container" id="setGroupsChipsContainer"></div>
           <div style="display: flex; gap: 8px; margin-top: 8px;">
             <input type="text" class="win11-input" id="newGroupInput" placeholder="أدخل اسم الفوج (مثال: 1AS-04)">
@@ -669,33 +675,33 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div>
-            <label class="win11-label">تعيين كلمة مرور الأستاذ (≥6 أحرف):</label>
+            <label for="initTeacherPassword" class="win11-label" style="cursor: pointer;">تعيين كلمة مرور الأستاذ (≥6 أحرف):</label>
             <input type="password" class="win11-input" id="initTeacherPassword" placeholder="••••••">
           </div>
           <div>
-            <label class="win11-label">تأكيد كلمة المرور:</label>
+            <label for="initConfirmPassword" class="win11-label" style="cursor: pointer;">تأكيد كلمة المرور:</label>
             <input type="password" class="win11-input" id="initConfirmPassword" placeholder="••••••">
           </div>
         </div>
 
         <div>
-          <label class="win11-label">الاسم الكامل للأستاذ:</label>
+          <label for="initTeacherFullName" class="win11-label" style="cursor: pointer;">الاسم الكامل للأستاذ:</label>
           <input type="text" class="win11-input" id="initTeacherFullName" placeholder="مثال: أستاذ مادة المعلوماتية" value="أستاذ مادة المعلوماتية">
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div>
-            <label class="win11-label">المؤسسة التعليمية:</label>
+            <label for="initInstitution" class="win11-label" style="cursor: pointer;">المؤسسة التعليمية:</label>
             <input type="text" class="win11-input" id="initInstitution" placeholder="مثال: ثانوية مخبر الإعلام الآلي" value="ثانوية مخبر الإعلام الآلي">
           </div>
           <div>
-            <label class="win11-label">السنة الدراسية:</label>
+            <label for="initSchoolYear" class="win11-label" style="cursor: pointer;">السنة الدراسية:</label>
             <input type="text" class="win11-input" id="initSchoolYear" placeholder="مثال: 2025/2026" value="2025/2026">
           </div>
         </div>
 
         <div>
-          <label class="win11-label">الأفواج التربوية المعتمدة:</label>
+          <label for="newInitGroupInput" class="win11-label" style="cursor: pointer;">الأفواج التربوية المعتمدة:</label>
           <div class="group-chips-container" id="initGroupsChipsContainer"></div>
           <div style="display: flex; gap: 8px; margin-top: 8px;">
             <input type="text" class="win11-input" id="newInitGroupInput" placeholder="اسم الفوج (مثال: 1AS-04)">
@@ -789,11 +795,28 @@
         });
       }
 
-      // New Session Button
+      // New Session Button (Prompt 3: Full Session State Reset & Confirm)
       const btnNew = document.getElementById('btnNewSession');
       if (btnNew) {
         btnNew.addEventListener('click', () => {
+          const hasActiveProgress = window.stateEngine && (
+            window.stateEngine.isSessionActive ||
+            window.stateEngine.isCompleted ||
+            window.stateEngine.currentPhase > 1 ||
+            window.stateEngine.penalties.length > 0 ||
+            window.stateEngine.selectedMedia !== null ||
+            (window.biosController && (window.biosController.settings.tpm || window.biosController.settings.secureBoot || (window.biosController.settings.firstBootDevice && !window.biosController.settings.firstBootDevice.includes('Hard Drive'))))
+          );
+
+          if (hasActiveProgress) {
+            const confirmed = confirm('هل أنت متأكد من رغبتك في بدء جلسة جديدة؟\nسيتم فقدان كافة التقدّم والبيانات الحالية وتصفير المحاكي إلى نقطة الصفر.');
+            if (!confirmed) return;
+          }
+
           if (window.soundSynth) window.soundSynth.playClick();
+          if (window.resetSessionState) {
+            window.resetSessionState();
+          }
           document.getElementById('sessionModal').classList.add('modal-visible');
         });
       }
@@ -1041,6 +1064,9 @@
         finaleRestart.addEventListener('click', () => {
           if (window.soundSynth) window.soundSynth.playClick();
           document.getElementById('grandFinaleModal').classList.remove('modal-visible');
+          if (window.resetSessionState) {
+            window.resetSessionState();
+          }
           sessionModal.classList.add('modal-visible');
         });
       }
@@ -1064,7 +1090,7 @@
       }
     }
 
-    // Draggable Phase-based Assistance Window Implementation
+    // Draggable Phase-based Assistance Window Implementation (Root-cause fix for drag jump & touch support)
     function initDraggableHintBar() {
       const bar = document.getElementById('draggableHintBar');
       const btnReset = document.getElementById('btnResetHintPos');
@@ -1072,39 +1098,94 @@
       if (!bar) return;
 
       let isDragging = false;
-      let startX, startY, initialLeft, initialTop;
+      let offsetX = 0;
+      let offsetY = 0;
+      let rafId = null;
 
-      bar.addEventListener('mousedown', (e) => {
+      function onPointerDown(e) {
         // Drag from anywhere on the window except interactive buttons or the vkb hint key
         if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('.vkb-key')) return;
+
+        // Support primary pointer/mouse button and touch
+        if (e.button !== undefined && e.button !== 0) return;
+
         isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
+        bar.classList.add('is-dragging');
+
+        // Capture initial bounding rectangle in viewport coordinates
         const rect = bar.getBoundingClientRect();
-        initialLeft = rect.left;
-        initialTop = rect.top;
+
+        // Calculate exact pointer offset from element top-left corner
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+
+        // Transition from CSS transform centering to absolute pixel coordinates with ZERO jump
         bar.style.transition = 'none';
         bar.style.transform = 'none';
-        bar.style.left = `${initialLeft}px`;
-        bar.style.top = `${initialTop}px`;
         bar.style.bottom = 'auto';
-        bar.classList.add('is-dragging');
+        bar.style.right = 'auto';
+        bar.style.left = `${rect.left}px`;
+        bar.style.top = `${rect.top}px`;
+
+        try {
+          bar.setPointerCapture(e.pointerId);
+        } catch (err) {}
+
         e.preventDefault();
-      });
+      }
 
-      document.addEventListener('mousemove', (e) => {
+      function onPointerMove(e) {
         if (!isDragging) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        bar.style.left = `${initialLeft + dx}px`;
-        bar.style.top = `${initialTop + dy}px`;
-      });
 
-      document.addEventListener('mouseup', () => {
-        if (isDragging) {
-          isDragging = false;
-          bar.classList.remove('is-dragging');
-          bar.style.transition = '';
+        const newX = e.clientX - offsetX;
+        const newY = e.clientY - offsetY;
+
+        // Keep within window viewport boundaries (clamp)
+        const barWidth = bar.offsetWidth || 860;
+        const barHeight = bar.offsetHeight || 50;
+        const minX = 4;
+        const maxX = Math.max(minX, window.innerWidth - barWidth - 4);
+        const minY = 52; // Respect top HUD bar (52px height)
+        const maxY = Math.max(minY, window.innerHeight - barHeight - 4);
+
+        const clampedX = Math.max(minX, Math.min(newX, maxX));
+        const clampedY = Math.max(minY, Math.min(newY, maxY));
+
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          bar.style.left = `${clampedX}px`;
+          bar.style.top = `${clampedY}px`;
+        });
+      }
+
+      function onPointerUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        bar.classList.remove('is-dragging');
+        bar.style.transition = '';
+
+        if (e && e.pointerId !== undefined) {
+          try {
+            bar.releasePointerCapture(e.pointerId);
+          } catch (err) {}
+        }
+      }
+
+      bar.addEventListener('pointerdown', onPointerDown);
+      window.addEventListener('pointermove', onPointerMove, { passive: true });
+      window.addEventListener('pointerup', onPointerUp);
+      window.addEventListener('pointercancel', onPointerUp);
+
+      // Window resize boundary clamping
+      window.addEventListener('resize', () => {
+        if (bar.style.transform === 'none' && bar.style.left && bar.style.top) {
+          const rect = bar.getBoundingClientRect();
+          const maxX = Math.max(4, window.innerWidth - rect.width - 4);
+          const maxY = Math.max(52, window.innerHeight - rect.height - 4);
+          const clampedX = Math.max(4, Math.min(rect.left, maxX));
+          const clampedY = Math.max(52, Math.min(rect.top, maxY));
+          bar.style.left = `${clampedX}px`;
+          bar.style.top = `${clampedY}px`;
         }
       });
 
@@ -1114,6 +1195,7 @@
           bar.style.top = 'auto';
           bar.style.bottom = '12px';
           bar.style.left = '50%';
+          bar.style.right = 'auto';
           bar.style.transform = 'translateX(-50%)';
         });
       }
@@ -1186,9 +1268,10 @@
       if (btnQuick) btnQuick.addEventListener('click', toggleMode);
       if (btnChin) btnChin.addEventListener('click', toggleMode);
 
-      // Keyboard Shortcut: F10
+      // Keyboard Shortcut: F10 (Only when Aptio BIOS is not active)
       window.addEventListener('keydown', (e) => {
         if (e.key === 'F10') {
+          if (document.getElementById('aptioBiosWrapper')) return;
           e.preventDefault();
           toggleMode();
         }

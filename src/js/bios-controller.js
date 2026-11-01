@@ -27,6 +27,31 @@ class BiosController {
     this.tabs = ['Main', 'Advanced', 'Chipset', 'Boot', 'Security', 'Save & Exit'];
   }
 
+  // Restore BIOS to initial factory defaults
+  reset() {
+    if (this.postTimer) {
+      clearInterval(this.postTimer);
+      this.postTimer = null;
+    }
+    if (this._currentPostKeyHandler) {
+      window.removeEventListener('keydown', this._currentPostKeyHandler);
+      this._currentPostKeyHandler = null;
+    }
+    this.activeTab = 'Main';
+    this.postSecondsLeft = 10;
+    this.postInterrupted = false;
+    this.isSecondBoot = false;
+    this.onSecondBootSuccess = null;
+
+    this.settings = {
+      tpm: false,
+      secureBoot: false,
+      firstBootDevice: 'Hard Drive (SSD)',
+      secondBootDevice: 'USB Flash Drive',
+      selectedItemIndex: 0
+    };
+  }
+
   // --- PHASE 1: POST SCREEN & 10s COUNTDOWN ---
   startPostCountdown(onSuccessInterrupt, onTimeoutFail) {
     this.postSecondsLeft = 10;
@@ -148,7 +173,6 @@ class BiosController {
 
         <div class="bios-footer">
           <span>Version 2.22.1284. Copyright (C) 2026 American Megatrends, Inc.</span>
-          <button class="bios-f10-quick-btn" id="biosQuickF10">حفظ وخروج (F10 Save & Exit)</button>
         </div>
       </div>
     `;
@@ -161,12 +185,6 @@ class BiosController {
         this.renderBiosUI(containerId);
       });
     });
-
-    // F10 button click
-    const f10Btn = container.querySelector('#biosQuickF10');
-    if (f10Btn) {
-      f10Btn.addEventListener('click', () => this.handleF10Save());
-    }
 
     // Interactive item click/toggles
     this.bindInteractiveItems(container);
@@ -238,13 +256,21 @@ class BiosController {
 
     if (tab === 'Save & Exit') {
       return `
-        <div class="bios-group-title">Exit Options</div>
+        <div class="bios-group-title">Save & Exit Setup Options</div>
         <div class="bios-row interactive" id="rowSaveExit" data-action="save-exit">
-          <span class="lbl highlight-opt">Save Changes and Exit (F10)</span>
+          <span class="lbl highlight-opt">Save Changes and Exit</span>
+          <span class="val">&gt;&gt;&gt;</span>
+        </div>
+        <div class="bios-row interactive" id="rowSaveReset" data-action="save-reset">
+          <span class="lbl highlight-opt">Save Changes and Reset</span>
           <span class="val">&gt;&gt;&gt;</span>
         </div>
         <div class="bios-row interactive" id="rowDiscardExit" data-action="discard-exit">
-          <span class="lbl">Discard Changes and Exit (ESC)</span>
+          <span class="lbl">Discard Changes and Exit</span>
+          <span class="val">&gt;&gt;&gt;</span>
+        </div>
+        <div class="bios-row interactive" id="rowDiscardChanges" data-action="discard-only">
+          <span class="lbl">Discard Changes</span>
           <span class="val">&gt;&gt;&gt;</span>
         </div>
         <div class="bios-row"><span class="lbl">Restore Optimized Defaults (F9)</span><span class="val">&gt;&gt;&gt;</span></div>
@@ -262,7 +288,7 @@ class BiosController {
       return 'Sets the system boot order. Use Enter to cycle through available devices: Hard Drive, USB Flash Drive, CD/DVD, PXE.';
     }
     if (tab === 'Save & Exit') {
-      return 'Press F10 or select Save Changes and Exit to apply changes and reset system.';
+      return 'Press F10 or select Save Changes and Exit to apply changes and reset system. Use Discard Changes to exit without saving.';
     }
     return 'Use &uarr; &darr; to navigate items, Enter to select, and F10 to save and exit.';
   }
@@ -306,18 +332,168 @@ class BiosController {
       });
     }
 
-    // Save & Exit Row Click
+    // Prompt 4 Modification 7: Multi-method authentic BIOS save & exit
     const rowSaveExit = container.querySelector('#rowSaveExit');
     if (rowSaveExit) {
-      rowSaveExit.addEventListener('click', () => this.handleF10Save());
+      rowSaveExit.addEventListener('click', () => {
+        this.confirmSaveAndExit();
+      });
+    }
+
+    const rowSaveReset = container.querySelector('#rowSaveReset');
+    if (rowSaveReset) {
+      rowSaveReset.addEventListener('click', () => {
+        this.confirmSaveAndExit();
+      });
     }
 
     const rowDiscardExit = container.querySelector('#rowDiscardExit');
     if (rowDiscardExit) {
       rowDiscardExit.addEventListener('click', () => {
-        alert('تم إلغاء التغييرات.');
+        this.confirmDiscardAndExit();
       });
     }
+
+    const rowDiscardChanges = container.querySelector('#rowDiscardChanges');
+    if (rowDiscardChanges) {
+      rowDiscardChanges.addEventListener('click', () => {
+        this.showBiosDialog(
+          'Discard Changes',
+          'Discard all unsaved configuration changes?',
+          () => {
+            this.reset();
+            this.renderBiosUI('virtualScreenContent');
+          },
+          null
+        );
+      });
+    }
+  }
+
+  showBiosDialog(title, prompt, onYes, onNo) {
+    const existing = document.getElementById('aptioBiosDialog');
+    if (existing) existing.remove();
+
+    const wrapper = document.getElementById('aptioBiosWrapper');
+    if (!wrapper) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'aptio-dialog-overlay';
+    overlay.id = 'aptioBiosDialog';
+    overlay.innerHTML = `
+      <div class="aptio-dialog-box" role="dialog" aria-modal="true">
+        <div class="aptio-dialog-title">${title}</div>
+        <div style="font-size: 14px; margin: 12px 0 18px 0; line-height: 1.5; color: #ffffff;">${prompt}</div>
+        <div class="aptio-dialog-btns">
+          <button class="aptio-dialog-btn selected" id="btnAptioYes">[ Yes ]</button>
+          <button class="aptio-dialog-btn" id="btnAptioNo">[ No ]</button>
+        </div>
+      </div>
+    `;
+    wrapper.appendChild(overlay);
+
+    const btnYes = overlay.querySelector('#btnAptioYes');
+    const btnNo = overlay.querySelector('#btnAptioNo');
+
+    btnYes.focus();
+
+    btnYes.addEventListener('click', () => {
+      if (window.soundSynth) window.soundSynth.playClick();
+      overlay.remove();
+      if (typeof onYes === 'function') onYes();
+    });
+
+    btnNo.addEventListener('click', () => {
+      if (window.soundSynth) window.soundSynth.playClick();
+      overlay.remove();
+      if (typeof onNo === 'function') onNo();
+    });
+
+    const dialogKeyHandler = (e) => {
+      if (!document.getElementById('aptioBiosDialog')) {
+        window.removeEventListener('keydown', dialogKeyHandler);
+        return;
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        if (document.activeElement === btnNo) {
+          btnNo.click();
+        } else {
+          btnYes.click();
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        btnNo.click();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        btnYes.focus();
+        btnYes.classList.add('selected');
+        btnNo.classList.remove('selected');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        btnNo.focus();
+        btnNo.classList.add('selected');
+        btnYes.classList.remove('selected');
+      }
+    };
+    window.addEventListener('keydown', dialogKeyHandler);
+  }
+
+  confirmSaveAndExit() {
+    this.showBiosDialog(
+      'Save & Reset Confirmation',
+      'Save configuration changes and exit setup?',
+      () => {
+        this.executeBiosSave();
+      },
+      () => {
+        // user clicked No: remain in BIOS
+      }
+    );
+  }
+
+  confirmDiscardAndExit() {
+    this.showBiosDialog(
+      'Discard Changes and Exit',
+      'Discard configuration changes and exit setup?',
+      () => {
+        this.executeBiosDiscard();
+      },
+      () => {
+        // user clicked No: remain in BIOS
+      }
+    );
+  }
+
+  executeBiosDiscard() {
+    if (window.soundSynth) window.soundSynth.playWarning();
+    this.showRebootBanner('Discarding changes and resetting system...', () => {
+      if (this.isSecondBoot) {
+        window.stateEngine.recordPenalty(
+          6,
+          1.00,
+          'تم الخروج من البيوس دون حفظ تغيير جهاز الإقلاع الأول إلى SSD',
+          'يجب حفظ التغييرات لاختيار القرص الداخلي SSD كجهاز إقلاع أول.'
+        );
+        alert('تنبيه: لقد خرجت دون حفظ! لا يزال وسيط التثبيت هو الإقلاع الأول.');
+        this.initBiosScreen('virtualScreenContent', true);
+      } else {
+        window.soundSynth.playErrorBeep();
+        window.stateEngine.recordPenalty(
+          2,
+          1.00,
+          'الخروج من البيوس دون حفظ الإعدادات المطلوبة (Discard Changes and Exit)',
+          'لم يتم حفظ إعدادات TPM و Secure Boot وترتيب الإقلاع، مما يمنع إقلاع مثبت الويندوز.'
+        );
+        this.showNoBootableDeviceError();
+      }
+    });
+  }
+
+  executeBiosSave() {
+    this.handleF10Save();
   }
 
   bindKeyboardNav() {
@@ -328,9 +504,17 @@ class BiosController {
         return;
       }
 
+      // If a dialog is open, let dialogKeyHandler handle keys
+      if (document.getElementById('aptioBiosDialog')) {
+        return;
+      }
+
       if (e.key === 'F10') {
         e.preventDefault();
-        this.handleF10Save();
+        this.confirmSaveAndExit();
+      } else if (e.key === 'Escape' || e.key === 'Esc') {
+        e.preventDefault();
+        this.confirmDiscardAndExit();
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
         const curIdx = this.tabs.indexOf(this.activeTab);

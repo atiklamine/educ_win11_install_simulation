@@ -960,20 +960,28 @@ html, body {
   align-items: center;
   gap: 12px;
   font-size: 13px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .stepper-score-box {
   background: var(--stepper-score-bg);
   border: 1px solid var(--stepper-score-border);
-  padding: 3px 12px;
+  padding: 4px 14px;
   border-radius: 6px;
   display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: max-content;
 }
 
 .stepper-score-label {
   color: var(--text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: -0.2px;
 }
 
 .stepper-score-value {

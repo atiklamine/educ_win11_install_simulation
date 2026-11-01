@@ -1108,15 +1108,59 @@
   align-items: center;
 }
 
-.bios-f10-quick-btn {
-  background: #ffff55;
-  color: #000000;
-  border: none;
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 3px;
+.aptio-dialog-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.aptio-dialog-box {
+  background: #0000aa;
+  border: 2px solid #ffffff;
+  box-shadow: 4px 4px 0px #000000;
+  padding: 20px 32px;
+  color: #ffffff;
+  font-family: 'Consolas', 'Courier New', monospace;
+  text-align: center;
+  min-width: 320px;
+}
+
+.aptio-dialog-title {
+  font-size: 14.5px;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.aptio-dialog-btns {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.aptio-dialog-btn {
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 13.5px;
+  font-weight: bold;
+  padding: 4px 18px;
   cursor: pointer;
-  font-size: 11px;
+  transition: all 0.1s ease;
+}
+
+.aptio-dialog-btn:hover,
+.aptio-dialog-btn.active {
+  background: #ffffff;
+  color: #0000aa;
 }
 
 .bios-fatal-error {
@@ -1361,6 +1405,8 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .oobe-card {
@@ -1373,6 +1419,30 @@
   color: #ffffff;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(20px);
+  position: relative;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.oobe-input-group {
+  position: relative;
+  cursor: text;
+  margin-bottom: 14px;
+  z-index: 12;
+}
+
+.oobe-input-group .win11-label {
+  display: inline-block;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  margin-bottom: 6px;
+}
+
+.oobe-input-wrapper {
+  position: relative;
+  width: 100%;
+  cursor: text;
 }
 
 .oobe-title {
@@ -1422,10 +1492,9 @@
 .desktop-screen {
   width: 100%;
   height: 100%;
-  background-color: #0c1527;
-  background-image: url('../assets/desktop-bloom.svg');
+  background-image: url('../assets/wallpapers/win11-bloom.jpg'), url('../assets/desktop-bloom.svg');
   background-size: cover;
-  background-position: center;
+  background-position: center center;
   background-repeat: no-repeat;
   position: relative;
   overflow: hidden;
@@ -1892,4 +1961,378 @@
   padding: 0 !important;
   border: none !important;
   box-shadow: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Prompt 4: Windows 11 App Windows (Settings & Explorer) & Sign-In Lock Screen
+   -------------------------------------------------------------------------- */
+.win11-app-window {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 580px;
+  max-width: 92%;
+  max-height: 82%;
+  background: rgba(32, 36, 44, 0.94);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 100;
+  color: #ffffff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  animation: winPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes winPopIn {
+  from { opacity: 0; transform: translate(-50%, -46%) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.win11-window-header {
+  height: 38px;
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px 0 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  user-select: none;
+}
+
+.win11-window-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.win11-window-controls {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.win11-win-ctrl-btn {
+  width: 38px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.1s ease;
+}
+
+.win11-win-ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.win11-win-ctrl-btn.close-btn:hover {
+  background: #c42b1c;
+  color: #ffffff;
+}
+
+.win11-window-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.win11-spec-section {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.win11-spec-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  color: #38bdf8;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.win11-spec-grid {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  row-gap: 6px;
+  column-gap: 12px;
+  font-size: 12px;
+}
+
+.win11-spec-label {
+  color: #94a3b8;
+}
+
+.win11-spec-val {
+  color: #f1f5f9;
+  font-weight: 500;
+}
+
+/* File Explorer Explorer View */
+.explorer-address-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 4px 10px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.explorer-folder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.explorer-folder-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.explorer-folder-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.explorer-folder-card span {
+  font-size: 11.5px;
+  color: #f1f5f9;
+  margin-top: 6px;
+  word-break: break-all;
+}
+
+/* Sign-in / Lock Screen */
+.win11-login-screen {
+  width: 100%;
+  height: 100%;
+  background-image: url('../assets/wallpapers/win11-bloom.jpg'), url('../assets/desktop-bloom.svg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.win11-login-screen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 15, 25, 0.45);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+}
+
+.win11-login-card {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 320px;
+  max-width: 90%;
+  animation: loginFadeUp 0.3s ease;
+}
+
+@keyframes loginFadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.win11-login-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0078d4, #004578);
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 16px;
+}
+
+.win11-login-user {
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.win11-login-input-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: all 0.15s ease;
+}
+
+.win11-login-input-row:focus-within {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+}
+
+.win11-login-input {
+  flex: 1;
+  height: 36px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 14px;
+  padding: 0 12px;
+  letter-spacing: 1px;
+}
+
+.win11-login-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: normal;
+}
+
+.win11-login-btn {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.win11-login-btn:hover {
+  background: #0078d4;
+}
+
+.win11-login-error {
+  margin-top: 14px;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.4;
+  display: none;
+  animation: shakeError 0.3s ease;
+}
+
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* Prompt 5: Explicit editable styling for all simulated OS inputs to prevent user-select inheritance issues */
+.win11-input,
+.oobe-text-input,
+.win11-login-input,
+.start-search-input,
+.virtual-screen-content input,
+#virtual-screen input {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  direction: ltr !important;
+  text-align: left !important;
+  cursor: text !important;
+  pointer-events: auto !important;
+}
+
+/* Prompt 6: Natural click and touch hit targets for OOBE fields */
+.oobe-text-input {
+  width: 100% !important;
+  min-height: 42px !important;
+  height: 42px !important;
+  padding: 8px 14px !important;
+  font-size: 14px !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  border-radius: 6px !important;
+  color: #ffffff !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  cursor: text !important;
+  pointer-events: auto !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  touch-action: manipulation;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease !important;
+}
+
+.oobe-text-input:hover {
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  background: rgba(15, 23, 42, 0.95) !important;
+}
+
+.oobe-text-input:focus {
+  border-color: #0078d4 !important;
+  background: #0f172a !important;
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.45) !important;
+}
+
+.win11-login-direct-btn {
+  min-width: 130px;
+  height: 38px;
+  background: #0067b8;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.win11-login-direct-btn:hover {
+  background: #0078d4;
+  box-shadow: 0 4px 12px rgba(0, 120, 212, 0.4);
 }

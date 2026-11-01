@@ -241,55 +241,261 @@ function renderPhase1Workstation(container) {
     };
   });
 
-  // Bind Tactile Power Button click on the Tower (Right Column)
-  const powerBtn = document.getElementById('btnTactilePower');
-  if (powerBtn) {
-    powerBtn.onclick = () => {
+  // Prompt 5 Modification 2: True Hardware Power Toggle Function (Power On / Shutdown)
+  window.handleHardwarePowerToggle = function(forceShutdown = false) {
+    const cont = document.getElementById('virtualScreenContent');
+    const pBtn = document.getElementById('btnTactilePower');
+    const towerLed = document.getElementById('towerPowerLed');
+    const hddLed = document.getElementById('towerHddLed');
+    const monLed = document.getElementById('monitorPowerLed');
+    const towerStatus = document.getElementById('towerLiveStatus');
+
+    // 1. IF CURRENTLY RUNNING (POWER ON) -> SHUTDOWN / POWER OFF
+    if (window.stateEngine.isPowerOn && !forceShutdown) {
       if (window.soundSynth) window.soundSynth.playPower();
+      window.stateEngine.isPowerOn = false;
 
-      const towerLed = document.getElementById('towerPowerLed');
-      const hddLed = document.getElementById('towerHddLed');
-      const monLed = document.getElementById('monitorPowerLed');
-      const towerStatus = document.getElementById('towerLiveStatus');
+      // Stop active intervals / timers
+      if (window.biosController && window.biosController.postTimer) {
+        clearInterval(window.biosController.postTimer);
+        window.biosController.postTimer = null;
+      }
+      if (window._phase6RebootTimer) {
+        clearInterval(window._phase6RebootTimer);
+        window._phase6RebootTimer = null;
+      }
+      if (window._phase6KeyHandler) {
+        window.removeEventListener('keydown', window._phase6KeyHandler);
+        window._phase6KeyHandler = null;
+      }
+      if (window._phase6InstallInterval) {
+        clearInterval(window._phase6InstallInterval);
+        window._phase6InstallInterval = null;
+      }
 
-      if (towerLed) towerLed.classList.add('active');
-      if (hddLed) hddLed.classList.add('active');
-      if (monLed) monLed.classList.add('active');
-      if (window.syncMonitorPowerLed) window.syncMonitorPowerLed(true);
-      if (towerStatus) towerStatus.textContent = '● قيد التشغيل (Running)';
+      // Turn OFF LEDs & audio
+      if (towerLed) towerLed.classList.remove('active');
+      if (hddLed) hddLed.classList.remove('active');
+      if (monLed) monLed.classList.remove('active');
+      if (window.syncMonitorPowerLed) window.syncMonitorPowerLed(false);
+      if (towerStatus) towerStatus.textContent = '○ متوقف (Powered Off)';
+      if (pBtn) {
+        pBtn.classList.remove('active');
+        pBtn.classList.add('pulsing');
+      }
 
-      // Modification 2 & 5: If powered on WITHOUT media inserted, show realistic literal English POST error & penalty
-      if (!window.stateEngine.selectedMedia) {
-        window.stateEngine.recordPenalty(
-          1,
-          1.00,
-          'تشغيل الحاسوب دون إدخال وسيط التثبيت في مكانه',
-          'يجب إدخال مفتاح USB أو قرص DVD في مكانه بالوحدة المركزية قبل تشغيل الجهاز لبدء تثبيت النظام.'
-        );
+      // Pitch black screen on virtual monitor
+      if (cont) {
+        cont.innerHTML = `
+          <div class="workstation-screen virtual-black-screen screen-off" id="virtualScreenOff" title="شاشة العرض (في وضع الاستعداد)"></div>
+        `;
+        const screenOff = cont.querySelector('#virtualScreenOff');
+        if (screenOff) {
+          screenOff.onclick = () => {
+            if (pBtn) {
+              pBtn.classList.remove('pulsing');
+              void pBtn.offsetWidth;
+              pBtn.classList.add('pulsing');
+            }
+          };
+        }
+      }
+      return;
+    }
 
-        container.innerHTML = `
+    // 2. FORCED SHUTDOWN (Long press >= 3.2s)
+    if (forceShutdown && window.stateEngine.isPowerOn) {
+      if (window.soundSynth) window.soundSynth.playErrorBeep();
+      window.stateEngine.isPowerOn = false;
+
+      if (window.biosController && window.biosController.postTimer) {
+        clearInterval(window.biosController.postTimer);
+        window.biosController.postTimer = null;
+      }
+      if (window._phase6RebootTimer) {
+        clearInterval(window._phase6RebootTimer);
+        window._phase6RebootTimer = null;
+      }
+      if (window._phase6KeyHandler) {
+        window.removeEventListener('keydown', window._phase6KeyHandler);
+        window._phase6KeyHandler = null;
+      }
+      if (window._phase6InstallInterval) {
+        clearInterval(window._phase6InstallInterval);
+        window._phase6InstallInterval = null;
+      }
+
+      if (towerLed) towerLed.classList.remove('active');
+      if (hddLed) hddLed.classList.remove('active');
+      if (monLed) monLed.classList.remove('active');
+      if (window.syncMonitorPowerLed) window.syncMonitorPowerLed(false);
+      if (towerStatus) towerStatus.textContent = '○ متوقف (Hard Powered Off)';
+      if (pBtn) {
+        pBtn.classList.remove('active');
+        pBtn.classList.add('pulsing');
+      }
+
+      if (cont) {
+        cont.innerHTML = `
+          <div class="workstation-screen virtual-black-screen screen-off" id="virtualScreenOff" title="شاشة العرض (في وضع الاستعداد)"></div>
+        `;
+        const screenOff = cont.querySelector('#virtualScreenOff');
+        if (screenOff) {
+          screenOff.onclick = () => {
+            if (pBtn) {
+              pBtn.classList.remove('pulsing');
+              void pBtn.offsetWidth;
+              pBtn.classList.add('pulsing');
+            }
+          };
+        }
+      }
+      return;
+    }
+
+    // 3. IF CURRENTLY OFF -> POWER ON
+    window.stateEngine.isPowerOn = true;
+    if (window.soundSynth) window.soundSynth.playPower();
+
+    if (towerLed) towerLed.classList.add('active');
+    if (hddLed) hddLed.classList.add('active');
+    if (monLed) monLed.classList.add('active');
+    if (window.syncMonitorPowerLed) window.syncMonitorPowerLed(true);
+    if (towerStatus) towerStatus.textContent = '● قيد التشغيل (Running)';
+    if (pBtn) {
+      pBtn.classList.remove('pulsing');
+      pBtn.classList.add('active');
+    }
+
+    const curPhase = window.stateEngine.currentPhase || 1;
+
+    // Phase 8: Clean self-boot from SSD to Desktop / Login
+    if (curPhase === 8) {
+      if (cont) executeIndependentRebootCycle(cont);
+      return;
+    }
+
+    // Phase 7: OOBE in progress
+    if (curPhase === 7) {
+      if (cont) {
+        cont.innerHTML = `
+          <div class="virtual-black-screen flex-center" style="flex-direction: column;">
+            <div class="spinner-win11"></div>
+            <p style="color: #ffffff; font-size: 15px; margin-top: 18px;">Resuming Windows 11 setup...</p>
+          </div>
+        `;
+        setTimeout(() => {
+          renderPhase7OOBE(cont);
+        }, 1000);
+      }
+      return;
+    }
+
+    // Phase 6: Check USB attached & BIOS boot device
+    if (curPhase === 6) {
+      const isUsbAttached = !window.stateEngine.biosConfig.usbUnplugged;
+      const isUsbFirst = (window.biosController.settings.firstBootDevice || '').toLowerCase().includes('usb');
+      if (isUsbAttached && isUsbFirst) {
+        if (cont) renderPhase6RebootCountdown(cont);
+      } else {
+        if (cont) renderPhase7OOBE(cont);
+      }
+      return;
+    }
+
+    // Phases 3, 4, 5: In-progress Windows Setup from media
+    if (curPhase >= 3 && curPhase <= 5) {
+      if (cont) {
+        cont.innerHTML = `
+          <div class="virtual-black-screen flex-center" style="flex-direction: column;">
+            <div class="spinner-win11"></div>
+            <p style="color: #ffffff; font-size: 15px; margin-top: 18px;">Loading Windows Setup files...</p>
+          </div>
+        `;
+        setTimeout(() => {
+          window.renderPhaseScreen(curPhase);
+        }, 1000);
+      }
+      return;
+    }
+
+    // Phase 2: BIOS
+    if (curPhase === 2) {
+      if (cont) renderPhase2Bios(cont);
+      return;
+    }
+
+    // Phase 1: Workstation / POST
+    if (!window.stateEngine.selectedMedia) {
+      window.stateEngine.recordPenalty(
+        1,
+        1.00,
+        'تشغيل الحاسوب دون إدخال وسيط التثبيت في مكانه',
+        'يجب إدخال مفتاح USB أو قرص DVD في مكانه بالوحدة المركزية قبل تشغيل الجهاز لبدء تثبيت النظام.'
+      );
+      if (cont) {
+        cont.innerHTML = `
           <div class="virtual-black-screen flex-center" style="flex-direction: column;">
             <div class="spinner-win11"></div>
             <div style="color: #38bdf8; font-weight: 700; font-size: 18px; margin-top: 18px;">Power On Self-Test (POST)...</div>
           </div>
         `;
-
         setTimeout(() => {
-          renderPhase1NoMediaPOST(container);
+          renderPhase1NoMediaPOST(cont);
         }, 700);
-        return;
       }
+      return;
+    }
 
-      container.innerHTML = `
+    if (cont) {
+      cont.innerHTML = `
         <div class="virtual-black-screen flex-center" style="flex-direction: column;">
           <div class="spinner-win11"></div>
           <div style="color: #38bdf8; font-weight: 700; font-size: 18px; margin-top: 18px;">Power On Self-Test (POST)...</div>
         </div>
       `;
-
       setTimeout(() => {
-        renderPhase1POST(container);
+        renderPhase1POST(cont);
       }, 700);
+    }
+  };
+
+  // Bind Tactile Power Button click & long-press on Central Unit
+  const powerBtn = document.getElementById('btnTactilePower');
+  if (powerBtn) {
+    let powerPressTimer = null;
+    let longPressFired = false;
+
+    powerBtn.addEventListener('pointerdown', () => {
+      longPressFired = false;
+      powerPressTimer = setTimeout(() => {
+        longPressFired = true;
+        if (window.stateEngine.isPowerOn) {
+          window.handleHardwarePowerToggle(true);
+        }
+      }, 3200);
+    });
+
+    powerBtn.addEventListener('pointerup', () => {
+      if (powerPressTimer) {
+        clearTimeout(powerPressTimer);
+        powerPressTimer = null;
+      }
+    });
+
+    powerBtn.addEventListener('pointerleave', () => {
+      if (powerPressTimer) {
+        clearTimeout(powerPressTimer);
+        powerPressTimer = null;
+      }
+    });
+
+    powerBtn.onclick = () => {
+      if (longPressFired) {
+        longPressFired = false;
+        return;
+      }
+      window.handleHardwarePowerToggle(false);
     };
   }
 }
@@ -365,11 +571,44 @@ function renderPhase1POST(container) {
     },
     // On interrupt timeout fail:
     () => {
-      alert('تحذير: لقد انقضت مهلة الـ 10 ثوانٍ دون مقاطعة الإقلاع عبر لوحة المفاتيح الحقيقية. تم خصم نقطة وإعادة ضبط الإقلاع.');
-      window.stateEngine.selectedMedia = null;
-      renderPhase1Workstation(container);
+      renderPhase1PostTimeoutFail(container);
     }
   );
+}
+
+function renderPhase1PostTimeoutFail(container) {
+  if (window.soundSynth) window.soundSynth.playErrorBeep();
+
+  container.innerHTML = `
+    <div class="virtual-black-screen" style="font-family: 'Consolas', 'Courier New', monospace; font-size: 13.5px; line-height: 1.6; padding: 24px; color: #cbd5e1; user-select: none;">
+      <div style="color: #ef4444; font-weight: bold; font-size: 15px; margin-bottom: 16px;">
+        An operating system wasn't found. Try disconnecting any drives that don't contain an operating system.
+      </div>
+      <div style="color: #94a3b8; margin-bottom: 24px;">
+        Press Ctrl+Alt+Del to restart (or click Restart below)
+      </div>
+
+      <div style="background: rgba(239, 68, 68, 0.1); border: 1.5px solid #ef4444; border-radius: 6px; padding: 14px 18px; max-width: 620px; color: #fca5a5; font-size: 13.5px; line-height: 1.7; margin-bottom: 22px;">
+        <strong style="color: #ffffff;">ماذا حدث على الجهاز الحقيقي؟</strong><br>
+        انقضت مهلة الـ 10 ثوانٍ دون مقاطعة الإقلاع بـ <strong>[F2 أو Delete]</strong>. لأن إعدادات البيوس لا تزال تشير إلى القرص الصلب الداخلي الفارغ (SSD) كخيار إقلاع أول، حاول الحاسوب الإقلاع منه ففشل لعدم وجود نظام تشغيل!<br><br>
+        <strong style="color: #38bdf8;">كيف تتصرف الآن لتدارك الأمر؟</strong><br>
+        اضغط على زر <strong>إعادة تشغيل الحاسوب</strong>، وفور بدء الإقلاع اضغط سريعاً على <strong>[F2 أو Del]</strong> في لوحة المفاتيح الحقيقية لدخول البيوس وضبط وسيط التثبيت كإقلاع أول.
+      </div>
+
+      <button class="fluent-btn fluent-btn-accent" id="btnRetryPost" style="height: 40px; padding: 0 22px; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <span>إعادة تشغيل الحاسوب ومقاطعة الإقلاع بـ [F2/Del]</span>
+      </button>
+    </div>
+  `;
+
+  const retryBtn = container.querySelector('#btnRetryPost');
+  if (retryBtn) {
+    retryBtn.onclick = () => {
+      if (window.soundSynth) window.soundSynth.playPower();
+      renderPhase1POST(container);
+    };
+  }
 }
 
 // ==========================================================================
@@ -554,7 +793,7 @@ function renderPhase4License(container) {
 }
 
 function renderPhase4SelectEdition(container) {
-  let selectedEdition = 'Windows 11 Pro Education';
+  let selectedEdition = null;
 
   container.innerHTML = `
     <div class="win11-setup-backdrop">
@@ -582,7 +821,7 @@ function renderPhase4SelectEdition(container) {
                 <span>Professional</span>
                 <span>2026-10-01</span>
               </div>
-              <div class="partition-row edition-row selected" data-edition="Windows 11 Pro Education">
+              <div class="partition-row edition-row" data-edition="Windows 11 Pro Education">
                 <span><strong>Windows 11 Pro Education</strong></span>
                 <span>x64</span>
                 <span>Education</span>
@@ -618,10 +857,23 @@ function renderPhase4SelectEdition(container) {
   const nextBtn = container.querySelector('#btnEditionNext');
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
-      if (window.soundSynth) window.soundSynth.playClick();
-      if (selectedEdition !== 'Windows 11 Pro Education') {
-        window.stateEngine.recordPenalty(4, 0.50, `اختيار نسخة غير مخصصة للتعليم (${selectedEdition})`);
+      if (!selectedEdition) {
+        window.soundSynth.playErrorBeep();
+        alert('يرجى النقر على اسم نظام التشغيل المطلوب من الجدول لتحديده أولاً.');
+        return;
       }
+      if (selectedEdition !== 'Windows 11 Pro Education') {
+        window.soundSynth.playErrorBeep();
+        window.stateEngine.recordPenalty(
+          4,
+          0.50,
+          `اختيار نسخة غير مخصصة للتعليم (${selectedEdition})`,
+          'يجب اختيار نسخة Windows 11 Pro Education المخصصة لقطاع التعليم.'
+        );
+        alert(`تنبيه: النسخة المحددة (${selectedEdition}) ليست النسخة المعتمدة لمخابر التعليم! يرجى اختيار Windows 11 Pro Education للمتابعة.`);
+        return;
+      }
+      if (window.soundSynth) window.soundSynth.playClick();
       renderPhase4Eula(container);
     });
   }
@@ -801,16 +1053,20 @@ function renderPhase5Partitioning(container) {
 
               <div class="partition-toolbar">
                 <button class="part-tool-btn" id="btnPartRefresh" title="Refresh">
-                  <span style="font-size: 13px;">&#8635;</span> Refresh
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                  <span>Refresh</span>
                 </button>
                 <button class="part-tool-btn" id="btnPartDelete" ${!gptCreated ? 'disabled' : ''} title="Delete">
-                  <span style="font-size: 13px;">&#10006;</span> Delete
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  <span>Delete</span>
                 </button>
                 <button class="part-tool-btn" id="btnPartFormat" ${!gptCreated ? 'disabled' : ''} title="Format">
-                  <span style="font-size: 13px;">&#128472;</span> Format
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/></svg>
+                  <span>Format</span>
                 </button>
                 <button class="part-tool-btn" id="btnPartLoadDriver" title="Load driver">
-                  <span style="font-size: 13px;">&#128194;</span> Load driver
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  <span>Load driver</span>
                 </button>
                 <button class="part-tool-btn" id="btnPartNew" ${gptCreated ? 'disabled' : ''} title="New">
                   <span style="font-size: 13px;">&#10010;</span> New
@@ -1011,6 +1267,7 @@ function renderPhase6Installation(container) {
       step5.className = 'active';
     } else if (progressPct >= 100) {
       clearInterval(interval);
+      window._phase6InstallInterval = null;
       step5.className = 'done';
       step5.innerHTML = '&#10004; Finishing up';
 
@@ -1020,6 +1277,7 @@ function renderPhase6Installation(container) {
       }, 800);
     }
   }, 400);
+  window._phase6InstallInterval = interval;
 }
 
 function renderPhase6RebootCountdown(container) {
@@ -1051,18 +1309,23 @@ function renderPhase6RebootCountdown(container) {
     if (span) span.textContent = seconds;
     if (seconds <= 0) {
       clearInterval(timer);
-      if (secondBootKeyHandler) window.removeEventListener('keydown', secondBootKeyHandler);
+      window._phase6RebootTimer = null;
+      if (secondBootKeyHandler) {
+        window.removeEventListener('keydown', secondBootKeyHandler);
+        window._phase6KeyHandler = null;
+      }
       // Student failed to interrupt second boot!
       window.stateEngine.recordPenalty(
         6,
         1.00,
-        'فاتتك فرصة مقاطعة الإقلاع الثاني (انقضت المهلة وعاد الجهاز للإقلاع من الفلاشة)',
+        'فوات مهلة مقاطعة الإقلاع الثاني والوقوع في حلقة التثبيت (Boot Loop)',
         'يجب دائماً مقاطعة الإقلاع الثاني بالضغط على F2 أو Del لإعادة القرص الصلب الداخلي كإقلاع أول لتفادي إعادة التثبيت.'
       );
-      alert('تحذير: انقضت المهلة دون مقاطعة الإقلاع الثاني عبر لوحة المفاتيح الحقيقية! تم خصم نقطة واحدة.');
-      enterSecondBootBios(container);
+      // Prompt 2 Modification 1: Do NOT enter BIOS automatically. Show realistic Boot Loop error!
+      renderPhase6BootLoopError(container);
     }
   }, 1000);
+  window._phase6RebootTimer = timer;
 
   // Global Keydown Listener for real physical keyboard
   secondBootKeyHandler = (e) => {
@@ -1071,12 +1334,46 @@ function renderPhase6RebootCountdown(container) {
     if (isF2 || isDel) {
       e.preventDefault();
       clearInterval(timer);
+      window._phase6RebootTimer = null;
       window.removeEventListener('keydown', secondBootKeyHandler);
+      window._phase6KeyHandler = null;
       if (window.soundSynth) window.soundSynth.playBeep(880, 0.1);
       enterSecondBootBios(container);
     }
   };
+  window._phase6KeyHandler = secondBootKeyHandler;
   window.addEventListener('keydown', secondBootKeyHandler);
+}
+
+function renderPhase6BootLoopError(container) {
+  if (window.soundSynth) window.soundSynth.playErrorBeep();
+
+  container.innerHTML = `
+    <div class="virtual-black-screen flex-center" style="flex-direction: column; padding: 24px; text-align: center;">
+      <div style="font-size: 48px; color: #ef4444; margin-bottom: 14px;">&#9888;</div>
+      <h2 style="color: #ef4444; font-size: 20px; margin-bottom: 12px;">انقضت المهلة دون مقاطعة الإقلاع: الوقوع في حلقة التثبيت (Boot Loop)!</h2>
+      
+      <div style="background: rgba(239, 68, 68, 0.1); border: 1.5px solid #ef4444; border-radius: 6px; padding: 14px 18px; max-width: 620px; color: #fca5a5; font-size: 13.5px; line-height: 1.7; margin-bottom: 22px; text-align: right;">
+        <strong style="color: #ffffff;">ماذا حدث على الجهاز الحقيقي؟</strong><br>
+        لأنك لم تضغط على <strong>[F2 أو Delete]</strong> في الوقت المحدد، واصل الحاسوب الإقلاع من جهاز الإقلاع الأول المسجل في البيوس (وهو مفتاح USB الذي لا يزال موصولاً)، مما أدى إلى بدء برنامج تثبيت الويندوز من الصفر مجدداً!<br><br>
+        <strong style="color: #38bdf8;">كيف تتصرف الآن لتدارك الأمر؟</strong><br>
+        اضغط على زر <strong>إعادة تشغيل الحاسوب</strong> أدناه (أو اضغط زر الطاقة في الوحدة المركزية)، وفور بدء الإقلاع اضغط سريعاً على <strong>[F2 أو Del]</strong> في لوحة المفاتيح الحقيقية لدخول البيوس وإعادة القرص الداخلي SSD كخيار أول.
+      </div>
+
+      <button class="fluent-btn fluent-btn-accent" id="btnRetrySecondBoot" style="height: 40px; padding: 0 22px; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <span>إعادة تشغيل الحاسوب ومقاطعة الإقلاع بـ [F2/Del]</span>
+      </button>
+    </div>
+  `;
+
+  const retryBtn = container.querySelector('#btnRetrySecondBoot');
+  if (retryBtn) {
+    retryBtn.onclick = () => {
+      if (window.soundSynth) window.soundSynth.playPower();
+      renderPhase6RebootCountdown(container);
+    };
+  }
 }
 
 function enterSecondBootBios(container) {
@@ -1282,6 +1579,8 @@ function renderPhase7OOBE(container) {
 }
 
 function renderPhase7Country(container) {
+  let selectedCountry = null;
+
   container.innerHTML = `
     <div class="oobe-backdrop">
       <div class="oobe-card">
@@ -1289,13 +1588,13 @@ function renderPhase7Country(container) {
         <p class="oobe-desc">اختر الدولة المناسبة لإعداد بيئة العمل المدرسية:</p>
 
         <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 10px; max-height: 180px; overflow-y: auto; margin-bottom: 20px;">
-          <div class="partition-row selected" style="padding: 10px;">
-            <span><strong>Algeria (الجزائر)</strong></span>
+          <div class="partition-row oobe-country-row" data-country="Algeria" style="padding: 10px; cursor: pointer;">
+            <span>Algeria (الجزائر)</span>
           </div>
-          <div class="partition-row" style="padding: 10px;">
+          <div class="partition-row oobe-country-row" data-country="France" style="padding: 10px; cursor: pointer;">
             <span>France</span>
           </div>
-          <div class="partition-row" style="padding: 10px;">
+          <div class="partition-row oobe-country-row" data-country="United States" style="padding: 10px; cursor: pointer;">
             <span>United States</span>
           </div>
         </div>
@@ -1307,9 +1606,35 @@ function renderPhase7Country(container) {
     </div>
   `;
 
+  // Manual interactive country selection
+  container.querySelectorAll('.oobe-country-row').forEach(row => {
+    row.addEventListener('click', () => {
+      if (window.soundSynth) window.soundSynth.playClick();
+      container.querySelectorAll('.oobe-country-row').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+      selectedCountry = row.getAttribute('data-country');
+    });
+  });
+
   const nextBtn = container.querySelector('#btnOobeCountryNext');
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
+      if (!selectedCountry) {
+        window.soundSynth.playErrorBeep();
+        alert('يرجى النقر على اسم الدولة من القائمة لتحديدها أولاً.');
+        return;
+      }
+      if (selectedCountry !== 'Algeria') {
+        window.soundSynth.playErrorBeep();
+        window.stateEngine.recordPenalty(
+          7,
+          0.50,
+          'اختيار دولة غير الجزائر في شاشة الإعداد الأولي OOBE',
+          'المعايير الوطنية المعتمدة تقتضي اختيار دولة الجزائر Algeria.'
+        );
+        alert('تنبيه: يجب اختيار دولة الجزائر (Algeria) لتطابق المعايير الوطنية بالمؤسسات التعليمية.');
+        return;
+      }
       if (window.soundSynth) window.soundSynth.playClick();
       renderPhase7NamePc(container);
     });
@@ -1317,60 +1642,351 @@ function renderPhase7Country(container) {
 }
 
 function renderPhase7NamePc(container) {
+  const currentPcName = window.stateEngine.oobeConfig.pcName || '';
+
   container.innerHTML = `
     <div class="oobe-backdrop">
-      <div class="oobe-card">
+      <div class="oobe-card" style="max-width: 520px;">
         <h2 class="oobe-title">Let's name your PC</h2>
         <p class="oobe-desc">عيّن اسماً مميزاً لمحطة العمل داخل شبكة مخبر الإعلام الآلي (مثال: LAB-PC-01):</p>
 
-        <div style="margin-bottom: 24px;">
-          <input type="text" class="win11-input" id="inpPcName" value="LAB-PC-01" style="height: 38px; font-size: 14px;">
+        <div class="oobe-input-group" id="groupPcName" style="margin-bottom: 12px;">
+          <label for="inpPcName" class="win11-label" style="display: block; cursor: pointer; margin-bottom: 6px;">اسم الحاسوب (PC Name) — إلزامي:</label>
+          <div class="oobe-input-wrapper">
+            <input type="text" class="win11-input oobe-text-input" id="inpPcName" value="${currentPcName}" maxlength="15" placeholder="أدخل اسم الحاسوب (مثال: LAB-PC-01)" autocomplete="off" spellcheck="false" autofocus>
+          </div>
+          <div id="pcNameErrorMsg" style="color: #ef4444; font-size: 12px; margin-top: 6px; min-height: 18px; display: none;"></div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end;">
+        <div style="font-size: 11.5px; color: #94a3b8; margin-bottom: 24px; line-height: 1.5;">
+          * يجب أن يتكون اسم الحاسوب من 1 إلى 15 حرفاً (أحرف إنجليزية، أرقام، أو شرطة -)، ولا يمكن أن يبدأ برقم أو شرطة أو يحتوي على مسافات.
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <button class="fluent-btn fluent-btn-standard" id="btnOobeNameBack">&lt; Back</button>
           <button class="fluent-btn fluent-btn-accent" id="btnOobeNameNext">Next &gt;</button>
         </div>
       </div>
     </div>
   `;
 
+  const inp = container.querySelector('#inpPcName');
+  const err = container.querySelector('#pcNameErrorMsg');
+  const backBtn = container.querySelector('#btnOobeNameBack');
   const nextBtn = container.querySelector('#btnOobeNameNext');
+  const groupPc = container.querySelector('#groupPcName');
+
+  // Click delegation so clicking anywhere on the group or label focuses the input
+  if (groupPc && inp) {
+    groupPc.addEventListener('click', (e) => {
+      if (e.target !== inp) inp.focus();
+    });
+  }
+
+  function validatePcName(val) {
+    const trimmed = (val || '').trim();
+    if (!trimmed) {
+      return 'لا يمكن ترك اسم الحاسوب فارغاً.';
+    }
+    if (trimmed.length > 15) {
+      return 'يجب ألا يتجاوز اسم الحاسوب 15 حرفاً.';
+    }
+    if (/\s/.test(val)) {
+      return 'لا يُسمح بوجود مسافات في اسم الحاسوب.';
+    }
+    if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(trimmed)) {
+      return 'يجب أن يبدأ اسم الحاسوب بحرف لاتيني، ولا يحتوي إلا على أحرف وأرقام وشرطة (-).';
+    }
+    return null;
+  }
+
+  // Real-time validation
+  if (inp) {
+    inp.addEventListener('input', () => {
+      const val = inp.value;
+      if (!val) {
+        if (err) err.style.display = 'none';
+        return;
+      }
+      const vErr = validatePcName(val);
+      if (vErr && err) {
+        err.textContent = vErr;
+        err.style.display = 'block';
+      } else if (err) {
+        err.style.display = 'none';
+      }
+    });
+
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (nextBtn) nextBtn.click();
+      }
+    });
+
+    setTimeout(() => inp.focus(), 60);
+  }
+
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      if (window.soundSynth) window.soundSynth.playClick();
+      if (inp) window.stateEngine.oobeConfig.pcName = inp.value.trim();
+      renderPhase7Country(container);
+    });
+  }
+
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
+      const val = inp ? inp.value : '';
+      const validationError = validatePcName(val);
+      if (validationError) {
+        if (window.soundSynth) window.soundSynth.playErrorBeep();
+        if (err) {
+          err.textContent = validationError;
+          err.style.display = 'block';
+        }
+        if (inp) inp.focus();
+        return;
+      }
+
       if (window.soundSynth) window.soundSynth.playClick();
+      window.stateEngine.oobeConfig.pcName = val.trim();
       renderPhase7Account(container);
     });
   }
 }
 
 function renderPhase7Account(container) {
+  const currentUsername = window.stateEngine.oobeConfig.username || '';
+  const currentPassword = window.stateEngine.oobeConfig.password || '';
+
   container.innerHTML = `
     <div class="oobe-backdrop">
-      <div class="oobe-card">
+      <div class="oobe-card" style="max-width: 520px;">
         <h2 class="oobe-title">Who's going to use this device?</h2>
-        <p class="oobe-desc">إنشاء حساب محلي مستقل ومحمي برمز PIN (Offline Local Account):</p>
+        <p class="oobe-desc">إنشاء حساب محلي مستقل ومحمي بكلمة مرور (Offline Local Account):</p>
 
-        <div style="margin-bottom: 14px;">
-          <label class="win11-label">اسم المستخدم (User name):</label>
-          <input type="text" class="win11-input" id="inpUsername" value="Eleve_1AS" style="height: 36px;">
+        <div class="oobe-input-group" id="groupUsername" style="margin-bottom: 14px;">
+          <label for="inpUsername" class="win11-label" style="display: block; cursor: pointer; margin-bottom: 6px;">اسم المستخدم (User name) — إلزامي:</label>
+          <div class="oobe-input-wrapper">
+            <input type="text" class="win11-input oobe-text-input" id="inpUsername" value="${currentUsername}" maxlength="20" placeholder="أدخل اسم الحساب (مثال: Yacine)" autocomplete="off" spellcheck="false" autofocus>
+          </div>
+          <div id="usernameErrorMsg" style="color: #ef4444; font-size: 11.5px; margin-top: 4px; display: none;"></div>
         </div>
 
-        <div style="margin-bottom: 20px;">
-          <label class="win11-label">رمز PIN للحساب:</label>
-          <input type="password" class="win11-input" id="inpPin" value="1234" style="height: 36px;">
+        <div class="oobe-input-group" id="groupPassword" style="margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label for="inpPassword" class="win11-label" style="margin-bottom: 0; cursor: pointer;">كلمة المرور (Enter password) — <span style="color: #38bdf8;">اختيارية</span>:</label>
+            <button type="button" class="fluent-btn fluent-btn-standard" id="btnClearPassword" tabindex="-1" style="font-size: 11px; height: 24px; padding: 0 8px; line-height: 1;">مسح / تفريغ كلمة المرور</button>
+          </div>
+          <div class="oobe-input-wrapper">
+            <input type="password" class="win11-input oobe-text-input" id="inpPassword" value="${currentPassword}" placeholder="اترك فارغاً لحساب بدون كلمة مرور">
+          </div>
+          <div id="passwordErrorMsg" style="color: #ef4444; font-size: 11.5px; margin-top: 4px; display: none;"></div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end;">
+        <div class="oobe-input-group" id="groupConfirmPassword" style="margin-bottom: 20px;">
+          <label for="inpConfirmPassword" class="win11-label" style="display: block; cursor: pointer; margin-bottom: 6px;">تأكيد كلمة المرور (Confirm password):</label>
+          <div class="oobe-input-wrapper">
+            <input type="password" class="win11-input oobe-text-input" id="inpConfirmPassword" value="${currentPassword}" placeholder="أعد إدخال كلمة المرور للتأكيد (إن وُجدت)">
+          </div>
+          <div id="confirmPasswordErrorMsg" style="color: #ef4444; font-size: 11.5px; margin-top: 4px; display: none;"></div>
+          <div id="passwordMatchMsg" style="color: #34d399; font-size: 11.5px; margin-top: 4px; display: none;">✔ كلمتا المرور متطابقتان</div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <button class="fluent-btn fluent-btn-standard" id="btnOobeAccountBack">&lt; Back</button>
           <button class="fluent-btn fluent-btn-accent" id="btnOobeAccountNext">Next &gt;</button>
         </div>
       </div>
     </div>
   `;
 
+  const inpUser = container.querySelector('#inpUsername');
+  const inpPass = container.querySelector('#inpPassword');
+  const inpConf = container.querySelector('#inpConfirmPassword');
+  const btnClearPass = container.querySelector('#btnClearPassword');
+  const userErr = container.querySelector('#usernameErrorMsg');
+  const passErr = container.querySelector('#passwordErrorMsg');
+  const confErr = container.querySelector('#confirmPasswordErrorMsg');
+  const matchMsg = container.querySelector('#passwordMatchMsg');
+  const backBtn = container.querySelector('#btnOobeAccountBack');
   const nextBtn = container.querySelector('#btnOobeAccountNext');
+  const groupUser = container.querySelector('#groupUsername');
+  const groupPass = container.querySelector('#groupPassword');
+  const groupConf = container.querySelector('#groupConfirmPassword');
+
+  // Click delegation for whole group/label hit areas
+  if (groupUser && inpUser) {
+    groupUser.addEventListener('click', (e) => {
+      if (e.target !== inpUser) inpUser.focus();
+    });
+  }
+  if (groupPass && inpPass) {
+    groupPass.addEventListener('click', (e) => {
+      if (e.target !== inpPass && e.target !== btnClearPass && !e.target.closest('#btnClearPassword')) {
+        inpPass.focus();
+      }
+    });
+  }
+  if (groupConf && inpConf) {
+    groupConf.addEventListener('click', (e) => {
+      if (e.target !== inpConf) inpConf.focus();
+    });
+  }
+
+  function validateUsername(name) {
+    const trimmed = (name || '').trim();
+    if (!trimmed) {
+      return 'لا يمكن ترك اسم الحساب فارغاً.';
+    }
+    if (trimmed.length > 20) {
+      return 'يجب ألا يتجاوز اسم الحساب 20 حرفاً.';
+    }
+    if (/[\\\/\[\]:;|=,+*?<>@"]/.test(trimmed)) {
+      return 'لا يمكن أن يحتوي اسم الحساب على رموز خاصة مثل / \\ [ ] : ; | = , + * ? < > @ "';
+    }
+    return null;
+  }
+
+  function checkPasswordMatch() {
+    const pVal = inpPass ? inpPass.value : '';
+    const cVal = inpConf ? inpConf.value : '';
+
+    if (!pVal) {
+      if (confErr) confErr.style.display = 'none';
+      if (passErr) passErr.style.display = 'none';
+      if (matchMsg) matchMsg.style.display = 'none';
+      return true;
+    }
+
+    if (cVal && pVal === cVal) {
+      if (confErr) confErr.style.display = 'none';
+      if (matchMsg) matchMsg.style.display = 'block';
+      return true;
+    } else if (cVal && pVal !== cVal) {
+      if (matchMsg) matchMsg.style.display = 'none';
+      if (confErr) {
+        confErr.textContent = 'كلمتا المرور غير متطابقتين. يرجى إعادة التأكيد بدقة.';
+        confErr.style.display = 'block';
+      }
+      return false;
+    } else {
+      if (matchMsg) matchMsg.style.display = 'none';
+      if (confErr) confErr.style.display = 'none';
+      return false;
+    }
+  }
+
+  if (inpUser) {
+    inpUser.addEventListener('input', () => {
+      const uErr = validateUsername(inpUser.value);
+      if (uErr && userErr) {
+        userErr.textContent = uErr;
+        userErr.style.display = 'block';
+      } else if (userErr) {
+        userErr.style.display = 'none';
+      }
+    });
+
+    inpUser.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (inpPass) inpPass.focus();
+      }
+    });
+
+    setTimeout(() => inpUser.focus(), 60);
+  }
+
+  if (inpPass) {
+    inpPass.addEventListener('input', () => {
+      checkPasswordMatch();
+    });
+
+    inpPass.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (inpConf) inpConf.focus();
+      }
+    });
+  }
+
+  if (inpConf) {
+    inpConf.addEventListener('input', () => {
+      checkPasswordMatch();
+    });
+
+    inpConf.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (nextBtn) nextBtn.click();
+      }
+    });
+  }
+
+  // Clear Password Button (Allowing returning to no password state)
+  if (btnClearPass) {
+    btnClearPass.addEventListener('click', () => {
+      if (window.soundSynth) window.soundSynth.playClick();
+      if (inpPass) inpPass.value = '';
+      if (inpConf) inpConf.value = '';
+      if (passErr) passErr.style.display = 'none';
+      if (confErr) confErr.style.display = 'none';
+      if (matchMsg) matchMsg.style.display = 'none';
+      window.stateEngine.oobeConfig.password = '';
+      if (inpPass) inpPass.focus();
+    });
+  }
+
+  // Back Button
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      if (window.soundSynth) window.soundSynth.playClick();
+      if (inpUser) window.stateEngine.oobeConfig.username = inpUser.value.trim();
+      if (inpPass) window.stateEngine.oobeConfig.password = inpPass.value;
+      renderPhase7NamePc(container);
+    });
+  }
+
+  // Next Button
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
+      if (userErr) userErr.style.display = 'none';
+      if (passErr) passErr.style.display = 'none';
+      if (confErr) confErr.style.display = 'none';
+
+      const uVal = inpUser ? inpUser.value : '';
+      const pVal = inpPass ? inpPass.value : '';
+      const cVal = inpConf ? inpConf.value : '';
+
+      const uError = validateUsername(uVal);
+      if (uError) {
+        if (window.soundSynth) window.soundSynth.playErrorBeep();
+        if (userErr) {
+          userErr.textContent = uError;
+          userErr.style.display = 'block';
+        }
+        if (inpUser) inpUser.focus();
+        return;
+      }
+
+      // Password optional: if empty, proceed with empty password
+      if (pVal) {
+        if (pVal !== cVal) {
+          if (window.soundSynth) window.soundSynth.playErrorBeep();
+          if (confErr) {
+            confErr.textContent = 'كلمتا المرور غير متطابقتين. يرجى إعادة التأكيد بدقة.';
+            confErr.style.display = 'block';
+          }
+          if (inpConf) inpConf.focus();
+          return;
+        }
+      }
+
       if (window.soundSynth) window.soundSynth.playClick();
+      window.stateEngine.oobeConfig.username = uVal.trim();
+      window.stateEngine.oobeConfig.password = pVal;
       renderPhase7PrivacySwitches(container);
     });
   }
@@ -1412,14 +2028,26 @@ function renderPhase7PrivacySwitches(container) {
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <button class="fluent-btn fluent-btn-standard" id="btnTurnAllOff" style="color: #38bdf8;">
-            تعطيل الكل دفعة واحدة (Turn All OFF)
-          </button>
+          <div style="display: flex; gap: 8px;">
+            <button class="fluent-btn fluent-btn-standard" id="btnOobePrivacyBack">&lt; Back</button>
+            <button class="fluent-btn fluent-btn-standard" id="btnTurnAllOff" style="color: #38bdf8;">
+              تعطيل الكل دفعة واحدة (Turn All OFF)
+            </button>
+          </div>
           <button class="fluent-btn fluent-btn-accent" id="btnPrivacyAccept">Accept (تأكيد الإعدادات)</button>
         </div>
       </div>
     </div>
   `;
+
+  // Back button to return to Account setup
+  const backBtn = container.querySelector('#btnOobePrivacyBack');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      if (window.soundSynth) window.soundSynth.playClick();
+      renderPhase7Account(container);
+    });
+  }
 
   // Quick Turn All OFF button
   const btnAllOff = container.querySelector('#btnTurnAllOff');
@@ -1489,7 +2117,7 @@ function renderPhase8Desktop(container) {
         <!-- Search Box -->
         <div class="start-search-box">
           <img src="assets/icon-search.svg" alt="Search">
-          <input type="text" class="start-search-input" placeholder="Type here to search..." readonly>
+          <input type="text" class="start-search-input" id="startSearchInput" placeholder="Type here to search..." autocomplete="off">
         </div>
 
         <!-- Pinned Section -->
@@ -1568,24 +2196,24 @@ function renderPhase8Desktop(container) {
 
         <!-- Start Menu Footer -->
         <div class="start-menu-footer">
-          <div class="start-user-profile" title="Current Student Account">
-            <div class="start-user-avatar">1AS</div>
-            <span style="font-size: 12.5px; font-weight: 600; color: #fff;">Eleve_1AS</span>
+          <div class="start-user-profile" id="btnStartUserProfile" title="Current Student Account">
+            <div class="start-user-avatar">${((window.stateEngine.oobeConfig.username || 'Eleve_1AS').substring(0, 2)).toUpperCase()}</div>
+            <span style="font-size: 12.5px; font-weight: 600; color: #fff;" id="desktopUsernameSpan">${window.stateEngine.oobeConfig.username || 'Eleve_1AS'}</span>
           </div>
 
           <div style="position: relative;">
             <button class="power-btn-trigger" id="btnStartPower" title="Power" aria-label="Power Options">
-              &#x23FB;
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
             </button>
             <div class="power-menu-dropdown" id="powerMenuDropdown">
               <button class="power-menu-item" id="btnSleepOS" type="button">
-                <span style="font-size: 14px;">&#9790;</span> Sleep (سكون)
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-inline-end: 8px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Sleep (سكون)
               </button>
               <button class="power-menu-item" id="btnShutdownOS" type="button">
-                <span style="font-size: 14px;">&#x23FB;</span> Shut down (إيقاف التشغيل)
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-inline-end: 8px;"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg> Shut down (إيقاف التشغيل)
               </button>
               <button class="power-menu-item" id="btnRestartOS" type="button">
-                <span style="font-size: 14px;">&#8635;</span> Restart (إعادة التشغيل)
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-inline-end: 8px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Restart (إعادة التشغيل)
               </button>
             </div>
           </div>
@@ -1682,6 +2310,167 @@ function renderPhase8Desktop(container) {
     if (powerMenu) powerMenu.classList.remove('visible');
   });
 
+  // Interactive Start Menu Search Filter
+  const searchInput = container.querySelector('#startSearchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const q = (searchInput.value || '').trim().toLowerCase();
+      const appItems = container.querySelectorAll('.start-pinned-grid .start-app-item');
+      appItems.forEach(item => {
+        const title = (item.getAttribute('title') || '').toLowerCase();
+        const text = (item.textContent || '').toLowerCase();
+        if (!q || title.includes(q) || text.includes(q)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  }
+
+  // Settings App (System > About showing custom PC Name)
+  function openSettingsAboutWindow() {
+    const desktop = container.querySelector('#win11DesktopContainer');
+    if (!desktop) return;
+    const existing = desktop.querySelector('#settingsAboutWindow');
+    if (existing) {
+      existing.remove();
+      return;
+    }
+    const pcName = window.stateEngine.oobeConfig.pcName || 'LAB-PC-01';
+    const win = document.createElement('div');
+    win.className = 'win11-app-window';
+    win.id = 'settingsAboutWindow';
+    win.innerHTML = `
+      <div class="win11-window-header">
+        <div class="win11-window-title">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#38bdf8" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Settings — System &gt; About</span>
+        </div>
+        <div class="win11-window-controls">
+          <button class="win11-win-ctrl-btn close-btn" id="btnCloseSettingsWin">&times;</button>
+        </div>
+      </div>
+      <div class="win11-window-body">
+        <div class="win11-spec-section">
+          <h4>
+            <span>Device specifications</span>
+            <span style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 11px; padding: 2px 8px; border-radius: 4px;">Rename this PC</span>
+          </h4>
+          <div class="win11-spec-grid">
+            <span class="win11-spec-label">Device name</span>
+            <span class="win11-spec-val" id="specDeviceName" style="color: #38bdf8; font-weight: bold; font-size: 13.5px;">${pcName}</span>
+            <span class="win11-spec-label">Processor</span>
+            <span class="win11-spec-val">Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz</span>
+            <span class="win11-spec-label">Installed RAM</span>
+            <span class="win11-spec-val">8.00 GB (7.82 GB usable)</span>
+            <span class="win11-spec-label">System type</span>
+            <span class="win11-spec-val">64-bit operating system, x64-based processor</span>
+            <span class="win11-spec-label">Pen and touch</span>
+            <span class="win11-spec-val">No pen or touch input is available for this display</span>
+          </div>
+        </div>
+        <div class="win11-spec-section">
+          <h4>Windows specifications</h4>
+          <div class="win11-spec-grid">
+            <span class="win11-spec-label">Edition</span>
+            <span class="win11-spec-val" style="color: #34d399;">Windows 11 Pro Education</span>
+            <span class="win11-spec-label">Version</span>
+            <span class="win11-spec-val">23H2</span>
+            <span class="win11-spec-label">Installed on</span>
+            <span class="win11-spec-val">${new Date().toLocaleDateString('en-US')}</span>
+            <span class="win11-spec-label">OS build</span>
+            <span class="win11-spec-val">22631.3007</span>
+          </div>
+        </div>
+      </div>
+    `;
+    desktop.appendChild(win);
+    win.querySelector('#btnCloseSettingsWin').onclick = () => win.remove();
+  }
+
+  // File Explorer Window (C:\Users\<account>)
+  function openFileExplorerWindow() {
+    const desktop = container.querySelector('#win11DesktopContainer');
+    if (!desktop) return;
+    const existing = desktop.querySelector('#fileExplorerWindow');
+    if (existing) {
+      existing.remove();
+      return;
+    }
+    const username = window.stateEngine.oobeConfig.username || 'Eleve_1AS';
+    const win = document.createElement('div');
+    win.className = 'win11-app-window';
+    win.id = 'fileExplorerWindow';
+    win.innerHTML = `
+      <div class="win11-window-header">
+        <div class="win11-window-title">
+          <img src="assets/icon-explorer.svg" width="16" height="16" alt="Explorer">
+          <span>File Explorer — C:\\Users\\${username}</span>
+        </div>
+        <div class="win11-window-controls">
+          <button class="win11-win-ctrl-btn close-btn" id="btnCloseExplorerWin">&times;</button>
+        </div>
+      </div>
+      <div class="win11-window-body">
+        <div class="explorer-address-bar">
+          <span style="color: #38bdf8;">📁</span>
+          <span>This PC &gt; Local Disk (C:) &gt; Users &gt; <strong style="color: #38bdf8;" id="explorerUserFolderSpan">${username}</strong></span>
+        </div>
+        <div class="explorer-folder-grid">
+          <div class="explorer-folder-card">
+            <div style="font-size: 26px;">📁</div>
+            <span>Desktop</span>
+          </div>
+          <div class="explorer-folder-card">
+            <div style="font-size: 26px;">📁</div>
+            <span>Documents</span>
+          </div>
+          <div class="explorer-folder-card">
+            <div style="font-size: 26px;">📁</div>
+            <span>Downloads</span>
+          </div>
+          <div class="explorer-folder-card">
+            <div style="font-size: 26px;">📁</div>
+            <span>Pictures</span>
+          </div>
+          <div class="explorer-folder-card">
+            <div style="font-size: 26px;">📁</div>
+            <span>Music</span>
+          </div>
+          <div class="explorer-folder-card">
+            <div style="font-size: 26px;">📁</div>
+            <span>Videos</span>
+          </div>
+        </div>
+      </div>
+    `;
+    desktop.appendChild(win);
+    win.querySelector('#btnCloseExplorerWin').onclick = () => win.remove();
+  }
+
+  // Bind settings clicks
+  const settingsItem = container.querySelector('.start-app-item[title="Settings"]');
+  if (settingsItem) {
+    settingsItem.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (window.soundSynth) window.soundSynth.playClick();
+      startMenu.classList.remove('visible');
+      openSettingsAboutWindow();
+    });
+  }
+
+  // Bind explorer clicks
+  const explorerBtns = container.querySelectorAll('.start-app-item[title="File Explorer"], .taskbar-icon-btn[title="File Explorer"], .desktop-icon-item[title="This PC"]');
+  explorerBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (window.soundSynth) window.soundSynth.playClick();
+      startMenu.classList.remove('visible');
+      openFileExplorerWindow();
+    });
+  });
+
   // Final Independent Reboot Loop Test (Start -> Power -> Restart)
   restartBtn.addEventListener('click', () => {
     if (window.soundSynth) window.soundSynth.playClick();
@@ -1720,11 +2509,108 @@ function executeIndependentRebootCycle(container) {
     `;
 
     setTimeout(() => {
-      // 3. Final Quiz Checkpoint 6
-      window.quizManager.showQuizForBank('bank_final', () => {
-        // Grand Finale!
-        window.stateEngine.completePhase(8);
+      // 3. Prompt 4 Modification 1: Authentic Windows 11 Lock / Login Screen
+      renderWin11LoginScreen(container, () => {
+        // Correct password entered! Trigger Final Quiz Checkpoint 6
+        window.quizManager.showQuizForBank('bank_final', () => {
+          // Grand Finale!
+          window.stateEngine.completePhase(8);
+        });
       });
     }, 2200);
   }, 1200);
+}
+
+function renderWin11LoginScreen(container, onLoginSuccess) {
+  const username = window.stateEngine.oobeConfig.username || 'Eleve_1AS';
+  const expectedPassword = window.stateEngine.oobeConfig.password || '';
+  const initial = username.substring(0, 2).toUpperCase();
+  const isPasswordless = expectedPassword.length === 0;
+
+  container.innerHTML = `
+    <div class="win11-login-screen">
+      <div class="win11-login-card">
+        <div class="win11-login-avatar">${initial}</div>
+        <div class="win11-login-user" id="loginUsernameLabel">${username}</div>
+
+        ${isPasswordless ? `
+          <div style="margin-top: 24px;">
+            <button class="win11-login-direct-btn" id="btnLoginSubmit" title="Sign in" aria-label="Sign in">Sign in</button>
+          </div>
+        ` : `
+          <div class="win11-login-input-row">
+            <input type="password" class="win11-login-input" id="loginPasswordInput" placeholder="Password" autofocus autocomplete="off">
+            <button class="win11-login-btn" id="btnLoginSubmit" title="Sign in" aria-label="Sign in">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </button>
+          </div>
+          <div class="win11-login-error" id="loginErrorMsg"></div>
+        `}
+      </div>
+    </div>
+  `;
+
+  const input = container.querySelector('#loginPasswordInput');
+  const btn = container.querySelector('#btnLoginSubmit');
+  const err = container.querySelector('#loginErrorMsg');
+
+  function attemptLogin() {
+    const entered = input ? input.value : '';
+    // If password was set, verify strictly
+    if (!isPasswordless && entered !== expectedPassword) {
+      if (window.soundSynth) window.soundSynth.playErrorBeep();
+      if (err) {
+        err.textContent = 'The password or PIN is incorrect. Try again.';
+        err.style.display = 'block';
+      }
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+      return;
+    }
+
+    // Correct password or passwordless account!
+    if (window.soundSynth) window.soundSynth.playSuccess();
+    const card = container.querySelector('.win11-login-card');
+    if (card) {
+      card.innerHTML = `
+        <div class="win11-login-avatar">${initial}</div>
+        <div class="win11-login-user">${username}</div>
+        <div style="margin-top: 10px;">
+          <div class="spinner-win11"></div>
+          <p style="color: #ffffff; font-size: 15px; margin-top: 14px;">Welcome</p>
+        </div>
+      `;
+    }
+
+    setTimeout(() => {
+      if (typeof onLoginSuccess === 'function') {
+        onLoginSuccess();
+      }
+    }, 1200);
+  }
+
+  if (btn) btn.addEventListener('click', attemptLogin);
+  if (input) {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        attemptLogin();
+      }
+    });
+    setTimeout(() => input.focus(), 100);
+  } else {
+    // If passwordless, also allow Enter key to sign in directly
+    const handleEnter = (e) => {
+      if (e.key === 'Enter') {
+        window.removeEventListener('keydown', handleEnter);
+        attemptLogin();
+      }
+    };
+    window.addEventListener('keydown', handleEnter);
+  }
 }

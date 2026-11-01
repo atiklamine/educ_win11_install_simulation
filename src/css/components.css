@@ -123,7 +123,7 @@
 
 /* Draggable Phase-based Assistance Window */
 .draggable-hint-bar {
-  position: absolute;
+  position: fixed;
   bottom: 12px;
   top: auto;
   left: 50%;
@@ -136,18 +136,23 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  z-index: 50;
+  z-index: 100;
   max-width: 860px;
   width: 90%;
   backdrop-filter: blur(12px);
   cursor: grab;
+  touch-action: none;
   transition: box-shadow 0.2s ease;
   user-select: none;
+  -webkit-user-select: none;
+  box-sizing: border-box;
 }
 
 .draggable-hint-bar.is-dragging {
-  cursor: grabbing;
+  cursor: grabbing !important;
   box-shadow: 0 16px 35px rgba(0, 0, 0, 0.5);
+  user-select: none !important;
+  -webkit-user-select: none !important;
 }
 
 .hint-handle {

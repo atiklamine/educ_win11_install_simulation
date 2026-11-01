@@ -1,0 +1,44 @@
+name: CI Validation Suite
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    name: Run Automated Tests (${{ matrix.os }}, Node ${{ matrix.node-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Run Headless Verification Tests
+        run: |
+          node test_simulator.js
+          node test_six_modifications.js
+          node test_modifications_7_8.js
+          node test_theme_and_french_names.js
+          node test_user_reported_fixes.js
+          node test_layout_3column_workstation.js
+          node test_strict_no_auto_execution.js
+          node test_session_reset.js
+          node test_prompt4_customization.js
+          node test_prompt5_investigation.js
+          node test_prompt6_pointer_and_cleanup.js
+

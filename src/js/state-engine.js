@@ -53,6 +53,7 @@ class StateEngine {
       pcName: 'LAB-PC-01',
       accountType: 'local',
       username: '',
+      password: '',
       pin: '',
       privacySwitches: {
         location: true,
@@ -101,7 +102,165 @@ class StateEngine {
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 
+  // Comprehensive Session State Resetting (Prompt 3 - Zero leftover session traces)
+  resetSessionState() {
+    // 1. Stop active timers and reset counters
+    this.stopTimer();
+    this.timerSeconds = 1800; // 30:00 initial
+    this.elapsedSeconds = 0;
+    this.isSessionActive = false;
+    this.isCompleted = false;
+
+    // 2. Clear simulation phases & scores to exact initial values
+    this.currentPhase = 1;
+    this.completedPhases.clear();
+    this.cognitiveScore = 0;
+    this.practicalScore = 14.00;
+    this.penalties = [];
+    this.diagnosticErrors = [];
+
+    // 3. Clear student data
+    this.student = {
+      firstName: '',
+      lastName: '',
+      group: '1AS-01',
+      mode: 'exam'
+    };
+
+    // 4. Reset media & simulation hardware states
+    this.selectedMedia = null;
+    this.isPowerOn = false;
+    this.biosConfig = {
+      tpm: false,
+      secureBoot: false,
+      firstBootDevice: 'Hard Drive (SSD)',
+      savedWithF10: false
+    };
+    this.secondBootConfig = {
+      firstBootDevice: 'USB Flash Drive',
+      usbUnplugged: false
+    };
+    this.partitionConfig = {
+      gptCreated: false,
+      selectedPartition: null,
+      primaryFormattedNTFS: false
+    };
+    this.oobeConfig = {
+      country: '',
+      pcName: '',
+      accountType: 'local',
+      username: '',
+      password: '',
+      pin: '',
+      privacySwitches: {
+        location: true,
+        findDevice: true,
+        diagnostics: true,
+        inking: true,
+        tailored: true,
+        advertisingId: true,
+        presence: true
+      }
+    };
+
+    // 5. Reset BIOS Controller to factory defaults
+    if (window.biosController && typeof window.biosController.reset === 'function') {
+      window.biosController.reset();
+    }
+
+    // 6. Reset Quiz Manager state
+    if (window.quizManager) {
+      window.quizManager.currentQuestion = null;
+      window.quizManager.attempts = 0;
+      window.quizManager.selectedOptionIndex = null;
+      if (typeof window.quizManager.closeQuizModal === 'function') {
+        window.quizManager.closeQuizModal();
+      }
+    }
+
+    // 7. Clear any pending Phase 6 intervals/handlers
+    if (window._phase6InstallInterval) {
+      clearInterval(window._phase6InstallInterval);
+      window._phase6InstallInterval = null;
+    }
+    if (window._phase6RebootTimer) {
+      clearInterval(window._phase6RebootTimer);
+      window._phase6RebootTimer = null;
+    }
+    if (window._phase6KeyHandler) {
+      window.removeEventListener('keydown', window._phase6KeyHandler);
+      window._phase6KeyHandler = null;
+    }
+
+    // 8. Close all session/dialog modals except the main container
+    const modalIds = [
+      'grandFinaleModal',
+      'expertGuideModal',
+      'aboutModal',
+      'teacherModal',
+      'pdfExportModal',
+      'exitConfirmModal',
+      'quizModal'
+    ];
+    modalIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('modal-visible');
+    });
+
+    const btnOpenFinale = document.getElementById('btnOpenFinaleResults');
+    if (btnOpenFinale) {
+      btnOpenFinale.classList.add('hidden');
+    }
+
+    // 9. Reset Power LEDs & Virtual Monitor
+    if (window.syncMonitorPowerLed) {
+      window.syncMonitorPowerLed(false);
+    }
+    const towerPowerLed = document.getElementById('towerPowerLed');
+    if (towerPowerLed) towerPowerLed.classList.remove('active');
+    const towerHddLed = document.getElementById('towerHddLed');
+    if (towerHddLed) towerHddLed.classList.remove('active');
+    const tactilePowerBtn = document.getElementById('btnTactilePower');
+    if (tactilePowerBtn) tactilePowerBtn.classList.remove('pulsing');
+
+    // 10. Update HUD, Stepper, and Hint Bar
+    this.updateHUD();
+    this.updateStepper();
+    this.updateHintBar();
+
+    // Reset draggable hint bar position to initial center bottom
+    const hintBar = document.getElementById('draggableHintBar');
+    if (hintBar) {
+      hintBar.style.top = 'auto';
+      hintBar.style.bottom = '12px';
+      hintBar.style.left = '50%';
+      hintBar.style.transform = 'translateX(-50%)';
+    }
+
+    // 11. Clear registration form inputs & error messages
+    const lastNameInput = document.getElementById('regLastName');
+    if (lastNameInput) lastNameInput.value = '';
+    const firstNameInput = document.getElementById('regFirstName');
+    if (firstNameInput) firstNameInput.value = '';
+    const lastNameError = document.getElementById('lastNameError');
+    if (lastNameError) lastNameError.style.display = 'none';
+    const firstNameError = document.getElementById('firstNameError');
+    if (firstNameError) firstNameError.style.display = 'none';
+    const regModeSelect = document.getElementById('regMode');
+    if (regModeSelect) regModeSelect.value = 'exam';
+
+    // 12. Render initial pitch-black Phase 1 Workstation standby screen
+    if (typeof window.renderPhaseScreen === 'function') {
+      window.renderPhaseScreen(1);
+    }
+  }
+
   initSession(studentData) {
+    // Reset BIOS & hardware state before starting new session
+    if (window.biosController && typeof window.biosController.reset === 'function') {
+      window.biosController.reset();
+    }
+
     const settings = (window.settingsManager && window.settingsManager.getSettings()) || {};
 
     if (studentData) {
@@ -128,8 +287,42 @@ class StateEngine {
     this.isCompleted = false;
     this.isSessionActive = true;
 
-    // Modification 1: reset USB media to detached on new session
+    // reset USB media to detached on new session
     this.selectedMedia = null;
+    this.isPowerOn = false;
+
+    this.biosConfig = {
+      tpm: false,
+      secureBoot: false,
+      firstBootDevice: 'Hard Drive (SSD)',
+      savedWithF10: false
+    };
+    this.secondBootConfig = {
+      firstBootDevice: 'USB Flash Drive',
+      usbUnplugged: false
+    };
+    this.partitionConfig = {
+      gptCreated: false,
+      selectedPartition: null,
+      primaryFormattedNTFS: false
+    };
+    this.oobeConfig = {
+      country: '',
+      pcName: '',
+      accountType: 'local',
+      username: '',
+      password: '',
+      pin: '',
+      privacySwitches: {
+        location: true,
+        findDevice: true,
+        diagnostics: true,
+        inking: true,
+        tailored: true,
+        advertisingId: true,
+        presence: true
+      }
+    };
 
     if (this.student.mode === 'exam') {
       this.timerSeconds = 1800; // 30:00 countdown
@@ -154,7 +347,6 @@ class StateEngine {
     this.updateStepper();
     this.updateHintBar();
   }
-
 
   startTimer() {
     if (this.timerInterval) clearInterval(this.timerInterval);
@@ -319,7 +511,7 @@ class StateEngine {
     }
     if (penaltiesValEl) {
       const totalDed = this.penalties.reduce((sum, p) => sum + p.deduction, 0);
-      penaltiesValEl.textContent = `-${totalDed.toFixed(2)}`;
+      penaltiesValEl.textContent = totalDed > 0 ? `-${totalDed.toFixed(2)}` : '0.00';
     }
   }
 
@@ -401,3 +593,8 @@ class StateEngine {
 
 // Global instance
 window.stateEngine = new StateEngine();
+window.resetSessionState = function() {
+  if (window.stateEngine) {
+    window.stateEngine.resetSessionState();
+  }
+};
