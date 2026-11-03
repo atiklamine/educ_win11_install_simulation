@@ -72,6 +72,7 @@ class ReportPdf {
         group: se.student.group || '1AS-01'
         // Session mode completely omitted as per Modification 6
       },
+      skipQuiz: !!se.skipQuiz,
       institution: {
         ministry: 'الجمهورية الجزائرية الديمقراطية الشعبية',
         department: 'وزارة التربية الوطنية',
@@ -87,6 +88,7 @@ class ReportPdf {
         maxScore: '20.00',
         displayTime: displayTime,
         sortableTime: this.formatSortableTime(se.elapsedSeconds),
+        skipQuiz: !!se.skipQuiz,
         cognitiveScore: se.cognitiveScore.toFixed(2),
         practicalScore: se.practicalScore.toFixed(2),
         appreciation: apprec.text,

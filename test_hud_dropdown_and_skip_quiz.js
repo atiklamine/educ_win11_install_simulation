@@ -1,5 +1,6 @@
 const assert = require('assert');
 const fs = require('fs');
+const path = require('path');
 
 console.log('Testing HUD Dropdown Menu & Skip Quiz Mode with Score Deduction...');
 
@@ -136,14 +137,28 @@ const finalScore = se.getCalculatedScore();
 assert(finalScore <= 14.00, `Final score must not exceed 14.00 (got: ${finalScore})`);
 console.log(`  ✓ PASS: Final score in skip quiz mode is strictly bounded to practical maximum (${finalScore} / 20.00)`);
 
-// Test F: Report PDF payload
+// Test F: Report PDF payload & Diagnostic Remediation Log Structure
 eval(pdfJs);
 const report = window.reportPdf.buildReportPayload();
 assert.strictEqual(report.evaluation.cognitiveScore, '0.00', 'Report cognitiveScore is 0.00');
 assert(report.penalties.some(p => p.reason.includes('تخطي الأسئلة التقويمية')), 'Report penalties log includes skip quiz deduction');
-console.log('  ✓ PASS: Official PDF report payload includes 0.00 cognitive score and clear skip deduction note');
+assert(Array.isArray(report.diagnosticLog), 'diagnosticLog must be an array');
+assert(report.diagnosticLog.length > 0, 'diagnosticLog must have an entry for skipped quiz');
+const skipDiagEntry = report.diagnosticLog[0];
+assert.strictEqual(typeof skipDiagEntry, 'object', 'diagnosticLog entry must be an object, NOT a string');
+assert.strictEqual(skipDiagEntry.phase, 'عام', 'diagnosticLog phase must be "عام"');
+assert(skipDiagEntry.title && skipDiagEntry.title.length > 0, 'diagnosticLog title must be defined');
+assert(skipDiagEntry.errorChoice && skipDiagEntry.errorChoice.length > 0, 'diagnosticLog errorChoice must be defined');
+assert(skipDiagEntry.rationale && skipDiagEntry.rationale.length > 0, 'diagnosticLog rationale must be defined');
+console.log('  ✓ PASS: Official PDF report payload includes structured diagnosticLog without undefined values');
+
+// Test G: Verify report-template.html injection doesn't generate "undefined" in table
+const reportTemplateHtml = fs.readFileSync(path.join(__dirname, 'report', 'report-template.html'), 'utf8');
+assert(reportTemplateHtml.includes('id="rCognitiveNote"'), 'report-template.html has rCognitiveNote');
+assert(reportTemplateHtml.includes('id="rPracticalNote"'), 'report-template.html has rPracticalNote');
+assert(!reportTemplateHtml.includes('م undefined'), 'report-template.html contains NO hardcoded "م undefined"');
+console.log('  ✓ PASS: report-template.html includes dynamic cognitive/practical notes and protects against undefined');
 
 console.log('\n================================================================');
 console.log('ALL HUD DROPDOWN & SKIP QUIZ TESTS PASSED (100%)!');
 console.log('================================================================\n');
-

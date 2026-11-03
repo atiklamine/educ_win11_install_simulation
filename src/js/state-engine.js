@@ -293,7 +293,13 @@ class StateEngine {
     this.skipQuiz = !!(studentData && (studentData.skipQuiz === true || studentData.quizMode === 'without_quiz'));
     if (this.skipQuiz) {
       this.cognitiveScore = 0;
-      this.diagnosticErrors.push('تم تخطي الأسئلة التقويمية بطلب من التلميذ (خصم كامل الجانب المعرفي: 0.00 / 6.00)');
+      this.recordDiagnosticError({
+        phase: 'عام',
+        title: 'التقويم المعرفي المفاهيمي (الأسئلة النظرية MCQs)',
+        errorChoice: 'تخطي الأسئلة التقويمية بطلب من التلميذ (-6.00 نقاط)',
+        expectedChoice: 'خوض غمار الأسئلة التقويمية لاكتساب واختبار المفاهيم المجردة',
+        rationale: 'تم تخطي الأسئلة بطلب من التلميذ فاعتُبرت إجاباتها ملغاة (0.00 / 6.00) والحد الأقصى للعلامة 14/20. يُوجَّه التلميذ لاختيار النمط الشامل لنيل العلامة الكاملة 20/20.'
+      });
     }
     this.isCompleted = false;
     this.isSessionActive = true;
@@ -420,7 +426,7 @@ class StateEngine {
 
   recordDiagnosticError(entry) {
     this.diagnosticErrors.push({
-      phase: entry.phase || this.currentPhase,
+      phase: entry.phase !== undefined ? entry.phase : this.currentPhase,
       title: entry.title || `سؤال تقويمي في المرحلة ${this.currentPhase}`,
       errorChoice: entry.errorChoice || 'إجابة غير صحيحة',
       expectedChoice: entry.expectedChoice || 'الإجابة المعتمدة في المنهاج',

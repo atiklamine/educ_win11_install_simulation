@@ -365,13 +365,13 @@
             <td style="text-align: right; font-weight: 700;">الجانب المعرفي المفاهيمي (الأسئلة التقويمية MCQs)</td>
             <td id="rCognitiveScore">5.50</td>
             <td>6.00</td>
-            <td>استيعاب دقيق للمفاهيم المجردة ونظم الملفات والبيوس</td>
+            <td id="rCognitiveNote">استيعاب دقيق للمفاهيم المجردة ونظم الملفات والبيوس</td>
           </tr>
           <tr>
             <td style="text-align: right; font-weight: 700;">الجانب المهاري الإجرائي (التنفيذ العملي السليم)</td>
             <td id="rPracticalScore">13.00</td>
             <td>14.00</td>
-            <td>تحكم متقن في البيوس، التجزئة، وتأمين الخصوصية</td>
+            <td id="rPracticalNote">تحكم متقن في البيوس، التجزئة، وتأمين الخصوصية</td>
           </tr>
           <tr>
             <td style="text-align: right; font-weight: 700;">مجموع الخصومات والجزاءات المسجلة</td>
@@ -500,12 +500,60 @@
       document.getElementById('rCognitiveScore').textContent = ev.cognitiveScore || '0.00';
       document.getElementById('rPracticalScore').textContent = ev.practicalScore || '0.00';
 
+      const isQuizSkipped = !!(data.skipQuiz || ev.skipQuiz || (data.penalties && data.penalties.some(p => p.phase === 'عام' || p.phase === 'شامل')));
+
+      // Cognitive & Practical Notes
+      const cogNoteEl = document.getElementById('rCognitiveNote');
+      if (cogNoteEl) {
+        if (isQuizSkipped) {
+          cogNoteEl.textContent = 'تم تخطي كافة الأسئلة بطلب من التلميذ (خصم 6.00 نقاط)';
+          cogNoteEl.style.color = '#b91c1c';
+        } else if (Number(ev.cognitiveScore) >= 5.0) {
+          cogNoteEl.textContent = 'استيعاب دقيق للمفاهيم المجردة ونظم الملفات والبيوس';
+          cogNoteEl.style.color = '#15803d';
+        } else if (Number(ev.cognitiveScore) >= 3.0) {
+          cogNoteEl.textContent = 'استيعاب متوسط، يحتاج لمراجعة بعض المفاهيم النظرية';
+          cogNoteEl.style.color = '#b45309';
+        } else {
+          cogNoteEl.textContent = 'تحكم غير كافٍ في المفاهيم النظرية ونظم الملفات';
+          cogNoteEl.style.color = '#b91c1c';
+        }
+      }
+
+      const pracNoteEl = document.getElementById('rPracticalNote');
+      if (pracNoteEl) {
+        const pracNum = Number(ev.practicalScore) || 0;
+        if (pracNum >= 13.5) {
+          pracNoteEl.textContent = 'تحكم ممتاز في البيوس، التجزئة، وتأمين الخصوصية';
+          pracNoteEl.style.color = '#15803d';
+        } else if (pracNum >= 10.0) {
+          pracNoteEl.textContent = 'تحكم مقبول في الإجراءات العملية مع بعض الهفوات';
+          pracNoteEl.style.color = '#b45309';
+        } else {
+          pracNoteEl.textContent = 'تحكم ضعيف في التطبيق العملي وخطوات التثبيت';
+          pracNoteEl.style.color = '#b91c1c';
+        }
+      }
+
+      // Penalties & Deductions Breakdown
       const penalties = data.penalties || [];
       const totalDed = penalties.reduce((sum, p) => sum + (p.deduction || 0), 0);
-      document.getElementById('rTotalPenalties').textContent = `-${totalDed.toFixed(2)}`;
-      document.getElementById('rPenaltiesSummary').textContent = penalties.length === 0 
-        ? 'أداء مثالي دون أي جزاءات مسجلة' 
-        : `تم تسجيل ${penalties.length} محاولات خاطئة تم حسم نقاطها فورياً`;
+      document.getElementById('rTotalPenalties').textContent = totalDed > 0 ? `-${totalDed.toFixed(2)}` : '0.00';
+
+      const practicalPenalties = penalties.filter(p => p.phase !== 'عام' && p.phase !== 'شامل');
+      let summaryText = '';
+      if (isQuizSkipped) {
+        if (practicalPenalties.length === 0) {
+          summaryText = 'حسم 6.00 نقاط لتخطي الأسئلة (أداء مهاري خالٍ من الأخطاء ✔)';
+        } else {
+          summaryText = `حسم 6.00 لتخطي الأسئلة + ${practicalPenalties.length} خطأ إجرائي مسجل`;
+        }
+      } else {
+        summaryText = practicalPenalties.length === 0 
+          ? 'أداء مثالي دون أي جزاءات مسجلة ✔' 
+          : `تم تسجيل ${practicalPenalties.length} أخطاء إجرائية تم حسم نقاطها فورياً`;
+      }
+      document.getElementById('rPenaltiesSummary').textContent = summaryText;
 
       // Render Competencies
       const compBody = document.getElementById('rCompetenciesBody');
@@ -532,14 +580,56 @@
             </tr>
           `;
         } else {
-          diagBody.innerHTML = diagList.map(d => `
-            <tr>
-              <td style="text-align: center; font-weight: bold;">م ${d.phase}</td>
-              <td><strong>${d.title}</strong></td>
-              <td style="color: #b91c1c;">${d.errorChoice}</td>
-              <td style="color: #1e3a8a;">${d.rationale}</td>
-            </tr>
-          `).join('');
+          diagBody.innerHTML = diagList.map(item => {
+            let d = item;
+            if (typeof d === 'string') {
+              d = {
+                phase: 'عام',
+                title: 'التقويم المعرفي المفاهيمي (الأسئلة النظرية MCQs)',
+                errorChoice: item,
+                rationale: 'تم تخطي الأسئلة التقويمية بطلب من التلميذ فاعتُبرت إجاباتها ملغاة.'
+              };
+            }
+            let phaseLabel = 'عام';
+            if (d.phase !== undefined && d.phase !== null && d.phase !== '') {
+              if (typeof d.phase === 'number') {
+                phaseLabel = `م ${d.phase}`;
+              } else {
+                const s = String(d.phase).trim();
+                phaseLabel = (s === 'عام' || s === 'شامل' || s.startsWith('م')) ? s : `م ${s}`;
+              }
+            }
+
+            const title = d.title || 'سؤال أو موقف مشكل تقويمي';
+            const errorChoice = d.errorChoice || 'إجراء غير مطابق للمعايير';
+            const rationale = d.rationale || 'مفهوم تقني يحتاج لمراجعة وتوضيح من طرف الأستاذ';
+
+            return `
+              <tr>
+                <td style="text-align: center; font-weight: bold;">${phaseLabel}</td>
+                <td><strong>${title}</strong></td>
+                <td style="color: #b91c1c;">${errorChoice}</td>
+                <td style="color: #1e3a8a;">${rationale}</td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+
+      // Custom Teacher Advice / Note
+      const customNoteEl = document.getElementById('rTeacherCustomNote');
+      if (customNoteEl) {
+        const total = Number(ev.totalScore) || 0;
+        if (isQuizSkipped) {
+          customNoteEl.textContent = 'أظهر التلميذ تحكماً مهارياً جيداً في الإجراءات العملية، مع التنبيه بضرورة خوض الأسئلة النظرية مستقبلاً لتثبيت المفاهيم ونيل العلامة الكاملة.';
+        } else if (total >= 18) {
+          customNoteEl.textContent = 'تلميذ متميز جداً، أبدى تمكناً عالياً في اتباع خطوات التثبيت النظيف واستيعاب معايير الأمان ونظم الملفات.';
+        } else if (total >= 14) {
+          customNoteEl.textContent = 'تحكم جيد جداً في الكفاءات المستهدفة مع وجود بعض الملاحظات البسيطة تم تداركها خلال الإنجاز.';
+        } else if (total >= 10) {
+          customNoteEl.textContent = 'مستوى مقبول إجمالاً، يُنصح بمراجعة مفاهيم التجزئة والبيوس لتعزيز التحكم الذاتي.';
+        } else {
+          customNoteEl.textContent = 'يحتاج إلى مرافقة بيداغوجية لمراجعة المفاهيم الأساسية لنظام التشغيل وخطوات التثبيت.';
         }
       }
     };
