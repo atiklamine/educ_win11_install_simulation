@@ -1642,7 +1642,7 @@ function renderPhase7Country(container) {
 }
 
 function renderPhase7NamePc(container) {
-  const currentPcName = window.stateEngine.oobeConfig.pcName || '';
+  const currentPcName = window.stateEngine.oobeConfig.pcName || 'LAB-PC-01';
 
   container.innerHTML = `
     <div class="oobe-backdrop">
@@ -1650,10 +1650,10 @@ function renderPhase7NamePc(container) {
         <h2 class="oobe-title">Let's name your PC</h2>
         <p class="oobe-desc">عيّن اسماً مميزاً لمحطة العمل داخل شبكة مخبر الإعلام الآلي (مثال: LAB-PC-01):</p>
 
-        <div class="oobe-input-group" id="groupPcName" style="margin-bottom: 12px;">
+        <div class="oobe-input-group" id="groupPcName" style="margin-bottom: 12px; cursor: text;">
           <label for="inpPcName" class="win11-label" style="display: block; cursor: pointer; margin-bottom: 6px;">اسم الحاسوب (PC Name) — إلزامي:</label>
           <div class="oobe-input-wrapper">
-            <input type="text" class="win11-input oobe-text-input" id="inpPcName" value="${currentPcName}" maxlength="15" placeholder="أدخل اسم الحاسوب (مثال: LAB-PC-01)" autocomplete="off" spellcheck="false" autofocus>
+            <input type="text" class="win11-input oobe-text-input" id="inpPcName" name="computerName" value="${currentPcName}" maxlength="15" placeholder="أدخل اسم الحاسوب (مثال: LAB-PC-01)" autocomplete="off" spellcheck="false" autofocus tabindex="1">
           </div>
           <div id="pcNameErrorMsg" style="color: #ef4444; font-size: 12px; margin-top: 6px; min-height: 18px; display: none;"></div>
         </div>
@@ -1663,8 +1663,8 @@ function renderPhase7NamePc(container) {
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <button class="fluent-btn fluent-btn-standard" id="btnOobeNameBack">&lt; Back</button>
-          <button class="fluent-btn fluent-btn-accent" id="btnOobeNameNext">Next &gt;</button>
+          <button class="fluent-btn fluent-btn-standard" id="btnOobeNameBack" tabindex="3">&lt; Back</button>
+          <button class="fluent-btn fluent-btn-accent" id="btnOobeNameNext" tabindex="2">Next &gt;</button>
         </div>
       </div>
     </div>
@@ -1724,20 +1724,32 @@ function renderPhase7NamePc(container) {
       }
     });
 
-    setTimeout(() => inp.focus(), 60);
+    // Auto-focus with cross-environment resilience (Electron + Browser)
+    const focusPcInput = () => {
+      if (document.body.contains(inp)) {
+        inp.focus();
+        if (typeof inp.select === 'function') {
+          inp.select();
+        }
+      }
+    };
+    focusPcInput();
+    requestAnimationFrame(focusPcInput);
+    setTimeout(focusPcInput, 50);
+    setTimeout(focusPcInput, 150);
   }
 
   if (backBtn) {
     backBtn.addEventListener('click', () => {
       if (window.soundSynth) window.soundSynth.playClick();
-      if (inp) window.stateEngine.oobeConfig.pcName = inp.value.trim();
+      if (inp) window.stateEngine.oobeConfig.pcName = (inp.value || 'LAB-PC-01').trim();
       renderPhase7Country(container);
     });
   }
 
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
-      const val = inp ? inp.value : '';
+      const val = (inp && inp.value.trim()) ? inp.value.trim() : 'LAB-PC-01';
       const validationError = validatePcName(val);
       if (validationError) {
         if (window.soundSynth) window.soundSynth.playErrorBeep();
@@ -1750,14 +1762,14 @@ function renderPhase7NamePc(container) {
       }
 
       if (window.soundSynth) window.soundSynth.playClick();
-      window.stateEngine.oobeConfig.pcName = val.trim();
+      window.stateEngine.oobeConfig.pcName = val;
       renderPhase7Account(container);
     });
   }
 }
 
 function renderPhase7Account(container) {
-  const currentUsername = window.stateEngine.oobeConfig.username || '';
+  const currentUsername = window.stateEngine.oobeConfig.username || 'Student';
   const currentPassword = window.stateEngine.oobeConfig.password || '';
 
   container.innerHTML = `
@@ -1766,37 +1778,37 @@ function renderPhase7Account(container) {
         <h2 class="oobe-title">Who's going to use this device?</h2>
         <p class="oobe-desc">إنشاء حساب محلي مستقل ومحمي بكلمة مرور (Offline Local Account):</p>
 
-        <div class="oobe-input-group" id="groupUsername" style="margin-bottom: 14px;">
+        <div class="oobe-input-group" id="groupUsername" style="margin-bottom: 14px; cursor: text;">
           <label for="inpUsername" class="win11-label" style="display: block; cursor: pointer; margin-bottom: 6px;">اسم المستخدم (User name) — إلزامي:</label>
           <div class="oobe-input-wrapper">
-            <input type="text" class="win11-input oobe-text-input" id="inpUsername" value="${currentUsername}" maxlength="20" placeholder="أدخل اسم الحساب (مثال: Yacine)" autocomplete="off" spellcheck="false" autofocus>
+            <input type="text" class="win11-input oobe-text-input" id="inpUsername" name="userName" value="${currentUsername}" maxlength="20" placeholder="أدخل اسم الحساب (مثال: Student)" autocomplete="off" spellcheck="false" autofocus tabindex="1">
           </div>
           <div id="usernameErrorMsg" style="color: #ef4444; font-size: 11.5px; margin-top: 4px; display: none;"></div>
         </div>
 
-        <div class="oobe-input-group" id="groupPassword" style="margin-bottom: 14px;">
+        <div class="oobe-input-group" id="groupPassword" style="margin-bottom: 14px; cursor: text;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <label for="inpPassword" class="win11-label" style="margin-bottom: 0; cursor: pointer;">كلمة المرور (Enter password) — <span style="color: #38bdf8;">اختيارية</span>:</label>
             <button type="button" class="fluent-btn fluent-btn-standard" id="btnClearPassword" tabindex="-1" style="font-size: 11px; height: 24px; padding: 0 8px; line-height: 1;">مسح / تفريغ كلمة المرور</button>
           </div>
           <div class="oobe-input-wrapper">
-            <input type="password" class="win11-input oobe-text-input" id="inpPassword" value="${currentPassword}" placeholder="اترك فارغاً لحساب بدون كلمة مرور">
+            <input type="password" class="win11-input oobe-text-input" id="inpPassword" name="password" value="${currentPassword}" placeholder="اترك فارغاً لحساب بدون كلمة مرور" tabindex="2">
           </div>
           <div id="passwordErrorMsg" style="color: #ef4444; font-size: 11.5px; margin-top: 4px; display: none;"></div>
         </div>
 
-        <div class="oobe-input-group" id="groupConfirmPassword" style="margin-bottom: 20px;">
+        <div class="oobe-input-group" id="groupConfirmPassword" style="margin-bottom: 20px; cursor: text;">
           <label for="inpConfirmPassword" class="win11-label" style="display: block; cursor: pointer; margin-bottom: 6px;">تأكيد كلمة المرور (Confirm password):</label>
           <div class="oobe-input-wrapper">
-            <input type="password" class="win11-input oobe-text-input" id="inpConfirmPassword" value="${currentPassword}" placeholder="أعد إدخال كلمة المرور للتأكيد (إن وُجدت)">
+            <input type="password" class="win11-input oobe-text-input" id="inpConfirmPassword" name="confirmPassword" value="${currentPassword}" placeholder="أعد إدخال كلمة المرور للتأكيد (إن وُجدت)" tabindex="3">
           </div>
           <div id="confirmPasswordErrorMsg" style="color: #ef4444; font-size: 11.5px; margin-top: 4px; display: none;"></div>
           <div id="passwordMatchMsg" style="color: #34d399; font-size: 11.5px; margin-top: 4px; display: none;">✔ كلمتا المرور متطابقتان</div>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <button class="fluent-btn fluent-btn-standard" id="btnOobeAccountBack">&lt; Back</button>
-          <button class="fluent-btn fluent-btn-accent" id="btnOobeAccountNext">Next &gt;</button>
+          <button class="fluent-btn fluent-btn-standard" id="btnOobeAccountBack" tabindex="5">&lt; Back</button>
+          <button class="fluent-btn fluent-btn-accent" id="btnOobeAccountNext" tabindex="4">Next &gt;</button>
         </div>
       </div>
     </div>
@@ -1896,7 +1908,19 @@ function renderPhase7Account(container) {
       }
     });
 
-    setTimeout(() => inpUser.focus(), 60);
+    // Auto-focus username with cross-environment resilience (Electron + Browser)
+    const focusUserInput = () => {
+      if (document.body.contains(inpUser)) {
+        inpUser.focus();
+        if (typeof inpUser.select === 'function') {
+          inpUser.select();
+        }
+      }
+    };
+    focusUserInput();
+    requestAnimationFrame(focusUserInput);
+    setTimeout(focusUserInput, 50);
+    setTimeout(focusUserInput, 150);
   }
 
   if (inpPass) {
@@ -1943,7 +1967,7 @@ function renderPhase7Account(container) {
   if (backBtn) {
     backBtn.addEventListener('click', () => {
       if (window.soundSynth) window.soundSynth.playClick();
-      if (inpUser) window.stateEngine.oobeConfig.username = inpUser.value.trim();
+      if (inpUser) window.stateEngine.oobeConfig.username = (inpUser.value || 'Student').trim();
       if (inpPass) window.stateEngine.oobeConfig.password = inpPass.value;
       renderPhase7NamePc(container);
     });
@@ -1956,7 +1980,7 @@ function renderPhase7Account(container) {
       if (passErr) passErr.style.display = 'none';
       if (confErr) confErr.style.display = 'none';
 
-      const uVal = inpUser ? inpUser.value : '';
+      const uVal = (inpUser && inpUser.value.trim()) ? inpUser.value.trim() : 'Student';
       const pVal = inpPass ? inpPass.value : '';
       const cVal = inpConf ? inpConf.value : '';
 
@@ -1985,7 +2009,7 @@ function renderPhase7Account(container) {
       }
 
       if (window.soundSynth) window.soundSynth.playClick();
-      window.stateEngine.oobeConfig.username = uVal.trim();
+      window.stateEngine.oobeConfig.username = uVal;
       window.stateEngine.oobeConfig.password = pVal;
       renderPhase7PrivacySwitches(container);
     });
@@ -2509,20 +2533,41 @@ function executeIndependentRebootCycle(container) {
     `;
 
     setTimeout(() => {
-      // 3. Prompt 4 Modification 1: Authentic Windows 11 Lock / Login Screen
-      renderWin11LoginScreen(container, () => {
-        // Correct password entered! Trigger Final Quiz Checkpoint 6
-        window.quizManager.showQuizForBank('bank_final', () => {
-          // Grand Finale!
-          window.stateEngine.completePhase(8);
+      const expectedPassword = window.stateEngine.oobeConfig.password || '';
+      const isPasswordless = expectedPassword.length === 0;
+
+      if (isPasswordless) {
+        // Prompt 9 Modification 4: No password configured -> Direct entry to Desktop after boot, no password requested!
+        container.innerHTML = `
+          <div class="virtual-black-screen flex-center" style="flex-direction: column;">
+            <div style="width: 56px; height: 56px; margin-bottom: 24px;">
+              <img src="assets/logo-win11-white.svg" class="win11-official-logo" style="width: 100%; height: 100%;" alt="Windows 11">
+            </div>
+            <div class="spinner-win11"></div>
+            <p style="color: #ffffff; font-size: 15px; margin-top: 18px;">Welcome</p>
+          </div>
+        `;
+        setTimeout(() => {
+          renderPhase8Desktop(container);
+          window.quizManager.showQuizForBank('bank_final', () => {
+            window.stateEngine.completePhase(8);
+          });
+        }, 1200);
+      } else {
+        // Password configured -> Show authentic Windows 11 Login Screen
+        renderWin11LoginScreen(container, () => {
+          renderPhase8Desktop(container);
+          window.quizManager.showQuizForBank('bank_final', () => {
+            window.stateEngine.completePhase(8);
+          });
         });
-      });
+      }
     }, 2200);
   }, 1200);
 }
 
 function renderWin11LoginScreen(container, onLoginSuccess) {
-  const username = window.stateEngine.oobeConfig.username || 'Eleve_1AS';
+  const username = window.stateEngine.oobeConfig.username || 'Student';
   const expectedPassword = window.stateEngine.oobeConfig.password || '';
   const initial = username.substring(0, 2).toUpperCase();
   const isPasswordless = expectedPassword.length === 0;
@@ -2539,8 +2584,8 @@ function renderWin11LoginScreen(container, onLoginSuccess) {
           </div>
         ` : `
           <div class="win11-login-input-row">
-            <input type="password" class="win11-login-input" id="loginPasswordInput" placeholder="Password" autofocus autocomplete="off">
-            <button class="win11-login-btn" id="btnLoginSubmit" title="Sign in" aria-label="Sign in">
+            <input type="password" class="win11-login-input" id="loginPasswordInput" placeholder="Password" autofocus autocomplete="off" tabindex="1">
+            <button class="win11-login-btn" id="btnLoginSubmit" title="Sign in" aria-label="Sign in" tabindex="2">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"/>
                 <polyline points="12 5 19 12 12 19"/>
@@ -2590,6 +2635,8 @@ function renderWin11LoginScreen(container, onLoginSuccess) {
     setTimeout(() => {
       if (typeof onLoginSuccess === 'function') {
         onLoginSuccess();
+      } else {
+        renderPhase8Desktop(container);
       }
     }, 1200);
   }
@@ -2602,7 +2649,13 @@ function renderWin11LoginScreen(container, onLoginSuccess) {
         attemptLogin();
       }
     });
-    setTimeout(() => input.focus(), 100);
+    const focusPass = () => {
+      if (document.body.contains(input)) input.focus();
+    };
+    focusPass();
+    requestAnimationFrame(focusPass);
+    setTimeout(focusPass, 60);
+    setTimeout(focusPass, 150);
   } else {
     // If passwordless, also allow Enter key to sign in directly
     const handleEnter = (e) => {

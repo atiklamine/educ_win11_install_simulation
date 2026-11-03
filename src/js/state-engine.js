@@ -52,7 +52,7 @@ class StateEngine {
       country: 'Algeria',
       pcName: 'LAB-PC-01',
       accountType: 'local',
-      username: '',
+      username: 'Student',
       password: '',
       pin: '',
       privacySwitches: {

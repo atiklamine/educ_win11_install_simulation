@@ -202,6 +202,8 @@ function createMainWindow() {
     minWidth: 1024,
     minHeight: 700,
     center: true,
+    focusable: true,
+    acceptFirstMouse: true,
     autoHideMenuBar: true,
     title: 'محاكي تنصيب ويندوز 11 التعليمي - المنهاج الجزائري',
     backgroundColor: '#0f172a',
@@ -216,6 +218,12 @@ function createMainWindow() {
 
   mainWindow.maximize();
   mainWindow.setFullScreen(true);
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.focus();
+    }
+  });
 
   mainWindow.loadFile(path.join(__dirname, 'src', 'index.html'));
 
