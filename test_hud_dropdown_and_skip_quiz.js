@@ -162,3 +162,4 @@ console.log('  ✓ PASS: report-template.html includes dynamic cognitive/practic
 console.log('\n================================================================');
 console.log('ALL HUD DROPDOWN & SKIP QUIZ TESTS PASSED (100%)!');
 console.log('================================================================\n');
+process.exit(0);

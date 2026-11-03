@@ -32,7 +32,8 @@ class StateEngine {
     this.isCompleted = false;
 
     // Simulation Flags
-    this.selectedMedia = 'usb'; // 'usb' | 'dvd' | 'pxe'
+    this.selectedMedia = null; // 'usb' | 'dvd' | 'pxe'
+    this.installationMedia = 'usb'; // remembers chosen media even after unplug
     this.isPowerOn = false;
     this.biosConfig = {
       tpm: false,
@@ -42,7 +43,8 @@ class StateEngine {
     };
     this.secondBootConfig = {
       firstBootDevice: 'USB Flash Drive',
-      usbUnplugged: false
+      usbUnplugged: false,
+      mediaUnplugged: false
     };
     this.partitionConfig = {
       gptCreated: false,
@@ -131,6 +133,7 @@ class StateEngine {
 
     // 4. Reset media & simulation hardware states
     this.selectedMedia = null;
+    this.installationMedia = 'usb';
     this.isPowerOn = false;
     this.biosConfig = {
       tpm: false,
@@ -140,7 +143,8 @@ class StateEngine {
     };
     this.secondBootConfig = {
       firstBootDevice: 'USB Flash Drive',
-      usbUnplugged: false
+      usbUnplugged: false,
+      mediaUnplugged: false
     };
     this.partitionConfig = {
       gptCreated: false,
@@ -306,6 +310,7 @@ class StateEngine {
 
     // reset USB media to detached on new session
     this.selectedMedia = null;
+    this.installationMedia = 'usb';
     this.isPowerOn = false;
 
     this.biosConfig = {
@@ -316,7 +321,8 @@ class StateEngine {
     };
     this.secondBootConfig = {
       firstBootDevice: 'USB Flash Drive',
-      usbUnplugged: false
+      usbUnplugged: false,
+      mediaUnplugged: false
     };
     this.partitionConfig = {
       gptCreated: false,
@@ -552,10 +558,41 @@ class StateEngine {
     this.updateHUDScore();
   }
 
+  getPhaseHint(phase) {
+    const media = this.selectedMedia || this.installationMedia || 'usb';
+    let mediaName = 'فلاش ديسك USB';
+    let mediaRemovalAction = 'نزع مفتاح USB من المنفذ الأمامي';
+    if (media === 'dvd') {
+      mediaName = 'قرص DVD';
+      mediaRemovalAction = 'إخراج قرص DVD من قارئ الأقراص';
+    } else if (media === 'pxe') {
+      mediaName = 'كابل الشبكة PXE';
+      mediaRemovalAction = 'فصل كابل الشبكة من منفذ LAN';
+    }
+
+    if (phase === 1) {
+      return 'المرحلة 1: شاشة العرض سوداء. اختر وسيط التثبيت من الرف على اليسار (فلاش ديسك USB أو قرص DVD أو كابل PXE)، واضغط زر التشغيل بالوحدة المركزية على اليمين، ثم اضغط سريعاً على [F2 أو Del] في لوحة المفاتيح الحقيقية لدخول البيوس قبل انقضاء المهلة (10 ثوانٍ).';
+    }
+
+    if (phase === 5) {
+      if (media === 'usb') {
+        return 'المرحلة 5: قسّم القرص (New) لإنشاء جدول GPT وأقسامه مع إمكانية تحديد الحجم المطلوب (أكبر من 64 GB). ⚠️ تنبيه بيداغوجي: التهيئة المنطقية (Logical Formatting) تعني اختيار نظام الملفات (File System) المناسب؛ ولتثبيت Windows 11 يجب اختيار القسم الأساسي الداخلي (Drive 0) وتنسيقه بنظام NTFS حصراً عبر زر Format قبل المتابعة. احذر اختيار الفلاش ديسك (Drive 1) كوسيط تثبيت لتفادي خصم النقاط.';
+      } else {
+        return 'المرحلة 5: قسّم القرص (New) لإنشاء جدول GPT وأقسامه مع إمكانية تحديد الحجم المطلوب (أكبر من 64 GB). ⚠️ تنبيه بيداغوجي: التهيئة المنطقية (Logical Formatting) تعني اختيار نظام الملفات (File System) المناسب؛ ولتثبيت Windows 11 يجب اختيار القسم الأساسي الداخلي (Drive 0) وتنسيقه بنظام NTFS حصراً عبر زر Format قبل المتابعة.';
+      }
+    }
+
+    if (phase === 6) {
+      return `المرحلة 6 (المرحلة الأولى لتنصيب النظام - نقل ونسخ الملفات): يقوم برنامج الإعداد بنسخ وتثبيت ملفات الويندوز من وسيط التثبيت (${mediaName}) إلى القرص الصلب الداخلي SSD. بعد اكتمال النسخ وبدء إعادة التشغيل، ادخل البيوس بـ [F2/Del] وأعد SSD كإقلاع أول واحفظ بـ [F10]، ثم انقر على وسيط التثبيت في الوحدة المركزية (${mediaRemovalAction}) فيزيائياً لكسر حلقة الإقلاع التكرارية.`;
+    }
+
+    return this.phaseHints[phase] || 'تابع تنفيذ الخطوة الحالية بدقة.';
+  }
+
   updateHintBar() {
     const hintTextEl = document.getElementById('hintBarText');
     if (hintTextEl) {
-      hintTextEl.textContent = this.phaseHints[this.currentPhase] || 'تابع تنفيذ الخطوة الحالية بدقة.';
+      hintTextEl.textContent = this.getPhaseHint(this.currentPhase);
     }
     const vkbKeyEl = document.getElementById('vkbKeyHint');
     if (vkbKeyEl && this.phaseVkbHints) {
