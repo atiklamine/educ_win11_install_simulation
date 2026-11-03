@@ -592,7 +592,8 @@ class BiosController {
       window.stateEngine.recordPenalty(
         2,
         0.50,
-        `جهاز الإقلاع الأول المختار لا يتطابق مع الوسيط المتصل (${chosenMedia.toUpperCase()})`
+        `جهاز الإقلاع الأول المختار لا يتطابق مع الوسيط المتصل (${chosenMedia.toUpperCase()})`,
+        `تم توصيل وسيط التثبيت (${chosenMedia.toUpperCase()}) بالوحدة المركزية؛ يجب اختيار نفس هذا الوسيط كجهاز إقلاع أول (1st Boot Device) في البيوس لبدء التثبيت.`
       );
       alert(`تنبيه: لقد قمت بتوصيل وسيط (${chosenMedia.toUpperCase()})، لكنك اخترت جهاز إقلاع مختلف في البيوس!`);
       return;

@@ -46,4 +46,5 @@ jobs:
           node test_final_enhancements.js
           node test_hud_dropdown_and_skip_quiz.js
           node test_media_consistency.js
+          node test_procedural_penalties_report.js
 

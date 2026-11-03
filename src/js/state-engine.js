@@ -415,13 +415,29 @@ class StateEngine {
       timestamp: new Date().toLocaleTimeString()
     });
 
-    if (pedagogicalRemediation) {
+    // Always record procedural mistakes in diagnosticErrors for complete transparency in the report
+    if (!String(reason).startsWith('إجابة خاطئة في السؤال التقويمي')) {
+      let remediationText = (pedagogicalRemediation && pedagogicalRemediation.trim()) ? pedagogicalRemediation.trim() : '';
+      if (!remediationText) {
+        if (typeof reason === 'string' && reason.includes('جهاز الإقلاع الأول المختار لا يتطابق')) {
+          remediationText = 'يجب دائماً مطابقة خيار جهاز الإقلاع الأول (1st Boot Device) في البيوس مع وسيط التثبيت الموصول فعلياً بالحاسوب.';
+        } else if (typeof reason === 'string' && reason.includes('إصلاح الحاسوب')) {
+          remediationText = 'القرص الصلب جديد وفارغ تماماً؛ يجب النقر على Install Now للتثبيت النظيف وتجنب خيارات الإصلاح.';
+        } else if (typeof reason === 'string' && reason.includes('قسم نظام محجوز')) {
+          remediationText = 'أقسام النظام المحجوزة مخصصة لملفات الإقلاع والاسترداد التلقائية؛ يجب تهيئة وتثبيت النظام على القسم الأساسي (Primary Partition) فقط.';
+        } else {
+          remediationText = `يجب تصحيح هذا الإجراء في المرحلة ${phaseNum} والالتزام بالمعايير التقنية السليمة لتفادي خصم النقاط.`;
+        }
+      }
+
+      const deductionText = deduction ? ` (-${Number(deduction).toFixed(2)} ن)` : '';
       this.diagnosticErrors.push({
         phase: phaseNum,
-        title: `خطأ إجرائي في المرحلة ${phaseNum}`,
-        errorChoice: reason,
-        expectedChoice: 'الإجراء الصحيح وفق المعايير التقنية',
-        rationale: pedagogicalRemediation,
+        title: `خطأ إجرائي في المرحلة ${phaseNum}${deductionText}`,
+        errorChoice: `${reason}${deductionText}`,
+        expectedChoice: 'الإجراء التقني السليم وفق المعايير',
+        rationale: remediationText,
+        deduction: deduction,
         timestamp: new Date().toLocaleTimeString()
       });
     }

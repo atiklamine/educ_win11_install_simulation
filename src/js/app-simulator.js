@@ -733,7 +733,12 @@ function renderPhase3InstallNow(container) {
     repairBtn.addEventListener('click', (e) => {
       e.preventDefault();
       window.soundSynth.playErrorBeep();
-      window.stateEngine.recordPenalty(3, 0.50, 'محاولة فتح إصلاح الحاسوب بدلاً من التثبيت النظيف (Install Now)');
+      window.stateEngine.recordPenalty(
+        3,
+        0.50,
+        'محاولة فتح إصلاح الحاسوب بدلاً من التثبيت النظيف (Install Now)',
+        'القرص الصلب جديد وفارغ تماماً؛ يجب النقر مباشرة على Install Now لبدء التثبيت النظيف وتجنب خيارات الإصلاح.'
+      );
       alert('تنبيه: محطة العمل جديدة ولا يوجد نظام سابق لإصلاحه. اضغط على Install Now لتنصيب النظام.');
     });
   }
@@ -1253,7 +1258,12 @@ function renderPhase5Partitioning(container) {
           redraw();
         } else {
           window.soundSynth.playErrorBeep();
-          window.stateEngine.recordPenalty(5, 0.50, 'محاولة تهيئة قسم نظام محجوز بدلاً من القسم الأساسي');
+          window.stateEngine.recordPenalty(
+            5,
+            0.50,
+            'محاولة تهيئة قسم نظام محجوز بدلاً من القسم الأساسي',
+            'أقسام النظام (Recovery, EFI, MSR) تدار وتنسق تلقائياً بواسطة مثبت الويندوز؛ التهيئة اليدوية بنظام NTFS مسموحة ومطلوبة فقط للقسم الأساسي (Drive 0 Partition 4).'
+          );
           alert('Windows cannot format a system partition. Please select Drive 0 Partition 4 to format with NTFS.');
         }
       });
@@ -1341,7 +1351,12 @@ function renderPhase5Partitioning(container) {
 
         if (selectedPartId !== 'part4') {
           window.soundSynth.playErrorBeep();
-          window.stateEngine.recordPenalty(5, 0.50, 'محاولة تثبيت النظام على قسم نظام محجوز بدلاً من القسم الأساسي');
+          window.stateEngine.recordPenalty(
+            5,
+            0.50,
+            'محاولة تثبيت النظام على قسم نظام محجوز بدلاً من القسم الأساسي',
+            'لا يمكن تثبيت نظام التشغيل على أقسام النظام المحجوزة أو أقسام التمهيد؛ يجب تثبيت النظام حصراً على القسم الأساسي (Primary Partition).'
+          );
           alert('Windows cannot be installed to this partition. Windows must be installed on the primary partition (Drive 0 Partition 4).');
           return;
         }

@@ -65,6 +65,32 @@ class ReportPdf {
     const secs = se.elapsedSeconds % 60;
     const displayTime = this.formatDisplayTime(se.elapsedSeconds);
 
+    // Ensure all penalties and deductions are represented in diagnosticLog with full pedagogical details
+    const fullDiagnosticLog = [...se.diagnosticErrors];
+    if (Array.isArray(se.penalties)) {
+      se.penalties.forEach(p => {
+        if (!p || p.phase === 'عام' || p.phase === 'شامل' || String(p.reason).includes('تخطي الأسئلة')) return;
+        const exists = fullDiagnosticLog.some(d => 
+          d.phase === p.phase && (
+            (d.errorChoice && d.errorChoice.includes(p.reason)) ||
+            (d.title && d.title.includes(p.reason))
+          )
+        );
+        if (!exists) {
+          const deductionText = p.deduction ? ` (-${Number(p.deduction).toFixed(2)} ن)` : '';
+          fullDiagnosticLog.push({
+            phase: p.phase,
+            title: `خطأ إجرائي في المرحلة ${p.phase}${deductionText}`,
+            errorChoice: `${p.reason}${deductionText}`,
+            expectedChoice: 'الإجراء التقني السليم وفق المعايير',
+            rationale: 'مخالفة للإجراء العملي المعتمد في هذه المرحلة تستوجب مراجعة التوجيهات البيداغوجية للأستاذ.',
+            deduction: p.deduction,
+            timestamp: p.timestamp || new Date().toLocaleTimeString()
+          });
+        }
+      });
+    }
+
     return {
       student: {
         firstName: se.student.firstName || 'مترشح',
@@ -120,7 +146,7 @@ class ReportPdf {
           }
         ]
       },
-      diagnosticLog: se.diagnosticErrors,
+      diagnosticLog: fullDiagnosticLog,
       penalties: [
         ...(se.skipQuiz ? [{ phase: 'عام', reason: 'تخطي الأسئلة التقويمية بطلب من التلميذ (خصم كامل الجانب المعرفي)', deduction: 6.00 }] : []),
         ...se.penalties

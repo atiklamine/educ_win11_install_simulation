@@ -418,14 +418,14 @@
     </table>
 
     <!-- Diagnostic & Misconceptions Log -->
-    <div class="section-title">سجل التشخيص البيداغوجي ومعالجة المفاهيم الخاطئة (Remediation Log)</div>
+    <div class="section-title">سجل التشخيص البيداغوجي وتفصيل الخصومات والأخطاء المسجلة (Remediation & Penalties Log)</div>
     <table class="diagnostic-table">
       <thead>
         <tr>
           <th style="width: 8%;">المرحلة</th>
           <th style="width: 32%;">السؤال أو الموقف المشكل</th>
-          <th style="width: 25%;">الخيار الخاطئ المسجل</th>
-          <th style="width: 35%;">التصحيح البيداغوجي المعتمد للأستاذ</th>
+          <th style="width: 26%;">الخطأ المسجل أو الخيار الخاطئ</th>
+          <th style="width: 34%;">التصحيح والتوجيه البيداغوجي المعتمد للأستاذ</th>
         </tr>
       </thead>
       <tbody id="rDiagnosticBody">
@@ -601,14 +601,17 @@
             }
 
             const title = d.title || 'سؤال أو موقف مشكل تقويمي';
-            const errorChoice = d.errorChoice || 'إجراء غير مطابق للمعايير';
-            const rationale = d.rationale || 'مفهوم تقني يحتاج لمراجعة وتوضيح من طرف الأستاذ';
+            let errorChoice = d.errorChoice || 'إجراء غير مطابق للمعايير';
+            if (d.deduction && !errorChoice.includes('(-')) {
+              errorChoice += ` (-${Number(d.deduction).toFixed(2)} ن)`;
+            }
+            const rationale = d.rationale || 'مفهوم تقني أو إجراء عملي يحتاج لمراجعة وتوضيح من طرف الأستاذ';
 
             return `
               <tr>
                 <td style="text-align: center; font-weight: bold;">${phaseLabel}</td>
                 <td><strong>${title}</strong></td>
-                <td style="color: #b91c1c;">${errorChoice}</td>
+                <td style="color: #b91c1c; font-weight: 500;">${errorChoice}</td>
                 <td style="color: #1e3a8a;">${rationale}</td>
               </tr>
             `;
