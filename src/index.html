@@ -31,6 +31,7 @@
           <strong id="hudStudentName">تلميذ (غير مسجل)</strong>
           <span class="hud-badge" id="hudStudentGroup">1AS-01</span>
           <span class="hud-badge" id="hudStudentMode" style="background: #0284c7; color: #fff;">امتحان (صارم)</span>
+          <span class="hud-badge" id="hudQuizModeBadge" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; display: none;" title="المحاكاة في نمط تخطي الأسئلة (الجانب المعرفي 0/6)">⚡ دون أسئلة (-6.00)</span>
         </div>
       </div>
 
@@ -41,14 +42,47 @@
 
       <div class="hud-actions-section">
         <button class="hud-btn hidden" id="btnOpenFinaleResults" title="عرض بطاقة التقييم والتقرير النهائي" style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #4ade80; font-weight: 700;">&#127881; النتيجة والتقرير</button>
-        <button class="hud-btn" id="btnToggleViewMode" title="التبديل بين وضع محطة العمل الكاملة وتكبير شاشة العرض [F10]">🖥️ تكبير شاشة المحاكاة (F10)</button>
-        <button class="hud-btn" id="btnToggleFullscreen" title="ملء شاشة التطبيق / نافذة البرنامج ككل [F11]">&#9974; ملء نافذة التطبيق (F11)</button>
-        <button class="hud-btn" id="btnToggleTheme" title="تبديل المظهر (فاتح / داكن / تباين عالي داكن / تباين عالي فاتح)">☀️ فاتح</button>
-        <div class="hud-font-ctrl" style="display: flex; gap: 2px;">
-          <button class="hud-btn" id="btnFontDec" title="تصغير حجم الخط (Font Size -)" style="padding: 4px 7px;">🗚-</button>
-          <button class="hud-btn" id="btnFontInc" title="تكبير حجم الخط (Font Size +)" style="padding: 4px 7px;">🗚+</button>
-        </div>
         <button class="hud-btn" id="btnNewSession" title="بدء جلسة تقييم جديدة">&#10010; جلسة جديدة</button>
+
+        <!-- Dropdown Menu for Display, Appearance, Themes, and Fonts -->
+        <div class="hud-dropdown" id="viewMenuDropdown">
+          <button class="hud-btn hud-dropdown-toggle" id="btnViewMenu" title="خيارات العرض والمظهر وتكبير الشاشة">
+            <span>🖥️ العرض والمظهر</span>
+            <span class="dropdown-arrow">▾</span>
+          </button>
+          <div class="hud-dropdown-menu" id="viewMenuContent">
+            <div class="hud-dropdown-header">شاشات العرض والتكبير:</div>
+            <button class="hud-dropdown-item" id="btnToggleViewMode" title="التبديل بين وضع محطة العمل الكاملة وتكبير شاشة العرض [F10]">
+              <span class="item-icon">🖥️</span>
+              <span class="item-label">تكبير شاشة المحاكاة (F10)</span>
+            </button>
+            <button class="hud-dropdown-item" id="btnToggleFullscreen" title="ملء شاشة التطبيق / نافذة البرنامج ككل [F11]">
+              <span class="item-icon">⛶</span>
+              <span class="item-label">ملء نافذة التطبيق (F11)</span>
+            </button>
+
+            <div class="hud-dropdown-divider"></div>
+
+            <div class="hud-dropdown-header">المظهر والألوان:</div>
+            <button class="hud-dropdown-item" id="btnToggleTheme" title="تبديل المظهر (فاتح / داكن / تباين عالي داكن / تباين عالي فاتح)">
+              <span class="item-icon">☀️</span>
+              <span class="item-label">فاتح</span>
+            </button>
+
+            <div class="hud-dropdown-divider"></div>
+
+            <div class="hud-dropdown-header">حجم خط النصوص:</div>
+            <div class="hud-dropdown-font-box">
+              <button class="hud-dropdown-font-btn" id="btnFontDec" title="تصغير حجم الخط (Font Size -)">
+                <span>🗚-</span> <span>تصغير</span>
+              </button>
+              <button class="hud-dropdown-font-btn" id="btnFontInc" title="تكبير حجم الخط (Font Size +)">
+                <span>🗚+</span> <span>تكبير</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <button class="hud-btn" id="btnOpenExpertGuide" title="الدليل الشامل وإرشادات التثبيت">&#128218; الدليل الشامل</button>
         <button class="hud-btn hud-btn-accent" id="btnExportPdf" title="استخراج شهادة تقييم الكفاءة PDF">&#128196; تصدير PDF</button>
         <button class="hud-btn" id="btnToggleSound" title="كتم / تفعيل المؤثرات الصوتية">&#128266; صوت</button>
@@ -372,6 +406,18 @@
             <option value="practice">نمط التدريب الحر (مؤقت منقضي مفتوح وتوجيه إرشادي مرن)</option>
           </select>
         </div>
+
+        <!-- Option for Simulation with / without Conceptual Questions -->
+        <div id="regQuizOptionContainer" style="margin-bottom: 14px;">
+          <label for="regQuizMode" class="win11-label" style="cursor: pointer;">نظام الأسئلة والتقويم:</label>
+          <select class="win11-select" id="regQuizMode">
+            <option value="with_quiz" selected>✅ محاكاة كاملة مع الأسئلة التقويمية (موصى به - تتيح نيل العلامة الكاملة 20/20)</option>
+            <option value="without_quiz">⚡ محاكاة عملية سريعة دون أسئلة (تُعتبر الأسئلة كلها خاطئة وتُخصم 6.00 نقاط — أقصى علامة 14/20)</option>
+          </select>
+          <div id="quizModeNotice" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 4px; padding: 6px 10px; font-size: 11.5px; margin-top: 6px; line-height: 1.45; display: none;">
+            ⚠️ <strong>تنبيه تحفيزي:</strong> باختيار هذا النمط، لن تظهر أي أسئلة أثناء المحاكاة وستُعتبر إجاباتها كلها خاطئة (0.00 / 6.00 في الجانب المعرفي)، وتكون أعلى علامة ممكنة هي 14.00 / 20.00 فقط! لخوض التقييم الكامل ونيل العلامة الكاملة، يُنصح باختيار المحاكاة مع الأسئلة.
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="fluent-btn fluent-btn-standard" id="btnCancelSession">إلغاء</button>
@@ -515,6 +561,14 @@
             <strong style="font-size: 14px;">8. الإقلاع الذاتي النهائي والاستقلالية الكاملة:</strong>
             <span>من سطح المكتب، اضغط Start &gt; Restart للتحقق من إقلاع الويندوز ذاتياً من القرص الداخلي، والإجابة عن السؤال النهائي لختام التقييم واستخراج التقرير.</span>
           </div>
+
+          <div class="guide-card guide-card-amber">
+            <strong style="font-size: 14px;">9. تخصيص بيئة العرض ونمط المحاكاة:</strong>
+            <span>
+              • <strong>قائمة العرض والمظهر:</strong> من الشريط العلوي، تتيح لك القائمة المنسدلة «🖥️ العرض والمظهر» التحكم في نمط عرض الشاشة الافتراضية، تكبير نافذة التطبيق بالكامل، التبديل بين أربعة ثيمات (فاتح، داكن، وتباين عالي)، وتكبير/تصغير حجم الخطوط لتوفير أقصى راحة بصرية.<br>
+              • <strong>نمطا المحاكاة:</strong> يمكنك الاختيار عند بدء الجلسة بين <em>النمط القياسي الشامل</em> (المحاكاة + الأسئلة النظرية لنيل 20/20) أو <em>نمط التدريب العملي فقط</em> (دون أسئلة، وتُخصم نقاطها الـ 6.00 كاملة تحفيزاً لخوض التحدي النظري).
+            </span>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -555,6 +609,10 @@
             <span>الجانب المهاري (العملي):</span>
             <strong id="finalePracticalScore">13.00 / 14.00</strong>
           </div>
+        </div>
+
+        <div id="finaleQuizSkipNotice" style="display: none; margin-top: 10px; padding: 10px 14px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; font-size: 12px; color: #fca5a5; line-height: 1.5;">
+          💡 <strong>تنبيه تحفيزي:</strong> تم إجراء هذه الجلسة في نمط <em>تخطي الأسئلة التقويمية</em> فخسرت 6.00 نقاط كاملة! لخوض التحدي الكامل وتحصيل العلامة الكاملة (20/20)، أعد المحاكاة في النمط الكامل مع تفعيل الأسئلة.
         </div>
 
         <div style="margin-top: 14px;">
@@ -805,6 +863,31 @@
     });
 
     function bindHudControls() {
+      // View & Appearance Dropdown Menu
+      const btnViewMenu = document.getElementById('btnViewMenu');
+      const viewMenuDropdown = document.getElementById('viewMenuDropdown');
+      if (btnViewMenu && viewMenuDropdown) {
+        btnViewMenu.addEventListener('click', (e) => {
+          e.stopPropagation();
+          viewMenuDropdown.classList.toggle('open');
+          if (window.soundSynth) window.soundSynth.playClick();
+        });
+
+        // Close on click outside
+        document.addEventListener('click', (e) => {
+          if (!viewMenuDropdown.contains(e.target)) {
+            viewMenuDropdown.classList.remove('open');
+          }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && viewMenuDropdown.classList.contains('open')) {
+            viewMenuDropdown.classList.remove('open');
+          }
+        });
+      }
+
       // Theme Toggle (Light, Dark, High-Contrast Dark, High-Contrast Light)
       const btnTheme = document.getElementById('btnToggleTheme');
       const themeList = ['light', 'dark', 'hc-dark', 'hc-light'];
@@ -1050,16 +1133,31 @@
           if (lastNameError) lastNameError.style.display = 'none';
           if (firstNameError) firstNameError.style.display = 'none';
 
+          const quizModeEl = document.getElementById('regQuizMode');
+          const quizMode = quizModeEl ? quizModeEl.value : 'with_quiz';
+          const skipQuiz = (quizMode === 'without_quiz');
+
           if (window.soundSynth) window.soundSynth.playClick();
           window.stateEngine.initSession({
             firstName,
             lastName,
             group,
-            mode
+            mode,
+            quizMode,
+            skipQuiz
           });
 
           closeSessionModal();
           window.stateEngine.goToPhase(1);
+        });
+      }
+
+      // Quiz Mode Option Change (Shows motivating notice if without_quiz is selected)
+      const regQuizMode = document.getElementById('regQuizMode');
+      const quizModeNotice = document.getElementById('quizModeNotice');
+      if (regQuizMode && quizModeNotice) {
+        regQuizMode.addEventListener('change', () => {
+          quizModeNotice.style.display = regQuizMode.value === 'without_quiz' ? 'block' : 'none';
         });
       }
 

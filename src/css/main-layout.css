@@ -413,6 +413,7 @@ html, body {
   z-index: 200;
   pointer-events: auto;
   position: relative;
+  overflow: visible !important;
   backdrop-filter: blur(10px);
 }
 
@@ -551,6 +552,164 @@ html, body {
 .hud-btn-danger:hover {
   background: #ef4444;
   color: #ffffff;
+}
+
+/* HUD Dropdown Menu Component */
+.hud-dropdown {
+  position: relative;
+  display: inline-block;
+  z-index: 210;
+}
+
+.hud-dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.hud-dropdown-toggle .dropdown-arrow {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.hud-dropdown.open .hud-dropdown-toggle .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.hud-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 240px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  padding: 8px 0;
+  z-index: 350;
+  display: none;
+  backdrop-filter: blur(16px);
+  animation: hudDropdownFade 0.15s ease-out;
+}
+
+[dir="rtl"] .hud-dropdown-menu {
+  left: auto;
+  right: 0;
+}
+
+[data-theme="dark"] .hud-dropdown-menu {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="hc-dark"] .hud-dropdown-menu {
+  background: #000000;
+  border: 2px solid #00ffff;
+  box-shadow: none;
+}
+
+[data-theme="hc-light"] .hud-dropdown-menu {
+  background: #ffffff;
+  border: 2px solid #000000;
+  box-shadow: none;
+}
+
+.hud-dropdown.open .hud-dropdown-menu {
+  display: block;
+}
+
+@keyframes hudDropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hud-dropdown-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 4px 14px 2px;
+  user-select: none;
+}
+
+.hud-dropdown-item {
+  width: 100%;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: right;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.hud-dropdown-item:hover {
+  background: var(--hud-btn-hover);
+  color: var(--accent-color);
+}
+
+.hud-dropdown-item.active {
+  background: rgba(0, 120, 212, 0.15);
+  color: var(--accent-color);
+  font-weight: 700;
+}
+
+.hud-dropdown-item .item-icon {
+  font-size: 14px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.hud-dropdown-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 6px 0;
+  opacity: 0.6;
+}
+
+.hud-dropdown-font-box {
+  padding: 4px 12px 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-dropdown-font-btn {
+  flex: 1;
+  padding: 5px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 4px;
+  border: 1px solid var(--hud-btn-border);
+  background: var(--hud-btn-bg);
+  color: var(--hud-btn-text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.hud-dropdown-font-btn:hover {
+  background: var(--hud-btn-hover);
+  border-color: var(--accent-color);
 }
 
 /* 2. Virtual Monitor Container & Dual View Mode Rig */

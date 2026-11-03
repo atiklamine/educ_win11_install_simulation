@@ -22,6 +22,7 @@ class StateEngine {
     this.practicalScore = 14.00; // starts full, penalized on procedural errors
     this.penalties = [];
     this.diagnosticErrors = [];
+    this.skipQuiz = false;
 
     // Session Timers
     this.timerSeconds = 1800; // 30 mins in exam mode
@@ -118,6 +119,7 @@ class StateEngine {
     this.practicalScore = 14.00;
     this.penalties = [];
     this.diagnosticErrors = [];
+    this.skipQuiz = false;
 
     // 3. Clear student data
     this.student = {
@@ -248,6 +250,10 @@ class StateEngine {
     if (firstNameError) firstNameError.style.display = 'none';
     const regModeSelect = document.getElementById('regMode');
     if (regModeSelect) regModeSelect.value = 'exam';
+    const regQuizSelect = document.getElementById('regQuizMode');
+    if (regQuizSelect) regQuizSelect.value = 'with_quiz';
+    const quizNotice = document.getElementById('quizModeNotice');
+    if (quizNotice) quizNotice.style.display = 'none';
 
     // 12. Render initial pitch-black Phase 1 Workstation standby screen
     if (typeof window.renderPhaseScreen === 'function') {
@@ -284,6 +290,11 @@ class StateEngine {
     this.practicalScore = 14.00;
     this.penalties = [];
     this.diagnosticErrors = [];
+    this.skipQuiz = !!(studentData && (studentData.skipQuiz === true || studentData.quizMode === 'without_quiz'));
+    if (this.skipQuiz) {
+      this.cognitiveScore = 0;
+      this.diagnosticErrors.push('تم تخطي الأسئلة التقويمية بطلب من التلميذ (خصم كامل الجانب المعرفي: 0.00 / 6.00)');
+    }
     this.isCompleted = false;
     this.isSessionActive = true;
 
@@ -478,6 +489,11 @@ class StateEngine {
       studentModeEl.textContent = this.student.mode === 'exam' ? 'امتحان (صارم)' : 'تدريب (حر)';
     }
 
+    const quizBadge = document.getElementById('hudQuizModeBadge');
+    if (quizBadge) {
+      quizBadge.style.display = this.skipQuiz ? 'inline-flex' : 'none';
+    }
+
     this.updateHUDTimer();
     this.updateHUDScore();
   }
@@ -562,8 +578,17 @@ class StateEngine {
       scoreApprec.textContent = apprec.text;
       scoreApprec.className = `badge-appreciation ${apprec.class}`;
     }
-    if (cogScore) cogScore.textContent = `${this.cognitiveScore.toFixed(2)} / 6.00`;
+    if (cogScore) {
+      cogScore.innerHTML = this.skipQuiz
+        ? `${this.cognitiveScore.toFixed(2)} / 6.00 <span style="font-size: 11px; color: #ef4444; font-weight: normal;">(تم تخطي الأسئلة: -6.00)</span>`
+        : `${this.cognitiveScore.toFixed(2)} / 6.00`;
+    }
     if (pracScore) pracScore.textContent = `${this.practicalScore.toFixed(2)} / 14.00`;
+
+    const skipNotice = document.getElementById('finaleQuizSkipNotice');
+    if (skipNotice) {
+      skipNotice.style.display = this.skipQuiz ? 'block' : 'none';
+    }
 
     if (durSpan) {
       const m = Math.floor(this.elapsedSeconds / 60);

@@ -123,6 +123,11 @@ class QuizManager {
   }
 
   showQuizForBank(bankKey, onComplete) {
+    if (window.stateEngine && window.stateEngine.skipQuiz) {
+      if (typeof onComplete === 'function') onComplete();
+      return;
+    }
+
     this.currentBankKey = bankKey;
     this.onQuizCompleteCallback = onComplete;
     this.attempts = 0;

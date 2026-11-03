@@ -119,7 +119,10 @@ class ReportPdf {
         ]
       },
       diagnosticLog: se.diagnosticErrors,
-      penalties: se.penalties,
+      penalties: [
+        ...(se.skipQuiz ? [{ phase: 'عام', reason: 'تخطي الأسئلة التقويمية بطلب من التلميذ (خصم كامل الجانب المعرفي)', deduction: 6.00 }] : []),
+        ...se.penalties
+      ],
       sessionMeta: {
         date: now.toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' }),
         time: now.toLocaleTimeString('ar-DZ'),
@@ -129,8 +132,7 @@ class ReportPdf {
       },
       developer: {
         title: 'أستاذ مادة المعلوماتية - الأغواط',
-        email: 'hadj.aissa.informatique@gmail.com',
-        phone: '00213.662.60.82'
+        email: 'hadj.aissa.informatique@gmail.com'
       }
     };
   }
