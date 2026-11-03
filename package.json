@@ -48,8 +48,10 @@
       "main.js",
       "preload.js",
       "package.json",
+      "index.html",
       "src/**/*",
       "assets/**/*",
+      "report/**/*",
       "!dist/**",
       "!dist - Copie/**"
     ],

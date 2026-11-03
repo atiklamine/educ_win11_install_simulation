@@ -1,9 +1,22 @@
 /**
  * Test PDF Export via Electron printToPDF
  */
-const { app, BrowserWindow, ipcMain } = require('electron');
+const electronModule = require('electron');
+if (typeof electronModule === 'string' || !electronModule.app) {
+  const { spawnSync } = require('child_process');
+  const electronBin = typeof electronModule === 'string' ? electronModule : require('electron');
+  const cleanEnv = { ...process.env };
+  delete cleanEnv.ELECTRON_RUN_AS_NODE;
+  const result = spawnSync(electronBin, [__filename], { env: cleanEnv, stdio: 'inherit' });
+  process.exit(result.status !== null ? result.status : 0);
+}
+
+const { app, BrowserWindow, ipcMain } = electronModule;
 const path = require('path');
 const fs = require('fs');
+
+app.commandLine.appendSwitch('disable-gpu');
+app.commandLine.appendSwitch('no-sandbox');
 
 // Require main.js functions or simulate save-pdf-report
 app.whenReady().then(async () => {

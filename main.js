@@ -341,7 +341,13 @@ ipcMain.handle('save-pdf-report', async (_event, data) => {
       }
     });
 
-    const reportTemplatePath = path.join(__dirname, 'report', 'report-template.html');
+    let reportTemplatePath = path.join(__dirname, 'report', 'report-template.html');
+    if (!fs.existsSync(reportTemplatePath)) {
+      const fallbackPath = path.join(__dirname, 'src', 'report', 'report-template.html');
+      if (fs.existsSync(fallbackPath)) {
+        reportTemplatePath = fallbackPath;
+      }
+    }
     await printWindow.loadFile(reportTemplatePath);
 
     // Inject data into the template
