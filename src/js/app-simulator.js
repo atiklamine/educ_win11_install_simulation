@@ -992,11 +992,20 @@ function renderPhase5Partitioning(container) {
   let gptCreated = window.stateEngine.partitionConfig.gptCreated;
   let selectedPartId = gptCreated ? 'part4' : 'part0';
   let primaryFormatted = window.stateEngine.partitionConfig.primaryFormattedNTFS;
+  let primaryFileSystem = window.stateEngine.partitionConfig.fileSystem || (primaryFormatted ? 'NTFS' : '');
+  let primarySizeMb = 524288;
+  let primarySizeGb = '511.2 GB';
+  let remainingSizeGb = null;
+  let showNewSizeBar = false;
+  let showFormatDialog = false;
+
+  // Has USB attached in workstation
+  const hasUsbMedia = window.stateEngine.selectedMedia === 'usb' || window.stateEngine.selectedMedia === 'usb_32gb' || (!window.stateEngine.secondBootConfig.usbUnplugged && window.stateEngine.currentPhase <= 5);
 
   function redraw() {
     container.innerHTML = `
       <div class="win11-setup-backdrop">
-        <div class="win11-window" style="width: 740px;">
+        <div class="win11-window" style="width: 760px;">
           <div class="win11-titlebar">
             <span>Windows Setup</span>
             <span style="color: #888;">&times;</span>
@@ -1004,9 +1013,12 @@ function renderPhase5Partitioning(container) {
 
           <div class="win11-body">
             <div>
-              <h2 class="win11-step-heading">Where do you want to install Windows?</h2>
-              <p class="win11-step-desc" style="margin-bottom: 12px; font-size: 11.5px; color: #a0a0a0;">
-                Select the unallocated drive or partition where you want to install Windows.
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <h2 class="win11-step-heading" style="margin-bottom: 0;">Where do you want to install Windows?</h2>
+                <span style="font-size: 11px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 4px; padding: 2px 8px;">التهيئة المنطقية والتجزئة</span>
+              </div>
+              <p class="win11-step-desc" style="margin-bottom: 10px; font-size: 11.5px; color: #a0a0a0;">
+                حدد مكان تثبيت نظام Windows. يجب اختيار القرص الصلب الداخلي (Drive 0 SSD)، تحديد الحجم، وتهيئته بنظام NTFS.
               </p>
 
               <div class="partition-table-container">
@@ -1044,12 +1056,65 @@ function renderPhase5Partitioning(container) {
                   </div>
                   <div class="partition-row ${selectedPartId === 'part4' ? 'selected' : ''}" data-id="part4">
                     <span><strong>Drive 0 Partition 4</strong></span>
-                    <span>511.2 GB</span>
-                    <span>511.2 GB</span>
+                    <span>${primarySizeGb}</span>
+                    <span>${primarySizeGb}</span>
                     <span><strong>${primaryFormatted ? 'Primary (NTFS)' : 'Unallocated'}</strong></span>
                   </div>
+                  ${remainingSizeGb ? `
+                    <div class="partition-row ${selectedPartId === 'part_unalloc' ? 'selected' : ''}" data-id="part_unalloc">
+                      <span>Drive 0 Unallocated Space</span>
+                      <span>${remainingSizeGb}</span>
+                      <span>${remainingSizeGb}</span>
+                      <span></span>
+                    </div>
+                  ` : ''}
                 `}
+                ${hasUsbMedia ? `
+                  <div class="partition-row ${selectedPartId === 'part_usb' ? 'selected' : ''}" data-id="part_usb" style="border-top: 1px dashed rgba(255, 255, 255, 0.15);">
+                    <span style="color: #fca5a5;">Drive 1 Partition 1: Kingston USB</span>
+                    <span>32.0 GB</span>
+                    <span>28.5 GB</span>
+                    <span style="color: #fca5a5;">Primary (FAT32)</span>
+                  </div>
+                ` : ''}
               </div>
+
+              ${showNewSizeBar ? `
+                <div class="partition-new-bar" style="margin-top: 8px; padding: 6px 12px; background: rgba(0, 120, 212, 0.15); border: 1px solid #0078d4; border-radius: 4px; display: flex; align-items: center; gap: 8px; font-size: 11.5px;">
+                  <span style="color: #ffffff; font-weight: 600;">Size:</span>
+                  <input type="number" id="inpPartSizeMb" style="width: 100px; padding: 3px 6px; background: #1e1e1e; border: 1px solid #0078d4; color: #fff; font-size: 11.5px; border-radius: 3px;" value="${primarySizeMb}" min="32768" max="524288" step="1024">
+                  <span style="color: #cbd5e1;">MB (الحد الأدنى المطلوب 64 GB = 65536 MB)</span>
+                  <button class="fluent-btn fluent-btn-accent" id="btnApplyNewPart" style="padding: 2px 12px; font-size: 11px;">Apply</button>
+                  <button class="fluent-btn fluent-btn-standard" id="btnCancelNewPart" style="padding: 2px 10px; font-size: 11px;">Cancel</button>
+                </div>
+              ` : ''}
+
+              ${showFormatDialog ? `
+                <div class="part-format-dialog" style="margin-top: 8px; padding: 10px 14px; background: rgba(15, 23, 42, 0.95); border: 1px solid #0078d4; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <strong style="color: #38bdf8; font-size: 12px;">التهيئة المنطقية للقسم (Logical Formatting - File System)</strong>
+                    <span style="font-size: 10.5px; color: #94a3b8;">اختر نظام الملفات:</span>
+                  </div>
+                  <div style="display: flex; gap: 18px; margin-bottom: 10px; font-size: 11.5px; color: #fff;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                      <input type="radio" name="fsChoice" value="NTFS" ${primaryFileSystem === 'NTFS' || !primaryFileSystem ? 'checked' : ''}>
+                      <strong style="color: #34d399;">NTFS</strong> (مطلوب وموصى به لـ Windows 11)
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                      <input type="radio" name="fsChoice" value="FAT32" ${primaryFileSystem === 'FAT32' ? 'checked' : ''}>
+                      FAT32
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                      <input type="radio" name="fsChoice" value="exFAT" ${primaryFileSystem === 'exFAT' ? 'checked' : ''}>
+                      exFAT
+                    </label>
+                  </div>
+                  <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                    <button class="fluent-btn fluent-btn-accent" id="btnConfirmFormat" style="padding: 2px 14px; font-size: 11px;">Format (تهيئة القسم)</button>
+                    <button class="fluent-btn fluent-btn-standard" id="btnCancelFormat" style="padding: 2px 10px; font-size: 11px;">Cancel</button>
+                  </div>
+                </div>
+              ` : ''}
 
               <div class="partition-toolbar">
                 <button class="part-tool-btn" id="btnPartRefresh" title="Refresh">
@@ -1112,33 +1177,78 @@ function renderPhase5Partitioning(container) {
       });
     }
 
-    // New Partition Button (Creates GPT Structure with authentic Windows prompt)
+    // New Partition Button
     const btnNew = container.querySelector('#btnPartNew');
     if (btnNew) {
       btnNew.addEventListener('click', () => {
+        if (selectedPartId === 'part_usb') {
+          alert('Windows cannot modify partitions on the active installation media (USB Flash Drive).');
+          return;
+        }
+        showNewSizeBar = true;
+        redraw();
+      });
+    }
+
+    // Apply New Partition
+    const btnApplyNew = container.querySelector('#btnApplyNewPart');
+    if (btnApplyNew) {
+      btnApplyNew.addEventListener('click', () => {
+        const inpSize = container.querySelector('#inpPartSizeMb');
+        const parsedMb = parseInt(inpSize ? inpSize.value : '524288', 10) || 524288;
+
+        if (parsedMb < 65536) {
+          window.soundSynth.playErrorBeep();
+          window.stateEngine.recordPenalty(5, 0.50, 'تحديد مساحة غير كافية لقسم تثبيت Windows 11 (أقل من 64 GB)', 'يشترط Windows 11 مساحة لا تقل عن 64 GB (65536 MB) لتثبيت النظام.');
+          alert('The selected partition size is too small. Windows 11 requires at least 64 GB (65,536 MB) of storage space.');
+          return;
+        }
+
         const confirmNew = confirm('To ensure that all Windows features work correctly, Windows might create additional partitions for system files.\n\nClick OK to proceed with creating partitions.');
         if (confirmNew) {
           if (window.soundSynth) window.soundSynth.playSuccess();
           gptCreated = true;
           window.stateEngine.partitionConfig.gptCreated = true;
+          primarySizeMb = parsedMb;
+          primarySizeGb = (parsedMb / 1024).toFixed(1) + ' GB';
+
+          const totalDiskMb = 524288;
+          const overheadMb = 100 + 16 + 650;
+          const remainingMb = totalDiskMb - parsedMb - overheadMb;
+
+          if (remainingMb > 1024) {
+            remainingSizeGb = (remainingMb / 1024).toFixed(1) + ' GB';
+          } else {
+            remainingSizeGb = null;
+          }
+
+          showNewSizeBar = false;
           selectedPartId = 'part4'; // auto select Primary partition 4
           redraw();
         }
       });
     }
 
-    // Format Button (Mandatory NTFS with authentic Windows confirmation)
+    const btnCancelNew = container.querySelector('#btnCancelNewPart');
+    if (btnCancelNew) {
+      btnCancelNew.addEventListener('click', () => {
+        showNewSizeBar = false;
+        redraw();
+      });
+    }
+
+    // Format Button
     const btnFormat = container.querySelector('#btnPartFormat');
     if (btnFormat) {
       btnFormat.addEventListener('click', () => {
+        if (selectedPartId === 'part_usb') {
+          alert('Windows cannot format the active installation media.');
+          return;
+        }
+
         if (selectedPartId === 'part4') {
-          const confirmFormat = confirm('The partition might contain recovery files, system files, or important software from your computer manufacturer. If you format this partition, any data stored on it will be lost.\n\nClick OK to format.');
-          if (confirmFormat) {
-            if (window.soundSynth) window.soundSynth.playSuccess();
-            primaryFormatted = true;
-            window.stateEngine.partitionConfig.primaryFormattedNTFS = true;
-            redraw();
-          }
+          showFormatDialog = true;
+          redraw();
         } else {
           window.soundSynth.playErrorBeep();
           window.stateEngine.recordPenalty(5, 0.50, 'محاولة تهيئة قسم نظام محجوز بدلاً من القسم الأساسي');
@@ -1147,14 +1257,58 @@ function renderPhase5Partitioning(container) {
       });
     }
 
+    // Confirm Format Dialog
+    const btnConfirmFmt = container.querySelector('#btnConfirmFormat');
+    if (btnConfirmFmt) {
+      btnConfirmFmt.addEventListener('click', () => {
+        const checkedFs = container.querySelector('input[name="fsChoice"]:checked');
+        const chosenFs = checkedFs ? checkedFs.value : 'NTFS';
+
+        const confirmFormat = confirm('The partition might contain recovery files, system files, or important software from your computer manufacturer. If you format this partition, any data stored on it will be lost.\n\nClick OK to format with ' + chosenFs + '.');
+        if (confirmFormat) {
+          primaryFileSystem = chosenFs;
+          window.stateEngine.partitionConfig.fileSystem = chosenFs;
+
+          if (chosenFs === 'NTFS') {
+            if (window.soundSynth) window.soundSynth.playSuccess();
+            primaryFormatted = true;
+            window.stateEngine.partitionConfig.primaryFormattedNTFS = true;
+          } else {
+            if (window.soundSynth) window.soundSynth.playErrorBeep();
+            primaryFormatted = false;
+            window.stateEngine.partitionConfig.primaryFormattedNTFS = false;
+          }
+          showFormatDialog = false;
+          redraw();
+        }
+      });
+    }
+
+    const btnCancelFmt = container.querySelector('#btnCancelFormat');
+    if (btnCancelFmt) {
+      btnCancelFmt.addEventListener('click', () => {
+        showFormatDialog = false;
+        redraw();
+      });
+    }
+
     // Delete Button
     const btnDelete = container.querySelector('#btnPartDelete');
     if (btnDelete) {
       btnDelete.addEventListener('click', () => {
+        if (selectedPartId === 'part_usb') {
+          alert('Windows cannot delete the active installation media partition.');
+          return;
+        }
         gptCreated = false;
         primaryFormatted = false;
+        primaryFileSystem = '';
+        remainingSizeGb = null;
+        primarySizeMb = 524288;
+        primarySizeGb = '511.2 GB';
         window.stateEngine.partitionConfig.gptCreated = false;
         window.stateEngine.partitionConfig.primaryFormattedNTFS = false;
+        window.stateEngine.partitionConfig.fileSystem = null;
         selectedPartId = 'part0';
         redraw();
       });
@@ -1164,6 +1318,18 @@ function renderPhase5Partitioning(container) {
     const btnNext = container.querySelector('#btnPartNext');
     if (btnNext) {
       btnNext.addEventListener('click', () => {
+        if (selectedPartId === 'part_usb') {
+          window.soundSynth.playErrorBeep();
+          window.stateEngine.recordPenalty(
+            5,
+            1.00,
+            'محاولة تثبيت نظام التشغيل على فلاش ديسك USB خارجي بدلاً من القرص الصلب الداخلي',
+            'لا يمكن تثبيت نظام التشغيل على وسيط USB خارجي؛ يجب دائماً اختيار القرص الصلب الداخلي (Drive 0 SSD) لتثبيت النظام.'
+          );
+          alert('Windows cannot be installed to this disk. Setup does not support configuration of or installation to disks connected through a USB port. Please select the internal hard drive (Drive 0).');
+          return;
+        }
+
         if (!gptCreated) {
           window.soundSynth.playErrorBeep();
           window.stateEngine.recordPenalty(5, 1.00, 'محاولة المتابعة على مساحة غير مخصصة دون إنشاء الأقسام', 'يجب إنشاء جدول الأقسام أولاً بالضغط على New.');
@@ -1180,13 +1346,18 @@ function renderPhase5Partitioning(container) {
 
         if (!primaryFormatted) {
           window.soundSynth.playErrorBeep();
+          const isWrongFs = primaryFileSystem && primaryFileSystem !== 'NTFS';
           window.stateEngine.recordPenalty(
             5,
             1.00,
-            'محاولة المتابعة على قسم غير مهيأ دون تهيئته بنظام NTFS',
+            isWrongFs ? 'اختيار نظام ملفات غير صالح (' + primaryFileSystem + ') بدلاً من NTFS لقسم النظام' : 'محاولة المتابعة على قسم غير مهيأ دون تهيئته بنظام NTFS',
             'يشترط Windows 11 تهيئة القسم الأساسي بنظام NTFS لضمان الأمان والصلاحيات وموثوقية التخزين.'
           );
-          alert('The selected partition is unallocated. You must click Format to format it with the NTFS file system before Windows can be installed.');
+          if (isWrongFs) {
+            alert('Windows cannot be installed to this partition. The partition is formatted with ' + primaryFileSystem + '. Windows 11 requires the NTFS file system. Please select Format and choose NTFS.');
+          } else {
+            alert('The selected partition is unallocated. You must click Format to format it with the NTFS file system before Windows can be installed.');
+          }
           return;
         }
 
@@ -1218,6 +1389,7 @@ function renderPhase6Installation(container) {
 
         <div class="win11-body">
           <div>
+            <div style="display: inline-block; background: rgba(0, 120, 212, 0.2); border: 1px solid #0078d4; border-radius: 4px; padding: 3px 10px; font-size: 11.5px; color: #38bdf8; margin-bottom: 10px; font-weight: 600;">🔵 المرحلة الأولى لتنصيب النظام: نقل ونسخ ملفات نظام التشغيل من وسيط التثبيت إلى القرص الصلب الداخلي (SSD)</div>
             <h2 class="win11-step-heading">نسخ ملفات النظام وتجهيز التثبيت</h2>
             <p class="win11-step-desc">يرجى الانتظار ريثما يقوم معالج التثبيت بنسخ وفك حزم نظام التشغيل:</p>
 
@@ -1557,18 +1729,23 @@ function renderPhase6UnplugUsb(container) {
 
 function renderPhase6Win11BootLogo(container, onComplete) {
   container.innerHTML = `
-    <div class="virtual-black-screen flex-center" style="flex-direction: column;">
-      <div style="width: 64px; height: 64px; margin-bottom: 28px;">
+    <div class="virtual-black-screen flex-center" style="flex-direction: column; text-align: center; padding: 20px;">
+      <div style="width: 64px; height: 64px; margin-bottom: 20px;">
         <img src="assets/logo-win11-white.svg" class="win11-official-logo" style="width: 100%; height: 100%;" alt="Windows 11">
       </div>
       <div class="spinner-win11"></div>
-      <p style="color: #94a3b8; font-size: 13px; margin-top: 24px;">Getting ready...</p>
+      <p style="color: #94a3b8; font-size: 13.5px; margin-top: 20px;">Getting ready...</p>
+      <div style="margin-top: 18px; max-width: 540px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 12px 18px; color: #f1f5f9; font-size: 12.5px; line-height: 1.6;">
+        <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">📌 تمييز بيداغوجي هام بين مرحلتي التثبيت:</strong>
+        اكتملت <strong>المرحلة الأولى</strong> (نقل ونسخ ملفات النظام من وسيط التثبيت إلى القرص الصلب SSD).<br>
+        تبدأ الآن <strong>المرحلة الثانية</strong>: ضبط إعدادات النظام (OOBE) التي تنطلق وتعمل مباشرة من ملفات الويندوز المخزنة داخل القرص الصلب الداخلي.
+      </div>
     </div>
   `;
 
   setTimeout(() => {
     if (typeof onComplete === 'function') onComplete();
-  }, 3000);
+  }, 3200);
 }
 
 // ==========================================================================
@@ -1583,6 +1760,9 @@ function renderPhase7Country(container) {
 
   container.innerHTML = `
     <div class="oobe-backdrop">
+      <div style="margin-bottom: 12px; display: inline-block; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 4px; padding: 4px 12px; font-size: 12px; color: #34d399; font-weight: 600;">
+        🟢 المرحلة الثانية لتنصيب النظام: ضبط إعدادات نظام التشغيل (OOBE) انطلاقاً من ملفات الويندوز بالقرص الصلب الداخلي
+      </div>
       <div class="oobe-card">
         <h2 class="oobe-title">Is this the right country or region?</h2>
         <p class="oobe-desc">اختر الدولة المناسبة لإعداد بيئة العمل المدرسية:</p>
@@ -2312,6 +2492,14 @@ function renderPhase8Desktop(container) {
   const sleepBtn = container.querySelector('#btnSleepOS');
   if (sleepBtn) {
     sleepBtn.addEventListener('click', () => {
+      const isPhase8AlreadyCompleted = window.stateEngine && window.stateEngine.completedPhases && window.stateEngine.completedPhases.has(8);
+      if (isPhase8AlreadyCompleted) {
+        if (window.soundSynth) window.soundSynth.playClick();
+        if (typeof window.handleHardwarePowerToggle === 'function') {
+          window.handleHardwarePowerToggle(false);
+        }
+        return;
+      }
       window.soundSynth.playErrorBeep();
       window.stateEngine.recordPenalty(8, 0.50, 'اختيار السكون (Sleep) بدلاً من إعادة التشغيل (Restart) لاختبار الإقلاع الذاتي', 'المطلوب هو الضغط على Restart للتحقق الفوري من إقلاع النظام ذاتياً من القرص الداخلي.');
       alert('تنبيه: لاختبار الإقلاع الذاتي والمستقل من القرص الصلب الداخلي، يجب الضغط على Restart (إعادة التشغيل).');
@@ -2320,6 +2508,14 @@ function renderPhase8Desktop(container) {
 
   if (shutdownBtn) {
     shutdownBtn.addEventListener('click', () => {
+      const isPhase8AlreadyCompleted = window.stateEngine && window.stateEngine.completedPhases && window.stateEngine.completedPhases.has(8);
+      if (isPhase8AlreadyCompleted) {
+        if (window.soundSynth) window.soundSynth.playClick();
+        if (typeof window.handleHardwarePowerToggle === 'function') {
+          window.handleHardwarePowerToggle(false);
+        }
+        return;
+      }
       window.soundSynth.playErrorBeep();
       window.stateEngine.recordPenalty(8, 0.50, 'اختيار إيقاف التشغيل بدلاً من إعادة التشغيل (Restart) لاختبار الإقلاع الذاتي', 'المطلوب هو الضغط على Restart للتحقق الفوري من إقلاع النظام ذاتياً من القرص الداخلي.');
       alert('تم النقر على إيقاف التشغيل (Shut down). لمتابعة التحقق العملي النهائي من إقلاع الويندوز المستقل، اختر: Restart (إعادة التشغيل).');
@@ -2549,17 +2745,23 @@ function executeIndependentRebootCycle(container) {
         `;
         setTimeout(() => {
           renderPhase8Desktop(container);
-          window.quizManager.showQuizForBank('bank_final', () => {
-            window.stateEngine.completePhase(8);
-          });
+          const isPhase8AlreadyCompleted = window.stateEngine && window.stateEngine.completedPhases && window.stateEngine.completedPhases.has(8);
+          if (!isPhase8AlreadyCompleted && window.quizManager) {
+            window.quizManager.showQuizForBank('bank_final', () => {
+              window.stateEngine.completePhase(8);
+            });
+          }
         }, 1200);
       } else {
         // Password configured -> Show authentic Windows 11 Login Screen
         renderWin11LoginScreen(container, () => {
           renderPhase8Desktop(container);
-          window.quizManager.showQuizForBank('bank_final', () => {
-            window.stateEngine.completePhase(8);
-          });
+          const isPhase8AlreadyCompleted = window.stateEngine && window.stateEngine.completedPhases && window.stateEngine.completedPhases.has(8);
+          if (!isPhase8AlreadyCompleted && window.quizManager) {
+            window.quizManager.showQuizForBank('bank_final', () => {
+              window.stateEngine.completePhase(8);
+            });
+          }
         });
       }
     }, 2200);

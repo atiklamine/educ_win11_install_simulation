@@ -82,7 +82,11 @@ assert(appJs.includes('isPasswordless') && appJs.includes('win11-login-direct-bt
 // 4.3 Elimination of infinite loops
 assert(appJs.includes('renderPhase8Desktop(container)'), 'renderPhase8Desktop is directly called upon successful login/boot');
 assert(!appJs.includes('while (true)'), 'No infinite loops in simulator engine');
-console.log('  ✓ PASS: Clean final boot loop: direct to desktop when passwordless, login screen when password protected');
+
+// 4.4 Final Assessment Quiz Asked Exactly Once (No repeated quiz on reboot after phase 8 completion)
+assert(appJs.includes('isPhase8AlreadyCompleted') && appJs.includes('completedPhases.has(8)'), 'Phase 8 checks completedPhases before re-triggering final quiz');
+assert(appJs.includes('!isPhase8AlreadyCompleted && window.quizManager'), 'Final quiz bank_final is only shown if Phase 8 is not yet completed');
+console.log('  ✓ PASS: Clean final boot loop: direct to desktop when passwordless, login screen when password protected, quiz asked exactly once');
 
 // -----------------------------------------------------------------------------
 // System & Security Integrity Checks

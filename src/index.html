@@ -43,7 +43,11 @@
         <button class="hud-btn hidden" id="btnOpenFinaleResults" title="عرض بطاقة التقييم والتقرير النهائي" style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #4ade80; font-weight: 700;">&#127881; النتيجة والتقرير</button>
         <button class="hud-btn" id="btnToggleViewMode" title="التبديل بين وضع محطة العمل الكاملة وتكبير شاشة العرض [F10]">🖥️ تكبير شاشة المحاكاة (F10)</button>
         <button class="hud-btn" id="btnToggleFullscreen" title="ملء شاشة التطبيق / نافذة البرنامج ككل [F11]">&#9974; ملء نافذة التطبيق (F11)</button>
-        <button class="hud-btn" id="btnToggleTheme" title="التبديل بين المظهر الفاتح والمظلم (Light / Dark Mode)">☀️ فاتح</button>
+        <button class="hud-btn" id="btnToggleTheme" title="تبديل المظهر (فاتح / داكن / تباين عالي داكن / تباين عالي فاتح)">☀️ فاتح</button>
+        <div class="hud-font-ctrl" style="display: flex; gap: 2px;">
+          <button class="hud-btn" id="btnFontDec" title="تصغير حجم الخط (Font Size -)" style="padding: 4px 7px;">🗚-</button>
+          <button class="hud-btn" id="btnFontInc" title="تكبير حجم الخط (Font Size +)" style="padding: 4px 7px;">🗚+</button>
+        </div>
         <button class="hud-btn" id="btnNewSession" title="بدء جلسة تقييم جديدة">&#10010; جلسة جديدة</button>
         <button class="hud-btn" id="btnOpenExpertGuide" title="دليل النظام الخبير وإرشادات التثبيت">&#128218; دليل النظام الخبير</button>
         <button class="hud-btn hud-btn-accent" id="btnExportPdf" title="استخراج شهادة تقييم الكفاءة PDF">&#128196; تصدير PDF</button>
@@ -442,45 +446,64 @@
 
   <!-- Modal 4: Expert System Simulation Guide -->
   <div class="modal-overlay" id="expertGuideModal">
-    <div class="modal-dialog" style="max-width: 720px;">
+    <div class="modal-dialog" style="max-width: 760px;">
       <div class="modal-header">
-        <h3 class="modal-title">&#128218; دليل النظام الخبير للمحاكاة (The Expert System Guide)</h3>
+        <h3 class="modal-title" style="font-size: 16px;">&#128218; دليل النظام الخبير الشامل لمراحل المحاكاة (1AS)</h3>
         <button class="modal-close-btn" id="btnCloseGuideModal">&times;</button>
       </div>
-      <div class="modal-body">
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
-          دليل إرشادي تقني استباقي يطابق البنية الفيزيائية لمحطة العمل وكود المحاكاة، ويقدم تنبيهات تنبؤية للخطوات الحاسمة:
+      <div class="modal-body" style="font-size: 14px; line-height: 1.7;">
+        <p style="color: var(--text-muted); margin-bottom: 14px; font-weight: 500;">
+          دليل بيداغوجي وتقني منظّم وموجز يوضح خطوات تثبيت نظام Windows 11 والتنبيهات المهارية لمنع الأخطاء وحماية النقاط:
         </p>
 
         <div style="display: flex; flex-direction: column; gap: 12px;">
           <div class="guide-card guide-card-blue">
-            <strong>1. تجهيز المحطة والإقلاع الأولي (POST):</strong>
-            <span>شاشة العرض تبدأ سوداء 100%. اختر وسيط التثبيت من <strong>الرف على اليسار</strong> (مفتاح USB أو قرص DVD)، ثم شغّل الحاسوب عبر <strong>زر الطاقة الحقيقي بالوحدة المركزية على اليمين</strong>. اضغط سريعاً على <strong>[F2 أو Del]</strong> في لوحة المفاتيح الحقيقية خلال 10 ثوانٍ لدخول البيوس (لتفادي خصم -1.00 نقطة). تنبيه: تشغيل الحاسوب دون وسيط يوقف الإقلاع برسالة No bootable device found.</span>
+            <strong style="font-size: 14px;">1. تجهيز المحطة والإقلاع الأولي (POST):</strong>
+            <span>اختر وسيط التثبيت من <strong>الرف على اليسار</strong> (فلاش ديسك USB أو قرص DVD)، ثم شغّل الحاسوب عبر <strong>زر الطاقة الحقيقي بالوحدة المركزية على اليمين</strong>. اضغط سريعاً على <strong>[F2 أو Del]</strong> في لوحة المفاتيح خلال 10 ثوانٍ لدخول البيوس (لتفادي خصم النقاط).</span>
           </div>
 
           <div class="guide-card guide-card-amber">
-            <strong>2. إعدادات البيوس ووسيط الإقلاع (UEFI BIOS):</strong>
-            <span>فعّل <strong>TPM 2.0</strong> و <strong>Secure Boot</strong> في تبويب Security، واجعل وسيط التثبيت كجهاز إقلاع أول في تبويب Boot، ثم اضغط حصراً على <strong>[F10]</strong> في لوحة المفاتيح الحقيقية للحفظ وإعادة التشغيل. ترك القرص الداخلي الفارغ كإقلاع أول يؤدي لرسالة فشل الإقلاع.</span>
+            <strong style="font-size: 14px;">2. إعدادات البيوس ووسيط الإقلاع (UEFI BIOS):</strong>
+            <span>فعّل متطلبات ويندوز 11: <strong>TPM 2.0</strong> و <strong>Secure Boot</strong> من تبويب Security، واجعل وسيط التثبيت كجهاز إقلاع أول في تبويب Boot، ثم اضغط حصراً على <strong>[F10]</strong> في لوحة المفاتيح للحفظ والخروج.</span>
           </div>
 
           <div class="guide-card guide-card-green">
-            <strong>3. التجزئة المنطقية والتهيئة بنظام NTFS:</strong>
-            <span>قسّم مساحة القرص غير المخصصة (New) لإنشاء أقسام GPT الأربعة، ثم حدد القسم الرابع الأساسي (Primary) واضغط <strong>Format</strong> لتهيئته بنظام NTFS قبل النقر على Next.</span>
-          </div>
-
-          <div class="guide-card guide-card-red">
-            <strong>4. كسر حلقة الإقلاع ونزع الوسيط وإعادة ترتيب الإقلاع:</strong>
-            <span>بعد اكتمال نسخ الملفات وبدء إعادة التشغيل، اضغط <strong>[F2 أو Del]</strong> في لوحة المفاتيح لدخول البيوس وإعادة القرص الداخلي <strong>SSD</strong> كإقلاع أول والحفظ بـ <strong>F10</strong>، ثم <strong>انقر مباشرة على وسيط التثبيت في الوحدة المركزية على اليمين لنزعه فيزيائياً</strong> لمنع الوقوع في حلقة التثبيت اللانهائية.</span>
+            <strong style="font-size: 14px;">3. الإعدادات الإقليمية ونوع التثبيت:</strong>
+            <span>اضبط لغة العرض وتنسيق الوقت للجزائر (Algeria) ولوحة المفاتيح (AZERTY)، ثم اختر التثبيت المخصص: <strong>Custom: Install Windows only (advanced)</strong>.</span>
           </div>
 
           <div class="guide-card guide-card-purple">
-            <strong>5. حماية الخصوصية الرقمية والتحكم في العرض:</strong>
-            <span>في شاشة OOBE، عطّل كافة خيارات التتبع الإعلاني السبعة (Turn All OFF). يمكنك التبديل بين محطة العمل الكاملة وتكبير شاشة المحاكاة عبر <strong>[F10]</strong>، وملء نافذة التطبيق بالكامل عبر <strong>[F11]</strong>. نافذة «مساعدة مرحلية» أسفل الشاشة توفر الإرشاد خطوة بخطوة وقابلة للسحب بالكامل.</span>
+            <strong style="font-size: 14px;">4. التجزئة المنطقية والتهيئة بنظام NTFS:</strong>
+            <span>
+              • <strong>مكان التثبيت:</strong> اختر القرص الصلب الداخلي (Drive 0 SSD). احذر اختيار فلاش ديسك USB (Drive 1) لأنه وسيط خارجي مؤقت وليس قرص نظام.<br>
+              • <strong>تحديد الحجم (New):</strong> يمكنك إنشاء قسم بالحجم الذي تريده (شرط ألا يقل عن 64 GB) مع إمكانية استغلال المساحة المتبقية لاحقاً.<br>
+              • <strong>التهيئة المنطقية (Format):</strong> تعني اختيار نظام الملفات؛ ويشترط اختيار <strong>NTFS</strong> حصراً لقسم النظام لدعم الأمان والملفات الكبيرة وموثوقية التخزين.
+            </span>
+          </div>
+
+          <div class="guide-card guide-card-blue">
+            <strong style="font-size: 14px;">5. المرحلة الأولى للتنصيب — نقل الملفات إلى القرص الصلب:</strong>
+            <span>في هذه المرحلة يقوم برنامج التثبيت بنسخ وفك ضغط ملفات النظام من وسيط التثبيت ونقلها إلى القرص الصلب الداخلي SSD.</span>
+          </div>
+
+          <div class="guide-card guide-card-red">
+            <strong style="font-size: 14px;">6. كسر حلقة الإقلاع ونزع وسيط التثبيت فيزيائياً:</strong>
+            <span>بمجرد اكتمال نسخ الملفات وبدء إعادة التشغيل، ادخل البيوس بـ <strong>[F2/Del]</strong> وأعد القرص الداخلي <strong>SSD</strong> كإقلاع أول واحفظ بـ <strong>F10</strong>، ثم <strong>انقر على وسيط التثبيت في الوحدة المركزية لنزعه فيزيائياً</strong> لمنع الوقوع في حلقة التثبيت اللانهائية.</span>
+          </div>
+
+          <div class="guide-card guide-card-green">
+            <strong style="font-size: 14px;">7. المرحلة الثانية للتنصيب — إعدادات نظام التشغيل (OOBE):</strong>
+            <span>يعمل النظام الآن ذاتياً من ملفات الويندوز المنقولة إلى القرص الداخلي SSD. اختر الجزائر، سمّ الحاسوب، أنشئ الحساب، وعطّل كافة خيارات التتبع الإعلاني السبعة (Turn All OFF) لحماية الخصوصية.</span>
+          </div>
+
+          <div class="guide-card guide-card-purple">
+            <strong style="font-size: 14px;">8. الإقلاع الذاتي النهائي والاستقلالية الكاملة:</strong>
+            <span>من سطح المكتب، اضغط Start &gt; Restart للتحقق من إقلاع الويندوز ذاتياً من القرص الداخلي، والإجابة عن السؤال النهائي لختام التقييم واستخراج التقرير.</span>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="fluent-btn fluent-btn-standard" id="btnOkGuide">فهمت التعليمات</button>
+        <button class="fluent-btn fluent-btn-standard" id="btnOkGuide">فهمت التعليمات ومستعد للتطبيق ✔</button>
       </div>
     </div>
   </div>
@@ -767,19 +790,23 @@
     });
 
     function bindHudControls() {
-      // Theme Toggle (Default Light mode, switchable to Dark mode)
+      // Theme Toggle (Light, Dark, High-Contrast Dark, High-Contrast Light)
       const btnTheme = document.getElementById('btnToggleTheme');
+      const themeList = ['light', 'dark', 'hc-dark', 'hc-light'];
+      const themeLabels = {
+        'light': { icon: '☀️ فاتح', title: 'المظهر الحالي: فاتح (انقر للتبديل إلى الداكن)' },
+        'dark': { icon: '🌙 داكن', title: 'المظهر الحالي: داكن (انقر للتبديل إلى تباين عالي داكن)' },
+        'hc-dark': { icon: '🔲 تباين داكن', title: 'المظهر الحالي: تباين عالي داكن (انقر للتبديل إلى تباين عالي فاتح)' },
+        'hc-light': { icon: '🔳 تباين فاتح', title: 'المظهر الحالي: تباين عالي فاتح (انقر للتبديل إلى الفاتح)' }
+      };
+
       const applyTheme = (theme) => {
+        if (!themeList.includes(theme)) theme = 'light';
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('app_theme', theme);
-        if (btnTheme) {
-          if (theme === 'dark') {
-            btnTheme.innerHTML = '🌙 داكن';
-            btnTheme.title = 'المظهر الحالي: داكن (انقر للتبديل إلى الفاتح)';
-          } else {
-            btnTheme.innerHTML = '☀️ فاتح';
-            btnTheme.title = 'المظهر الحالي: فاتح (انقر للتبديل إلى الداكن)';
-          }
+        if (btnTheme && themeLabels[theme]) {
+          btnTheme.innerHTML = themeLabels[theme].icon;
+          btnTheme.title = themeLabels[theme].title;
         }
       };
 
@@ -789,9 +816,45 @@
       if (btnTheme) {
         btnTheme.addEventListener('click', () => {
           const activeTheme = document.documentElement.getAttribute('data-theme') || 'light';
-          const nextTheme = activeTheme === 'light' ? 'dark' : 'light';
+          const currentIndex = themeList.indexOf(activeTheme);
+          const nextTheme = themeList[(currentIndex + 1) % themeList.length];
           applyTheme(nextTheme);
           if (window.soundSynth) window.soundSynth.playClick();
+        });
+      }
+
+      // Font Size Controls (Normal, Large, X-Large)
+      const fontSizes = ['normal', 'large', 'xlarge'];
+      const applyFontSize = (size) => {
+        if (!fontSizes.includes(size)) size = 'normal';
+        document.documentElement.setAttribute('data-font-size', size);
+        localStorage.setItem('app_font_size', size);
+      };
+      const savedFontSize = localStorage.getItem('app_font_size') || 'normal';
+      applyFontSize(savedFontSize);
+
+      const btnFontDec = document.getElementById('btnFontDec');
+      const btnFontInc = document.getElementById('btnFontInc');
+
+      if (btnFontInc) {
+        btnFontInc.addEventListener('click', () => {
+          const cur = document.documentElement.getAttribute('data-font-size') || 'normal';
+          const idx = fontSizes.indexOf(cur);
+          if (idx < fontSizes.length - 1) {
+            applyFontSize(fontSizes[idx + 1]);
+            if (window.soundSynth) window.soundSynth.playClick();
+          }
+        });
+      }
+
+      if (btnFontDec) {
+        btnFontDec.addEventListener('click', () => {
+          const cur = document.documentElement.getAttribute('data-font-size') || 'normal';
+          const idx = fontSizes.indexOf(cur);
+          if (idx > 0) {
+            applyFontSize(fontSizes[idx - 1]);
+            if (window.soundSynth) window.soundSynth.playClick();
+          }
         });
       }
 
