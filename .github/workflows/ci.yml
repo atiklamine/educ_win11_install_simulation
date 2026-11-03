@@ -41,4 +41,9 @@ jobs:
           node test_prompt4_customization.js
           node test_prompt5_investigation.js
           node test_prompt6_pointer_and_cleanup.js
+          node test_prompt9_modifications.js
+          node test_phase8_single_quiz.js
+          node test_final_enhancements.js
+          node test_hud_dropdown_and_skip_quiz.js
+          node test_media_consistency.js
 
