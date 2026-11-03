@@ -16,13 +16,14 @@ assert(mainCss.includes('--screen-bg: #000000;'), '--screen-bg set to pure black
 assert(mainCss.includes('background: #000000 !important;'), 'Expanded background forced to black to eliminate white screen');
 console.log('  ✓ PASS: Screen maximization flex display & pure black background verified (zero white flash)');
 
-// 2. Phase 1 vs Phase 2 Distinction
-console.log('\n[Check 2] Verifying Pedagogical Distinction (File Transfer vs OOBE from SSD)...');
-assert(appJs.includes('المرحلة الأولى لتنصيب النظام: نقل ونسخ ملفات نظام التشغيل'), 'Phase 6 badge distinguishes Phase 1: copying files');
-assert(appJs.includes('المرحلة الثانية لتنصيب النظام: ضبط إعدادات نظام التشغيل (OOBE)') || appJs.includes('المرحلة الثانية: ضبط إعدادات النظام (OOBE)'), 'Phase 6 logo & Phase 7 distinguish Phase 2: OOBE from SSD');
-assert(seJs.includes('المرحلة الأولى لتنصيب النظام - نقل ونسخ الملفات'), 'StateEngine hint emphasizes Phase 1 file copy');
-assert(seJs.includes('المرحلة الثانية لتنصيب النظام - إعدادات نظام التشغيل OOBE'), 'StateEngine hint emphasizes Phase 2 OOBE from SSD');
-console.log('  ✓ PASS: Clear pedagogical distinction between file copy to SSD vs OOBE from SSD confirmed');
+// 2. OS Screen Authenticity & Pedagogical Phase Distinction in Companion Tools
+console.log('\n[Check 2] Verifying OS Screen Authenticity & Pedagogical Distinction in Assistance Tools...');
+assert(!appJs.includes('🔵 المرحلة الأولى لتنصيب النظام'), 'No artificial banners inside Phase 6 OS window (authentic Windows setup)');
+assert(!appJs.includes('🟢 المرحلة الثانية لتنصيب النظام'), 'No artificial banners inside Phase 7 OOBE screen (authentic Windows OOBE)');
+assert(!appJs.includes('📌 تمييز بيداغوجي'), 'No pedagogical box in Windows boot screen');
+assert(seJs.includes('المرحلة الأولى لتنصيب النظام - نقل ونسخ الملفات'), 'StateEngine hint emphasizes Phase 1 file copy in draggable assistance window');
+assert(seJs.includes('المرحلة الثانية لتنصيب النظام - إعدادات نظام التشغيل OOBE'), 'StateEngine hint emphasizes Phase 2 OOBE from SSD in draggable assistance window');
+console.log('  ✓ PASS: OS screens are 100% authentic, pedagogical guidance properly situated in assistance window and guide');
 
 // 3. Phase 5 Partitioning (USB Drive, Custom Sizing, Format FS Choice, Logical Format Notice)
 console.log('\n[Check 3] Verifying Phase 5 Partitioning Enhancements...');
@@ -44,12 +45,17 @@ assert(indexHtml.includes('btnFontDec') && indexHtml.includes('btnFontInc'), 'Fo
 assert(indexHtml.includes('hc-dark') && indexHtml.includes('hc-light'), 'Theme cycling includes high contrast themes');
 console.log('  ✓ PASS: High-contrast themes (dark & light) and font size controls verified');
 
-// 5. System Guide Updates
-console.log('\n[Check 5] Verifying System Guide (The Expert System Guide)...');
-assert(indexHtml.includes('دليل النظام الخبير الشامل لمراحل المحاكاة'), 'Guide header updated');
+// 5. System Guide & About Modal Updates
+console.log('\n[Check 5] Verifying System Guide (الدليل الشامل) and About Modal (حول البرنامج)...');
+assert(indexHtml.includes('الدليل الشامل لمراحل المحاكاة وتنصيب Windows 11'), 'Comprehensive Guide modal title updated');
+assert(indexHtml.includes('الدليل الشامل') && indexHtml.includes('btnOpenExpertGuide'), 'HUD button text updated to الدليل الشامل');
 assert(indexHtml.includes('المرحلة الأولى للتنصيب — نقل الملفات إلى القرص الصلب'), 'Guide includes Phase 1 explanation');
 assert(indexHtml.includes('المرحلة الثانية للتنصيب — إعدادات نظام التشغيل (OOBE)'), 'Guide includes Phase 2 explanation');
-console.log('  ✓ PASS: Expert system guide updated with complete, concise, readable instructions');
+assert(!indexHtml.includes('00213.662.60.82'), 'Phone number removed from About modal');
+assert(indexHtml.includes('hadj.aissa.informatique@gmail.com'), 'Email preserved in About modal');
+assert(indexHtml.includes('https://atiklamine.github.io/educ_win11_install_simulation/src/index.html'), 'Live Web link in About modal');
+assert(indexHtml.includes('https://github.com/atiklamine/educ_win11_install_simulation/releases'), 'Releases link in About modal');
+console.log('  ✓ PASS: Comprehensive Guide renamed & aligned; About Modal updated with live links and zero phone number');
 
 // 6. Security and DLL integrity
 console.log('\n[Check 6] Verifying dist/inf.dll Integrity...');

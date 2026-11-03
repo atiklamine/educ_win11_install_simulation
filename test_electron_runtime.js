@@ -1,13 +1,21 @@
 /**
  * Headless Electron Verification Test
  */
-const { app, BrowserWindow } = require('electron');
+const electronModule = require('electron');
+if (typeof electronModule === 'string' || !electronModule.app) {
+  const { spawnSync } = require('child_process');
+  const electronBin = typeof electronModule === 'string' ? electronModule : require('electron');
+  const cleanEnv = { ...process.env };
+  delete cleanEnv.ELECTRON_RUN_AS_NODE;
+  const result = spawnSync(electronBin, [__filename], { env: cleanEnv, stdio: 'inherit' });
+  process.exit(result.status !== null ? result.status : 0);
+}
+
+const { app, BrowserWindow, ipcMain } = electronModule;
 const path = require('path');
 
 app.commandLine.appendSwitch('disable-gpu');
 app.commandLine.appendSwitch('no-sandbox');
-
-const { ipcMain } = require('electron');
 ipcMain.handle('settings:exists', async () => true);
 ipcMain.handle('settings:load', async () => ({
   success: true,

@@ -1013,13 +1013,7 @@ function renderPhase5Partitioning(container) {
 
           <div class="win11-body">
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <h2 class="win11-step-heading" style="margin-bottom: 0;">Where do you want to install Windows?</h2>
-                <span style="font-size: 11px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 4px; padding: 2px 8px;">التهيئة المنطقية والتجزئة</span>
-              </div>
-              <p class="win11-step-desc" style="margin-bottom: 10px; font-size: 11.5px; color: #a0a0a0;">
-                حدد مكان تثبيت نظام Windows. يجب اختيار القرص الصلب الداخلي (Drive 0 SSD)، تحديد الحجم، وتهيئته بنظام NTFS.
-              </p>
+              <h2 class="win11-step-heading">Where do you want to install Windows?</h2>
 
               <div class="partition-table-container">
                 <div class="partition-table-header">
@@ -1083,7 +1077,7 @@ function renderPhase5Partitioning(container) {
                 <div class="partition-new-bar" style="margin-top: 8px; padding: 6px 12px; background: rgba(0, 120, 212, 0.15); border: 1px solid #0078d4; border-radius: 4px; display: flex; align-items: center; gap: 8px; font-size: 11.5px;">
                   <span style="color: #ffffff; font-weight: 600;">Size:</span>
                   <input type="number" id="inpPartSizeMb" style="width: 100px; padding: 3px 6px; background: #1e1e1e; border: 1px solid #0078d4; color: #fff; font-size: 11.5px; border-radius: 3px;" value="${primarySizeMb}" min="32768" max="524288" step="1024">
-                  <span style="color: #cbd5e1;">MB (الحد الأدنى المطلوب 64 GB = 65536 MB)</span>
+                  <span style="color: #cbd5e1;">MB</span>
                   <button class="fluent-btn fluent-btn-accent" id="btnApplyNewPart" style="padding: 2px 12px; font-size: 11px;">Apply</button>
                   <button class="fluent-btn fluent-btn-standard" id="btnCancelNewPart" style="padding: 2px 10px; font-size: 11px;">Cancel</button>
                 </div>
@@ -1092,13 +1086,13 @@ function renderPhase5Partitioning(container) {
               ${showFormatDialog ? `
                 <div class="part-format-dialog" style="margin-top: 8px; padding: 10px 14px; background: rgba(15, 23, 42, 0.95); border: 1px solid #0078d4; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <strong style="color: #38bdf8; font-size: 12px;">التهيئة المنطقية للقسم (Logical Formatting - File System)</strong>
-                    <span style="font-size: 10.5px; color: #94a3b8;">اختر نظام الملفات:</span>
+                    <strong style="color: #ffffff; font-size: 12px;">Format Partition</strong>
+                    <span style="font-size: 10.5px; color: #94a3b8;">File System:</span>
                   </div>
                   <div style="display: flex; gap: 18px; margin-bottom: 10px; font-size: 11.5px; color: #fff;">
                     <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
                       <input type="radio" name="fsChoice" value="NTFS" ${primaryFileSystem === 'NTFS' || !primaryFileSystem ? 'checked' : ''}>
-                      <strong style="color: #34d399;">NTFS</strong> (مطلوب وموصى به لـ Windows 11)
+                      <strong style="color: #38bdf8;">NTFS</strong> (Default)
                     </label>
                     <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
                       <input type="radio" name="fsChoice" value="FAT32" ${primaryFileSystem === 'FAT32' ? 'checked' : ''}>
@@ -1110,7 +1104,7 @@ function renderPhase5Partitioning(container) {
                     </label>
                   </div>
                   <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                    <button class="fluent-btn fluent-btn-accent" id="btnConfirmFormat" style="padding: 2px 14px; font-size: 11px;">Format (تهيئة القسم)</button>
+                    <button class="fluent-btn fluent-btn-accent" id="btnConfirmFormat" style="padding: 2px 14px; font-size: 11px;">OK</button>
                     <button class="fluent-btn fluent-btn-standard" id="btnCancelFormat" style="padding: 2px 10px; font-size: 11px;">Cancel</button>
                   </div>
                 </div>
@@ -1389,7 +1383,6 @@ function renderPhase6Installation(container) {
 
         <div class="win11-body">
           <div>
-            <div style="display: inline-block; background: rgba(0, 120, 212, 0.2); border: 1px solid #0078d4; border-radius: 4px; padding: 3px 10px; font-size: 11.5px; color: #38bdf8; margin-bottom: 10px; font-weight: 600;">🔵 المرحلة الأولى لتنصيب النظام: نقل ونسخ ملفات نظام التشغيل من وسيط التثبيت إلى القرص الصلب الداخلي (SSD)</div>
             <h2 class="win11-step-heading">نسخ ملفات النظام وتجهيز التثبيت</h2>
             <p class="win11-step-desc">يرجى الانتظار ريثما يقوم معالج التثبيت بنسخ وفك حزم نظام التشغيل:</p>
 
@@ -1735,11 +1728,6 @@ function renderPhase6Win11BootLogo(container, onComplete) {
       </div>
       <div class="spinner-win11"></div>
       <p style="color: #94a3b8; font-size: 13.5px; margin-top: 20px;">Getting ready...</p>
-      <div style="margin-top: 18px; max-width: 540px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 12px 18px; color: #f1f5f9; font-size: 12.5px; line-height: 1.6;">
-        <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">📌 تمييز بيداغوجي هام بين مرحلتي التثبيت:</strong>
-        اكتملت <strong>المرحلة الأولى</strong> (نقل ونسخ ملفات النظام من وسيط التثبيت إلى القرص الصلب SSD).<br>
-        تبدأ الآن <strong>المرحلة الثانية</strong>: ضبط إعدادات النظام (OOBE) التي تنطلق وتعمل مباشرة من ملفات الويندوز المخزنة داخل القرص الصلب الداخلي.
-      </div>
     </div>
   `;
 
@@ -1760,9 +1748,6 @@ function renderPhase7Country(container) {
 
   container.innerHTML = `
     <div class="oobe-backdrop">
-      <div style="margin-bottom: 12px; display: inline-block; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 4px; padding: 4px 12px; font-size: 12px; color: #34d399; font-weight: 600;">
-        🟢 المرحلة الثانية لتنصيب النظام: ضبط إعدادات نظام التشغيل (OOBE) انطلاقاً من ملفات الويندوز بالقرص الصلب الداخلي
-      </div>
       <div class="oobe-card">
         <h2 class="oobe-title">Is this the right country or region?</h2>
         <p class="oobe-desc">اختر الدولة المناسبة لإعداد بيئة العمل المدرسية:</p>

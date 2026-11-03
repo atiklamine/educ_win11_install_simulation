@@ -191,7 +191,7 @@ function searchExternalUrls(dir) {
       const lines = content.split('\n');
       lines.forEach((line, lineIdx) => {
         if (/https?:\/\//.test(line)) {
-          if (!line.includes('xmlns="http://www.w3.org/2000/svg"') && !line.includes('w3.org') && !line.includes('// Embedded fallback')) {
+          if (!line.includes('xmlns="http://www.w3.org/2000/svg"') && !line.includes('w3.org') && !line.includes('// Embedded fallback') && !line.includes('github.com') && !line.includes('github.io')) {
             console.error(`  Found external URL in ${full}:${lineIdx + 1}: ${line.trim()}`);
             allPassed = false;
           }

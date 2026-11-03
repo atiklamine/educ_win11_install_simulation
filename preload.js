@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   isFullscreen: () => ipcRenderer.invoke('is-fullscreen'),
   onFullscreenChanged: (callback) => ipcRenderer.on('window-fullscreen-changed', (event, isFull) => callback(isFull)),
   quitApp: () => ipcRenderer.invoke('quit-app'),
-  getDesktopPath: () => ipcRenderer.invoke('get-desktop-path')
+  getDesktopPath: () => ipcRenderer.invoke('get-desktop-path'),
+  openExternal: (url) => ipcRenderer.invoke('app:openExternal', url)
 });
 

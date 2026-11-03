@@ -225,6 +225,14 @@ function createMainWindow() {
     }
   });
 
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('mailto:')) {
+      shell.openExternal(url);
+      return { action: 'deny' };
+    }
+    return { action: 'allow' };
+  });
+
   mainWindow.loadFile(path.join(__dirname, 'src', 'index.html'));
 
   mainWindow.on('closed', () => {
@@ -421,5 +429,18 @@ ipcMain.handle('get-desktop-path', () => {
     return app.getPath('desktop');
   } catch {
     return path.join(process.env.USERPROFILE || 'C:\\', 'Desktop');
+  }
+});
+
+// IPC: Open External URL safely
+ipcMain.handle('app:openExternal', async (_event, url) => {
+  try {
+    if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('mailto:'))) {
+      await shell.openExternal(url);
+      return { success: true };
+    }
+    return { success: false, error: 'Invalid URL scheme' };
+  } catch (err) {
+    return { success: false, error: err.message };
   }
 });
