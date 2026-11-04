@@ -1,5 +1,5 @@
 /**
- * Headless Electron Verification Test
+ * Master Headless Electron DOM & Responsiveness Verification Test
  */
 const electronModule = require('electron');
 if (typeof electronModule === 'string' || !electronModule.app) {
@@ -13,9 +13,11 @@ if (typeof electronModule === 'string' || !electronModule.app) {
 
 const { app, BrowserWindow, ipcMain } = electronModule;
 const path = require('path');
+const rootDir = path.resolve(__dirname, '..');
 
 app.commandLine.appendSwitch('disable-gpu');
 app.commandLine.appendSwitch('no-sandbox');
+
 ipcMain.handle('settings:exists', async () => true);
 ipcMain.handle('settings:load', async () => ({
   success: true,
@@ -35,27 +37,26 @@ ipcMain.handle('is-fullscreen', async () => true);
 let win;
 let hasError = false;
 
-
 app.whenReady().then(async () => {
   win = new BrowserWindow({
     show: false,
     width: 1280,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(rootDir, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false
     }
   });
 
   win.webContents.on('console-message', (evt, level, msg, line, src) => {
-    if (level >= 3) { // error
+    if (level >= 3) {
       console.error(`[Renderer Error L${line}] ${msg}`);
       hasError = true;
     }
   });
 
-  await win.loadFile(path.join(__dirname, 'src', 'index.html'));
+  await win.loadFile(path.join(rootDir, 'src', 'index.html'));
 
   // Test state initialization
   const isReady = await win.webContents.executeJavaScript(`
@@ -69,7 +70,6 @@ app.whenReady().then(async () => {
 
   if (isReady) {
     console.log('✓ All simulator engines (stateEngine, biosController, quizManager, soundSynth, reportPdf, settingsManager) successfully initialized in Electron DOM.');
-
   } else {
     console.error('FAIL: Engines failed to initialize in DOM.');
     hasError = true;

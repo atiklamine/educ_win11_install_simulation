@@ -1,5 +1,5 @@
 /**
- * Test PDF Export via Electron printToPDF
+ * Headless PDF Export Verification Test (with automatic temporary file cleanup)
  */
 const electronModule = require('electron');
 if (typeof electronModule === 'string' || !electronModule.app) {
@@ -11,14 +11,15 @@ if (typeof electronModule === 'string' || !electronModule.app) {
   process.exit(result.status !== null ? result.status : 0);
 }
 
-const { app, BrowserWindow, ipcMain } = electronModule;
+const { app, BrowserWindow } = electronModule;
 const path = require('path');
 const fs = require('fs');
+
+const rootDir = path.resolve(__dirname, '..');
 
 app.commandLine.appendSwitch('disable-gpu');
 app.commandLine.appendSwitch('no-sandbox');
 
-// Require main.js functions or simulate save-pdf-report
 app.whenReady().then(async () => {
   const printWindow = new BrowserWindow({
     show: false,
@@ -31,8 +32,27 @@ app.whenReady().then(async () => {
     }
   });
 
-  const reportTemplatePath = path.join(__dirname, 'report', 'report-template.html');
-  await printWindow.loadFile(reportTemplatePath);
+  let templateHtml = null;
+  const candidatePaths = [
+    path.join(rootDir, 'report', 'report-template.html'),
+    path.join(rootDir, 'src', 'report', 'report-template.html'),
+    path.join(app.getAppPath(), 'report', 'report-template.html'),
+    path.join(app.getAppPath(), 'src', 'report', 'report-template.html')
+  ];
+  for (const p of candidatePaths) {
+    try {
+      if (fs.existsSync(p)) {
+        templateHtml = fs.readFileSync(p, 'utf8');
+        if (templateHtml && templateHtml.length > 500) break;
+      }
+    } catch (e) {}
+  }
+
+  if (!templateHtml) {
+    throw new Error('Report template could not be loaded from candidate paths');
+  }
+
+  await printWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(templateHtml));
 
   const samplePayload = {
     student: {
@@ -48,36 +68,39 @@ app.whenReady().then(async () => {
       unit: 'الوحدة التعليمية: نظام التشغيل'
     },
     evaluation: {
-      totalScore: '18.75',
-      maxScore: '20.00',
-      cognitiveScore: '5.50',
-      practicalScore: '13.25',
-      appreciation: 'متحكم جداً (ممتاز)',
-      appreciationClass: 'grade-excellent',
+      cognitiveScore: 6.0,
+      cognitiveMax: 6.0,
+      cognitiveNote: 'استيعاب دقيق للمفاهيم المجردة ونظم الملفات والبيوس',
+      practicalScore: 13.5,
+      practicalMax: 14.0,
+      practicalNote: 'تحكم متقن في البيوس، التجزئة، وتأمين الخصوصية',
+      totalScore: 18.0,
+      totalMax: 20.0,
+      totalDeductions: 1.5,
       competencies: [
         {
           name: 'كفاءة إعداد العتاد وضبط البيوس (BIOS/UEFI Configuration)',
-          score: '4.75',
-          max: '5.00',
-          description: 'سلامة ربط الوسائط، مقاطعة الإقلاع، وتفعيل TPM 2.0 و Secure Boot.'
+          score: 4.5,
+          max: 5.0,
+          criteria: 'سلامة ربط الوسائط، مقاطعة الإقلاع الأولي، وتفعيل TPM 2.0 وSecure Boot وترتيب الإقلاع.'
         },
         {
           name: 'كفاءة التجزئة المنطقية ونظم الملفات (Partitioning & Filesystem)',
-          score: '5.00',
-          max: '5.00',
-          description: 'إنشاء جدول GPT، التهيئة بـ NTFS، واختيار Pro Education.'
+          score: 5.0,
+          max: 5.0,
+          criteria: 'إنشاء جدول أقسام GPT، التهيئة الإلزامية بـ NTFS للقسم الأساسي، واختيار النسخة المناسبة.'
         },
         {
           name: 'كفاءة الإعداد وتأمين الخصوصية الرقمية (Privacy & User Setup)',
-          score: '4.50',
-          max: '5.00',
-          description: 'حساب محلي مستقل وتعطيل كافة خدمات التتبع السبعة.'
+          score: 5.0,
+          max: 5.0,
+          criteria: 'إنشاء حساب محلي مستقل للمخبر، وحماية بيانات المتعلم بتعطيل كافة خيارات التتبع السبعة.'
         },
         {
-          name: 'كفاءة الإقلاع المستقل واستكشاف الأخطاء (Independent Boot Loop)',
-          score: '4.50',
-          max: '5.00',
-          description: 'كسر حلقة التثبيت وإعادة ضبط SSD كإقلاع أول.'
+          name: 'كفاءة الإقلاع الذاتي المستقل (Clean Independent SSD Boot)',
+          score: 3.5,
+          max: 5.0,
+          criteria: 'كسر حلقة التثبيت وإعادة ضبط SSD كإقلاع أول.'
         }
       ]
     },
@@ -94,8 +117,8 @@ app.whenReady().then(async () => {
       { phase: 1, deduction: 1.0, reason: 'تأخر مقاطعة الإقلاع في POST' }
     ],
     sessionMeta: {
-      date: '24 أكتوبر 2026',
-      time: '20:45',
+      date: '04 نوفمبر 2026',
+      time: '12:00',
       duration: '22 دقيقة و 30 ثانية'
     }
   };
@@ -118,20 +141,15 @@ app.whenReady().then(async () => {
     }
   });
 
-  const testPdfPath = path.join(__dirname, 'test_output_report.pdf');
-  fs.writeFileSync(testPdfPath, pdfBuffer);
-
-  const stats = fs.statSync(testPdfPath);
-  console.log(`✓ PDF successfully generated and saved: ${testPdfPath} (Size: ${stats.size} bytes)`);
-
   printWindow.destroy();
   app.quit();
 
-  if (stats.size > 5000) {
-    console.log('✓ PDF size and integrity validated.');
+  if (pdfBuffer && pdfBuffer.length > 50000) {
+    console.log(`✓ PDF successfully generated in memory (Size: ${pdfBuffer.length} bytes, Zero disk residue).`);
+    console.log('✓ PDF size and integrity validated.\n');
     process.exit(0);
   } else {
-    console.error('FAIL: PDF buffer too small.');
+    console.error('FAIL: PDF buffer generation failed or too small.');
     process.exit(1);
   }
 });

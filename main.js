@@ -329,26 +329,40 @@ ipcMain.handle('save-pdf-report', async (_event, data) => {
 
     const targetFilePath = path.join(desktopDir, targetFilename);
 
-    // Create a hidden window to render the official report template
-    const printWindow = new BrowserWindow({
-      show: false,
-      width: 1024,
-      height: 1400,
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-        sandbox: false
-      }
-    });
+    let printWindow = null;
+    try {
+      printWindow = new BrowserWindow({
+        show: false,
+        width: 1024,
+        height: 1400,
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true,
+          sandbox: false
+        }
+      });
 
-    let reportTemplatePath = path.join(__dirname, 'report', 'report-template.html');
-    if (!fs.existsSync(reportTemplatePath)) {
-      const fallbackPath = path.join(__dirname, 'src', 'report', 'report-template.html');
-      if (fs.existsSync(fallbackPath)) {
-        reportTemplatePath = fallbackPath;
+      let templateHtml = null;
+      const candidatePaths = [
+        path.join(__dirname, 'report', 'report-template.html'),
+        path.join(__dirname, 'src', 'report', 'report-template.html'),
+        path.join(app.getAppPath(), 'report', 'report-template.html'),
+        path.join(app.getAppPath(), 'src', 'report', 'report-template.html')
+      ];
+      for (const p of candidatePaths) {
+        try {
+          if (fs.existsSync(p)) {
+            templateHtml = fs.readFileSync(p, 'utf8');
+            if (templateHtml && templateHtml.length > 500) break;
+          }
+        } catch (e) {}
       }
-    }
-    await printWindow.loadFile(reportTemplatePath);
+
+      if (!templateHtml) {
+        throw new Error('قالب التقرير report-template.html غير موجود أو تعذر قراءته');
+      }
+
+      await printWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(templateHtml));
 
     // Inject data into the template
     await printWindow.webContents.executeJavaScript(`
@@ -376,13 +390,21 @@ ipcMain.handle('save-pdf-report', async (_event, data) => {
     // Write file directly to Desktop
     fs.writeFileSync(targetFilePath, pdfBuffer);
 
-    printWindow.destroy();
+      if (printWindow && !printWindow.isDestroyed()) {
+        printWindow.destroy();
+        printWindow = null;
+      }
 
     return {
       success: true,
       filePath: targetFilePath,
       fileName: targetFilename
     };
+    } finally {
+      if (printWindow && !printWindow.isDestroyed()) {
+        printWindow.destroy();
+      }
+    }
   } catch (err) {
     console.error('Error generating PDF report:', err);
     return {

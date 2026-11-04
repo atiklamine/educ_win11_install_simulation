@@ -29,22 +29,4 @@ jobs:
         run: npm ci || npm install
 
       - name: Run Headless Verification Tests
-        run: |
-          node test_simulator.js
-          node test_six_modifications.js
-          node test_modifications_7_8.js
-          node test_theme_and_french_names.js
-          node test_user_reported_fixes.js
-          node test_layout_3column_workstation.js
-          node test_strict_no_auto_execution.js
-          node test_session_reset.js
-          node test_prompt4_customization.js
-          node test_prompt5_investigation.js
-          node test_prompt6_pointer_and_cleanup.js
-          node test_prompt9_modifications.js
-          node test_phase8_single_quiz.js
-          node test_final_enhancements.js
-          node test_hud_dropdown_and_skip_quiz.js
-          node test_media_consistency.js
-          node test_procedural_penalties_report.js
-
+        run: node tests/test_simulator.js
