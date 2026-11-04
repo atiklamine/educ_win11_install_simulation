@@ -516,71 +516,203 @@
 
   <!-- Modal 4: Comprehensive Simulation Guide (الدليل الشامل) -->
   <div class="modal-overlay" id="expertGuideModal">
-    <div class="modal-dialog" style="max-width: 760px;">
+    <div class="modal-dialog" style="max-width: 820px;">
       <div class="modal-header">
         <h3 class="modal-title" style="font-size: 16px;">&#128218; الدليل الشامل لمراحل المحاكاة وتنصيب Windows 11 (1AS)</h3>
         <button class="modal-close-btn" id="btnCloseGuideModal">&times;</button>
       </div>
-      <div class="modal-body" style="font-size: 14px; line-height: 1.7;">
-        <p style="color: var(--text-muted); margin-bottom: 14px; font-weight: 500;">
-          دليل بيداغوجي وتقني منظّم وموجز يوضح خطوات تثبيت نظام Windows 11 والتنبيهات المهارية لمنع الأخطاء وحماية النقاط:
-        </p>
+      <div class="modal-body" style="font-size: 14px; line-height: 1.7; padding-top: 12px;">
+        
+        <!-- Guide Navigation Tabs -->
+        <div class="guide-nav-tabs">
+          <button class="guide-tab-btn active" id="btnTabGuideSteps" type="button">
+            <span>📋</span> <span>مراحل وخطوات المحاكاة (1-9)</span>
+          </button>
+          <button class="guide-tab-btn" id="btnTabGuideGlossary" type="button">
+            <span>📖</span> <span>شرح مصطلحات تنصيب الأنظمة والشبكات</span>
+          </button>
+        </div>
 
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <div class="guide-card guide-card-blue">
-            <strong style="font-size: 14px;">1. تجهيز المحطة والإقلاع الأولي (POST):</strong>
-            <span>اختر وسيط التثبيت من <strong>الرف على اليسار</strong> (فلاش ديسك USB أو قرص DVD)، ثم شغّل الحاسوب عبر <strong>زر الطاقة الحقيقي بالوحدة المركزية على اليمين</strong>. اضغط سريعاً على <strong>[F2 أو Del]</strong> في لوحة المفاتيح خلال 10 ثوانٍ لدخول البيوس (لتفادي خصم النقاط).</span>
-          </div>
+        <!-- TAB 1: Simulation Steps & Guidance -->
+        <div id="guideTabStepsContent">
+          <p style="color: var(--text-muted); margin-bottom: 14px; font-weight: 500;">
+            دليل بيداغوجي وتقني منظّم وموجز يوضح خطوات تثبيت نظام Windows 11 والتنبيهات المهارية لمنع الأخطاء وحماية النقاط:
+          </p>
 
-          <div class="guide-card guide-card-amber">
-            <strong style="font-size: 14px;">2. إعدادات البيوس ووسيط الإقلاع (UEFI BIOS):</strong>
-            <span>فعّل متطلبات ويندوز 11: <strong>TPM 2.0</strong> و <strong>Secure Boot</strong> من تبويب Security، واجعل وسيط التثبيت كجهاز إقلاع أول في تبويب Boot، ثم اضغط حصراً على <strong>[F10]</strong> في لوحة المفاتيح للحفظ والخروج.</span>
-          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="guide-card guide-card-blue">
+              <strong style="font-size: 14px;">1. تجهيز المحطة والإقلاع الأولي (POST):</strong>
+              <span>اختر وسيط التثبيت من <strong>الرف على اليسار</strong> (فلاش ديسك USB أو قرص DVD أو شبكة PXE)، ثم شغّل الحاسوب عبر <strong>زر الطاقة الحقيقي بالوحدة المركزية على اليمين</strong>. اضغط سريعاً على <strong>[F2 أو Del]</strong> في لوحة المفاتيح خلال 10 ثوانٍ لدخول البيوس (لتفادي خصم النقاط).</span>
+            </div>
 
-          <div class="guide-card guide-card-green">
-            <strong style="font-size: 14px;">3. الإعدادات الإقليمية ونوع التثبيت:</strong>
-            <span>اضبط لغة العرض وتنسيق الوقت للجزائر (Algeria) ولوحة المفاتيح (AZERTY)، ثم اختر التثبيت المخصص: <strong>Custom: Install Windows only (advanced)</strong>.</span>
-          </div>
+            <div class="guide-card guide-card-amber">
+              <strong style="font-size: 14px;">2. إعدادات البيوس ووسيط الإقلاع (UEFI BIOS):</strong>
+              <span>فعّل متطلبات ويندوز 11: <strong>TPM 2.0</strong> و <strong>Secure Boot</strong> من تبويب Security، واجعل وسيط التثبيت كجهاز إقلاع أول في تبويب Boot، ثم اضغط حصراً على <strong>[F10]</strong> في لوحة المفاتيح للحفظ والخروج.</span>
+            </div>
 
-          <div class="guide-card guide-card-purple">
-            <strong style="font-size: 14px;">4. التجزئة المنطقية والتهيئة بنظام NTFS:</strong>
-            <span>
-              • <strong>مكان التثبيت:</strong> اختر القرص الصلب الداخلي (Drive 0 SSD). احذر اختيار فلاش ديسك USB (Drive 1) لأنه وسيط خارجي مؤقت وليس قرص نظام.<br>
-              • <strong>تحديد الحجم (New):</strong> يمكنك إنشاء قسم بالحجم الذي تريده (شرط ألا يقل عن 64 GB) مع إمكانية استغلال المساحة المتبقية لاحقاً.<br>
-              • <strong>التهيئة المنطقية (Format):</strong> تعني اختيار نظام الملفات؛ ويشترط اختيار <strong>NTFS</strong> حصراً لقسم النظام لدعم الأمان والملفات الكبيرة وموثوقية التخزين.
-            </span>
-          </div>
+            <div class="guide-card guide-card-green">
+              <strong style="font-size: 14px;">3. الإعدادات الإقليمية ونوع التثبيت:</strong>
+              <span>اضبط لغة العرض وتنسيق الوقت للجزائر (Algeria) ولوحة المفاتيح (AZERTY)، ثم اختر التثبيت المخصص: <strong>Custom: Install Windows only (advanced)</strong>.</span>
+            </div>
 
-          <div class="guide-card guide-card-blue">
-            <strong style="font-size: 14px;">5. المرحلة الأولى للتنصيب — نقل الملفات إلى القرص الصلب:</strong>
-            <span>في هذه المرحلة يقوم برنامج التثبيت بنسخ وفك ضغط ملفات النظام من وسيط التثبيت ونقلها إلى القرص الصلب الداخلي SSD.</span>
-          </div>
+            <div class="guide-card guide-card-purple">
+              <strong style="font-size: 14px;">4. التجزئة المنطقية والتهيئة بنظام NTFS:</strong>
+              <span>
+                • <strong>مكان التثبيت:</strong> اختر القرص الصلب الداخلي (Drive 0 SSD). احذر اختيار فلاش ديسك USB (Drive 1) لأنه وسيط خارجي مؤقت وليس قرص نظام.<br>
+                • <strong>تحديد الحجم (New):</strong> يمكنك إنشاء قسم بالحجم الذي تريده (شرط ألا يقل عن 64 GB) مع إمكانية استغلال المساحة المتبقية لاحقاً.<br>
+                • <strong>التهيئة المنطقية (Format):</strong> تعني اختيار نظام الملفات؛ ويشترط اختيار <strong>NTFS</strong> حصراً لقسم النظام لدعم الأمان والملفات الكبيرة وموثوقية التخزين.
+              </span>
+            </div>
 
-          <div class="guide-card guide-card-red">
-            <strong style="font-size: 14px;">6. كسر حلقة الإقلاع ونزع وسيط التثبيت فيزيائياً:</strong>
-            <span>بمجرد اكتمال نسخ الملفات وبدء إعادة التشغيل، ادخل البيوس بـ <strong>[F2/Del]</strong> وأعد القرص الداخلي <strong>SSD</strong> كإقلاع أول واحفظ بـ <strong>F10</strong>، ثم <strong>انقر على وسيط التثبيت في الوحدة المركزية (مفتاح USB أو قرص DVD أو كابل PXE) لنزعه أو إخراجه فيزيائياً</strong> لمنع الوقوع في حلقة التثبيت اللانهائية.</span>
-          </div>
+            <div class="guide-card guide-card-blue">
+              <strong style="font-size: 14px;">5. المرحلة الأولى للتنصيب — نقل الملفات إلى القرص الصلب:</strong>
+              <span>في هذه المرحلة يقوم برنامج التثبيت بنسخ وفك ضغط ملفات النظام من وسيط التثبيت ونقلها إلى القرص الصلب الداخلي SSD.</span>
+            </div>
 
-          <div class="guide-card guide-card-green">
-            <strong style="font-size: 14px;">7. المرحلة الثانية للتنصيب — إعدادات نظام التشغيل (OOBE):</strong>
-            <span>يعمل النظام الآن ذاتياً من ملفات الويندوز المنقولة إلى القرص الداخلي SSD. اختر الجزائر، سمّ الحاسوب، أنشئ الحساب، وعطّل كافة خيارات التتبع الإعلاني السبعة (Turn All OFF) لحماية الخصوصية.</span>
-          </div>
+            <div class="guide-card guide-card-red">
+              <strong style="font-size: 14px;">6. كسر حلقة الإقلاع ونزع وسيط التثبيت فيزيائياً:</strong>
+              <span>بمجرد اكتمال نسخ الملفات وبدء إعادة التشغيل، ادخل البيوس بـ <strong>[F2/Del]</strong> وأعد القرص الداخلي <strong>SSD</strong> كإقلاع أول واحفظ بـ <strong>F10</strong>، ثم <strong>انقر على وسيط التثبيت في الوحدة المركزية (مفتاح USB أو قرص DVD أو كابل PXE) لنزعه أو إخراجه فيزيائياً</strong> لمنع الوقوع في حلقة التثبيت اللانهائية.</span>
+            </div>
 
-          <div class="guide-card guide-card-purple">
-            <strong style="font-size: 14px;">8. الإقلاع الذاتي النهائي والاستقلالية الكاملة:</strong>
-            <span>من سطح المكتب، اضغط Start &gt; Restart للتحقق من إقلاع الويندوز ذاتياً من القرص الداخلي، والإجابة عن السؤال النهائي لختام التقييم واستخراج التقرير.</span>
-          </div>
+            <div class="guide-card guide-card-green">
+              <strong style="font-size: 14px;">7. المرحلة الثانية للتنصيب — إعدادات نظام التشغيل (OOBE):</strong>
+              <span>يعمل النظام الآن ذاتياً من ملفات الويندوز المنقولة إلى القرص الداخلي SSD. اختر الجزائر، سمّ الحاسوب، أنشئ الحساب، وعطّل كافة خيارات التتبع الإعلاني السبعة (Turn All OFF) لحماية الخصوصية.</span>
+            </div>
 
-          <div class="guide-card guide-card-amber">
-            <strong style="font-size: 14px;">9. تخصيص بيئة العرض ونمط المحاكاة:</strong>
-            <span>
-              • <strong>قائمة العرض والمظهر:</strong> من الشريط العلوي، تتيح لك القائمة المنسدلة «🖥️ العرض والمظهر» التحكم في نمط عرض الشاشة الافتراضية، تكبير نافذة التطبيق بالكامل، التبديل بين أربعة ثيمات (فاتح، داكن، وتباين عالي)، وتكبير/تصغير حجم الخطوط لتوفير أقصى راحة بصرية.<br>
-              • <strong>نمطا المحاكاة:</strong> يمكنك الاختيار عند بدء الجلسة بين <em>النمط القياسي الشامل</em> (المحاكاة + الأسئلة النظرية لنيل 20/20) أو <em>نمط التدريب العملي فقط</em> (دون أسئلة، وتُخصم نقاطها الـ 6.00 كاملة تحفيزاً لخوض التحدي النظري).
-            </span>
+            <div class="guide-card guide-card-purple">
+              <strong style="font-size: 14px;">8. الإقلاع الذاتي النهائي والاستقلالية الكاملة:</strong>
+              <span>من سطح المكتب، اضغط Start &gt; Restart للتحقق من إقلاع الويندوز ذاتياً من القرص الداخلي، والإجابة عن السؤال النهائي لختام التقييم واستخراج التقرير.</span>
+            </div>
+
+            <div class="guide-card guide-card-amber">
+              <strong style="font-size: 14px;">9. تخصيص بيئة العرض ونمط المحاكاة:</strong>
+              <span>
+                • <strong>قائمة العرض والمظهر:</strong> من الشريط العلوي، تتيح لك القائمة المنسدلة «🖥️ العرض والمظهر» التحكم في نمط عرض الشاشة الافتراضية، تكبير نافذة التطبيق بالكامل، التبديل بين أربعة ثيمات (فاتح، داكن، وتباين عالي)، وتكبير/تصغير حجم الخطوط لتوفير أقصى راحة بصرية.<br>
+                • <strong>نمطا المحاكاة:</strong> يمكنك الاختيار عند بدء الجلسة بين <em>النمط القياسي الشامل</em> (المحاكاة + الأسئلة النظرية لنيل 20/20) أو <em>نمط التدريب العملي فقط</em> (دون أسئلة، وتُخصم نقاطها الـ 6.00 كاملة تحفيزاً لخوض التحدي النظري).
+              </span>
+            </div>
           </div>
         </div>
+
+        <!-- TAB 2: Glossary of Operating System & Network Installation Terms -->
+        <div id="guideTabGlossaryContent" style="display: none;">
+          <p style="color: var(--text-muted); margin-bottom: 14px; font-weight: 500;">
+            مرجع علمي وبيداغوجي شامل يشرح أهم المفاهيم والمصطلحات التقنية الواردة في مراحل تنصيب أنظمة التشغيل وشبكات الحواسيب:
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            
+            <!-- 1. PXE -->
+            <div class="guide-card guide-card-blue">
+              <strong style="font-size: 14.5px;">1. PXE — الإقلاع الشبكي المسبق</strong>
+              <span>
+                • <strong>الاختصار:</strong> Preboot Execution Environment<br>
+                • <strong>المعنى:</strong> تقنية تسمح للجهاز بالإقلاع وتنصيب نظام التشغيل من <strong>الشبكة</strong> بدلاً من القرص الصلب أو الفلاشة، عبر بطاقة الشبكة (NIC).<br>
+                • <strong>كيف يعمل (باختصار وتنظيم):</strong>
+                <ol style="margin: 4px 20px; line-height: 1.6;">
+                  <li><strong>البحث:</strong> عند التشغيل، ترسل بطاقة الشبكة طلب بث (Broadcast) للبحث عن خادم DHCP.</li>
+                  <li><strong>العنوان:</strong> يرد خادم DHCP بعنوان IP للجهاز + عنوان خادم PXE + اسم ملف الإقلاع.</li>
+                  <li><strong>التحميل:</strong> يتصل الجهاز بخادم PXE (عادة عبر بروتوكول TFTP) ويحمّل ملف إقلاع صغير (أقل من 32 كيلوبايت).</li>
+                  <li><strong>التنفيذ:</strong> يبدأ الملف الصغير بتحميل بيئة تنصيب مؤقتة (مثل WinPE في ويندوز أو Kickstart في لينكس) وتبدأ عملية التنصيب الفعلية.</li>
+                </ol>
+              </span>
+            </div>
+
+            <!-- 2. UEFI -->
+            <div class="guide-card guide-card-amber">
+              <strong style="font-size: 14.5px;">2. UEFI — واجهة البرنامج الثابت الموحدة الموسعة</strong>
+              <span>
+                • <strong>الاختصار:</strong> Unified Extensible Firmware Interface<br>
+                • <strong>المعنى:</strong> واجهة البرنامج الثابت الحديثة التي تحل محل نظام BIOS القديم، وظيفتها تهيئة العتاد وإقلاع نظام التشغيل.<br>
+                • <strong>الميزة:</strong> تدعم معمارية 64-بت، تدعم أقراصاً أكبر حجماً بنمط (GPT)، توفر إقلاعاً أسرع بكثير، وبيئة برمجية أكثر أماناً للتحقق من سلامة مكونات الإقلاع.
+              </span>
+            </div>
+
+            <!-- 3. TPM -->
+            <div class="guide-card guide-card-green">
+              <strong style="font-size: 14.5px;">3. TPM — وحدة النظام الأساسي الموثوق</strong>
+              <span>
+                • <strong>الاختصار:</strong> Trusted Platform Module (مثل إصدار TPM 2.0)<br>
+                • <strong>المعنى:</strong> شريحة أمان مادية دقيقة (أو وحدة معالجة أمنية مدمجة في المعالج) على اللوحة الأم (Motherboard)، وظيفتها حماية المفاتيح الرقمية والتشفير على مستوى العتاد الفيزيائي.<br>
+                • <strong>الفائدة:</strong> تخزين مفاتيح تشفير القرص الصلب (مثل تقنية BitLocker) بحيث لا يمكن استخراجها أو كسرها حتى لو سُرق القرص أو أُصيب الجهاز ببرمجيات خبيثة.
+              </span>
+            </div>
+
+            <!-- 4. Secure Boot -->
+            <div class="guide-card guide-card-purple">
+              <strong style="font-size: 14.5px;">4. Secure Boot — الإقلاع الآمن</strong>
+              <span>
+                • <strong>الاختصار:</strong> ليس اختصاراً، بل ميزة أمنية قياسية (Secure Boot).<br>
+                • <strong>المعنى:</strong> ميزة أمان تعمل بتكامل مباشر ضمن واجهة UEFI، وظيفتها منع البرمجيات الخبيثة وبرامج التسلل العميقة (Rootkits) من اختراق مرحلة الإقلاع.<br>
+                • <strong>كيف يعمل:</strong> يتحقق UEFI من التوقيع الرقمي المعتمد لكل برنامج مشغل (Driver) أو محمل إقلاع (Bootloader) يحاول الإقلاع؛ وإذا كان التوقيع غير موجود أو غير موثوق، يرفض النظام الإقلاع فوراً حماية للجهاز.
+              </span>
+            </div>
+
+            <!-- 5. OOBE -->
+            <div class="guide-card guide-card-blue">
+              <strong style="font-size: 14.5px;">5. OOBE — تجربة الاستخدام الأولى</strong>
+              <span>
+                • <strong>الاختصار:</strong> Out-of-Box Experience<br>
+                • <strong>المعنى:</strong> شاشات الترحيب والإعداد الأولي التفاعلية التي تظهر للمستخدم عند تشغيل جهاز جديد أو بعد اكتمال نقل ملفات ويندوز وإعادة التشغيل لأول مرة.<br>
+                • <strong>المحتوى:</strong> اختيار الدولة واللغة وتخطيط لوحة المفاتيح، الاتصال بالشبكة، تسمية الحاسوب، إنشاء حساب المستخدم المحلي، تخصيص معايير الخصوصية، وصولاً إلى استقرار سطح المكتب.
+              </span>
+            </div>
+
+            <!-- 6. POST -->
+            <div class="guide-card guide-card-amber">
+              <strong style="font-size: 14.5px;">6. POST — الفحص الذاتي عند التشغيل</strong>
+              <span>
+                • <strong>الاختصار:</strong> Power-On Self-Test<br>
+                • <strong>المعنى:</strong> سلسلة اختبارات تشخيصية آلية وسريعة يجريها البرنامج الثابت (Firmware) فور الضغط على زر الطاقة في الوحدة المركزية.<br>
+                • <strong>الوظيفة:</strong> التأكد من سلامة العتاد الأساسي (المعالج، الذاكرة الحية RAM، بطاقة الشاشة، وحدات التخزين) قبل محاولة الإقلاع، وهي النافذة الزمنية الوحيدة المتاحة للضغط على مفاتيح الدخول للبيوس مثل [F2] أو [Del].
+              </span>
+            </div>
+
+            <!-- 7. GPT -->
+            <div class="guide-card guide-card-green">
+              <strong style="font-size: 14.5px;">7. GPT — جدول تجزئة المعرفات الفريدة</strong>
+              <span>
+                • <strong>الاختصار:</strong> GUID Partition Table<br>
+                • <strong>المعنى:</strong> معيار حديث لتخطيط جداول الأقسام على الأقراص الصلبة وSSD، طُوّر ليحل محل معيار MBR (Master Boot Record) القديم.<br>
+                • <strong>المميزات:</strong> يدعم أقراص تخزين ضخمة تتجاوز بكثير حد 2 تيرابايت (تصل إلى ملايين التيرابايتات)، يتيح إنشاء حتى 128 قسماً أساسياً دون الحاجة لأقسام موسعة، ويتميز بنسخ احتياطية تلقائية لجدول التجزئة لمنع تلف الأقسام، وهو النمط الإلزامي لتثبيت Windows 11 على أنظمة UEFI.
+              </span>
+            </div>
+
+            <!-- 8. NTFS -->
+            <div class="guide-card guide-card-purple">
+              <strong style="font-size: 14.5px;">8. NTFS — نظام ملفات التقنية الحديثة</strong>
+              <span>
+                • <strong>الاختصار:</strong> New Technology File System<br>
+                • <strong>المعنى:</strong> نظام الملفات الافتراضي والرئيسي لأنظمة تشغيل Windows لتخزين وتنظيم واسترجاع الملفات على الأقراص الصلبة.<br>
+                • <strong>الفائدة والأهمية:</strong> يتميز بنظام صلاحيات أمان متقدم (ACL Permissions)، ميزة السجل اليومي (Journaling) لتفادي فقدان البيانات عند انقطاع الكهرباء المفاجئ، دعم ضغط وتشفير الملفات، والقدرة على تخزين ملفات فردية عملاقة تفوق بكثير حد 4 جيجابايت الذي يعجز عنه نظام FAT32 القديم.
+              </span>
+            </div>
+
+            <!-- 9. Boot Loop -->
+            <div class="guide-card guide-card-red">
+              <strong style="font-size: 14.5px;">9. Boot Loop — حلقة الإقلاع اللانهائية</strong>
+              <span>
+                • <strong>المفهوم والخطأ:</strong> حلقة تكرارية غير مرغوبة يقع فيها الحاسوب بعد انتهاء نسخ ملفات التثبيت وإعادة التشغيل، حيث يقلع الجهاز مجدداً من الفلاشة أو الـ DVD ليعيد شاشة التثبيت الأولى من الصفر بدلاً من الإقلاع من القرص الصلب.<br>
+                • <strong>الحل والوقاية:</strong> تعديل أسبقية الإقلاع في البيوس (Boot Priority) فور إعادة التشغيل لإعادة القرص الصلب الداخلي SSD كخيار أول، أو نزع وسيط التثبيت فيزيائياً من المنفذ بمجرد انتهاء النسخ.
+              </span>
+            </div>
+
+            <!-- 10. WinPE -->
+            <div class="guide-card guide-card-blue">
+              <strong style="font-size: 14.5px;">10. WinPE — بيئة التثبيت المسبق لويندوز</strong>
+              <span>
+                • <strong>الاختصار:</strong> Windows Preinstallation Environment<br>
+                • <strong>المعنى:</strong> إصدار مصغر ومستقل من نظام Windows يقلع مباشرة في الذاكرة الحية (RAM) دون الحاجة لوجود نظام مثبت مسبقاً على القرص.<br>
+                • <strong>الوظيفة:</strong> توفير الواجهة الرسومية لمعالج التثبيت (Setup Wizard)، إتاحة أدوات تقسيم وتهيئة الأقراص (Diskpart)، وتحميل برامج التشغيل الضرورية لتمكين تثبيت نظام التشغيل الكامل على القرص الصلب.
+              </span>
+            </div>
+
+          </div>
+        </div>
+
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" style="justify-content: space-between;">
+        <span style="font-size: 12px; color: var(--text-muted);">نظام محاكاة Windows 11 — مادة المعلوماتية (1AS)</span>
         <button class="fluent-btn fluent-btn-standard" id="btnOkGuide">فهمت التعليمات ومستعد للتطبيق ✔</button>
       </div>
     </div>
@@ -1206,6 +1338,30 @@
       };
       if (btnCloseAbout) btnCloseAbout.addEventListener('click', closeAbout);
       if (btnOkAbout) btnOkAbout.addEventListener('click', closeAbout);
+
+      // Guide Modal Tabs Switcher
+      const btnTabSteps = document.getElementById('btnTabGuideSteps');
+      const btnTabGlossary = document.getElementById('btnTabGuideGlossary');
+      const tabStepsContent = document.getElementById('guideTabStepsContent');
+      const tabGlossaryContent = document.getElementById('guideTabGlossaryContent');
+
+      if (btnTabSteps && btnTabGlossary && tabStepsContent && tabGlossaryContent) {
+        btnTabSteps.addEventListener('click', () => {
+          btnTabSteps.classList.add('active');
+          btnTabGlossary.classList.remove('active');
+          tabStepsContent.style.display = 'block';
+          tabGlossaryContent.style.display = 'none';
+          if (window.soundSynth) window.soundSynth.playClick();
+        });
+
+        btnTabGlossary.addEventListener('click', () => {
+          btnTabGlossary.classList.add('active');
+          btnTabSteps.classList.remove('active');
+          tabStepsContent.style.display = 'none';
+          tabGlossaryContent.style.display = 'block';
+          if (window.soundSynth) window.soundSynth.playClick();
+        });
+      }
 
       // Guide Modal
       const guideModal = document.getElementById('expertGuideModal');
