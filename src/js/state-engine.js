@@ -614,6 +614,10 @@ class StateEngine {
     if (vkbKeyEl && this.phaseVkbHints) {
       vkbKeyEl.textContent = this.phaseVkbHints[this.currentPhase] || 'لوحة المفاتيح';
     }
+    const hintTitleEl = document.getElementById('hintBarTitle');
+    if (hintTitleEl) {
+      hintTitleEl.textContent = `مساعدة مرحلية (مـ ${this.currentPhase}):`;
+    }
   }
 
   showGrandFinaleModal(isTimeout = false) {

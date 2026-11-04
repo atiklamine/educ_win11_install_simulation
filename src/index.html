@@ -76,6 +76,7 @@
               <button class="hud-dropdown-font-btn" id="btnFontDec" title="تصغير حجم الخط (Font Size -)">
                 <span>🗚-</span> <span>تصغير</span>
               </button>
+              <span class="hud-font-badge" id="hudFontBadge" title="حجم الخط الحالي">عادي</span>
               <button class="hud-dropdown-font-btn" id="btnFontInc" title="تكبير حجم الخط (Font Size +)">
                 <span>🗚+</span> <span>تكبير</span>
               </button>
@@ -94,18 +95,26 @@
     <!-- 2. Virtual Monitor Container -->
     <main class="virtual-monitor-wrapper view-mode-rig" id="virtualMonitorWrapper">
       <!-- Draggable Hint Bar (نافذة مساعدة مرحلية موحدة) -->
-      <div class="draggable-hint-bar" id="draggableHintBar" title="اسحب من أي مكان لتحريك نافذة المساعدة">
-        <div class="hint-handle" id="hintDragHandle">
-          <span>💡 مساعدة مرحلية:</span>
+      <div class="draggable-hint-bar" id="draggableHintBar" title="اسحب لتحريك نافذة المساعدة أو اضغط زر التصغير/التوسيع">
+        <div class="hint-bar-header" id="hintBarHeader">
+          <div class="hint-handle" id="hintDragHandle">
+            <span class="hint-icon">💡</span>
+            <span class="hint-title" id="hintBarTitle">مساعدة مرحلية:</span>
+          </div>
+          <button class="hint-collapse-btn" id="btnToggleHintCollapse" title="تصغير / إظهار نافذة المساعدة (Toggle)">
+            <span class="hint-collapse-icon" id="hintCollapseIcon">▼</span>
+          </button>
         </div>
-        <div class="hint-text" id="hintBarText">
-          المرحلة 1: اختر وسيط التثبيت من الرف على اليسار، واضغط زر التشغيل بالوحدة المركزية على اليمين، ثم اضغط على [F2 أو Del] في لوحة المفاتيح الحقيقية قبل انقضاء المهلة.
+        <div class="hint-collapsible-body" id="hintCollapsibleBody">
+          <div class="hint-text" id="hintBarText">
+            المرحلة 1: اختر وسيط التثبيت من الرف على اليسار، واضغط زر التشغيل بالوحدة المركزية على اليمين، ثم اضغط على [F2 أو Del] في لوحة المفاتيح الحقيقية قبل انقضاء المهلة.
+          </div>
+          <div class="virtual-keyboard-hint-display" id="vkbHintDisplay" title="تلميح بصري فقط: اضغط المفتاح الفعلي على لوحة المفاتيح الحقيقية">
+            <span class="vkb-label">مفتاح المرحلة:</span>
+            <span class="vkb-key" id="vkbKeyHint" data-key="F2">F2 / Del</span>
+          </div>
+          <button class="hint-reset-btn" id="btnResetHintPos" title="استرجاع الموضع الافتراضي أسفل الشاشة">استرجاع الموضع</button>
         </div>
-        <div class="virtual-keyboard-hint-display" id="vkbHintDisplay" title="تلميح بصري فقط: اضغط المفتاح الفعلي على لوحة المفاتيح الحقيقية">
-          <span class="vkb-label">مفتاح المرحلة:</span>
-          <span class="vkb-key" id="vkbKeyHint" data-key="F2">F2 / Del</span>
-        </div>
-        <button class="hint-reset-btn" id="btnResetHintPos" title="استرجاع الموضع الافتراضي أسفل الشاشة">استرجاع الموضع</button>
       </div>
 
       <!-- Workstation Rig Stage (Mode: Virtual Rig on Desk) -->
@@ -923,10 +932,34 @@
 
       // Font Size Controls (Normal, Large, X-Large)
       const fontSizes = ['normal', 'large', 'xlarge'];
+      const fontSizeLabels = {
+        normal: 'عادي',
+        large: 'كبير',
+        xlarge: 'كبير جداً'
+      };
       const applyFontSize = (size) => {
         if (!fontSizes.includes(size)) size = 'normal';
         document.documentElement.setAttribute('data-font-size', size);
         localStorage.setItem('app_font_size', size);
+
+        const badge = document.getElementById('hudFontBadge');
+        if (badge) {
+          badge.textContent = fontSizeLabels[size] || size;
+        }
+
+        const btnDec = document.getElementById('btnFontDec');
+        const btnInc = document.getElementById('btnFontInc');
+        const idx = fontSizes.indexOf(size);
+        if (btnDec) {
+          btnDec.disabled = (idx === 0);
+          btnDec.style.opacity = (idx === 0) ? '0.45' : '1';
+          btnDec.style.cursor = (idx === 0) ? 'not-allowed' : 'pointer';
+        }
+        if (btnInc) {
+          btnInc.disabled = (idx === fontSizes.length - 1);
+          btnInc.style.opacity = (idx === fontSizes.length - 1) ? '0.45' : '1';
+          btnInc.style.cursor = (idx === fontSizes.length - 1) ? 'not-allowed' : 'pointer';
+        }
       };
       const savedFontSize = localStorage.getItem('app_font_size') || 'normal';
       applyFontSize(savedFontSize);
@@ -935,7 +968,8 @@
       const btnFontInc = document.getElementById('btnFontInc');
 
       if (btnFontInc) {
-        btnFontInc.addEventListener('click', () => {
+        btnFontInc.addEventListener('click', (e) => {
+          e.stopPropagation();
           const cur = document.documentElement.getAttribute('data-font-size') || 'normal';
           const idx = fontSizes.indexOf(cur);
           if (idx < fontSizes.length - 1) {
@@ -946,7 +980,8 @@
       }
 
       if (btnFontDec) {
-        btnFontDec.addEventListener('click', () => {
+        btnFontDec.addEventListener('click', (e) => {
+          e.stopPropagation();
           const cur = document.documentElement.getAttribute('data-font-size') || 'normal';
           const idx = fontSizes.indexOf(cur);
           if (idx > 0) {
@@ -1282,6 +1317,9 @@
       const bar = document.getElementById('draggableHintBar');
       const btnReset = document.getElementById('btnResetHintPos');
       const vkbHint = document.getElementById('vkbKeyHint');
+      const btnCollapse = document.getElementById('btnToggleHintCollapse');
+      const hintCollapseIcon = document.getElementById('hintCollapseIcon');
+      const hintHeader = document.getElementById('hintBarHeader');
       if (!bar) return;
 
       let isDragging = false;
@@ -1328,7 +1366,7 @@
         const newY = e.clientY - offsetY;
 
         // Keep within window viewport boundaries (clamp)
-        const barWidth = bar.offsetWidth || 860;
+        const barWidth = bar.offsetWidth || (bar.classList.contains('is-collapsed') ? 180 : 860);
         const barHeight = bar.offsetHeight || 50;
         const minX = 4;
         const maxX = Math.max(minX, window.innerWidth - barWidth - 4);
@@ -1376,11 +1414,47 @@
         }
       });
 
+      const toggleHintCollapse = (forceState) => {
+        const isNowCollapsed = (forceState !== undefined) ? forceState : !bar.classList.contains('is-collapsed');
+        bar.classList.toggle('is-collapsed', isNowCollapsed);
+        if (hintCollapseIcon) {
+          hintCollapseIcon.textContent = isNowCollapsed ? '▲' : '▼';
+        }
+        if (btnCollapse) {
+          btnCollapse.title = isNowCollapsed ? 'إظهار نافذة المساعدة' : 'تصغير نافذة المساعدة';
+        }
+        if (isNowCollapsed && window.innerWidth <= 768) {
+          bar.style.top = 'auto';
+          bar.style.bottom = '8px';
+          bar.style.left = '50%';
+          bar.style.right = 'auto';
+          bar.style.transform = 'translateX(-50%)';
+        }
+      };
+
+      if (btnCollapse) {
+        btnCollapse.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleHintCollapse();
+          if (window.soundSynth) window.soundSynth.playClick();
+        });
+      }
+
+      if (hintHeader) {
+        hintHeader.addEventListener('click', (e) => {
+          if (bar.classList.contains('is-collapsed')) {
+            e.stopPropagation();
+            toggleHintCollapse(false);
+            if (window.soundSynth) window.soundSynth.playClick();
+          }
+        });
+      }
+
       if (btnReset) {
         btnReset.addEventListener('click', (e) => {
           e.stopPropagation();
           bar.style.top = 'auto';
-          bar.style.bottom = '12px';
+          bar.style.bottom = (window.innerWidth <= 768) ? '8px' : '12px';
           bar.style.left = '50%';
           bar.style.right = 'auto';
           bar.style.transform = 'translateX(-50%)';
@@ -1394,6 +1468,11 @@
           if (window.soundSynth) window.soundSynth.playWarning();
           alert('هذا تلميح بصري فقط يوضح الزر المطلوب!\nيجب عليك الضغط على المفتاح الفعلي في لوحة المفاتيح الحقيقية لحاسوبك.');
         });
+      }
+
+      // Automatically collapse by default on mobile devices / narrow viewports (<= 768px)
+      if (window.innerWidth <= 768) {
+        toggleHintCollapse(true);
       }
     }
 

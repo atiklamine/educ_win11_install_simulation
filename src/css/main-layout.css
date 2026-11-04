@@ -353,20 +353,101 @@
   --ui-font-scale: 1.30;
 }
 
+/* Cascading UI font scaling across interactive & pedagogical elements */
+body {
+  font-size: calc(13px * var(--ui-font-scale, 1));
+}
+
 .hud-top-bar {
   font-size: calc(13px * var(--ui-font-scale, 1));
+}
+
+.hud-app-logo {
+  font-size: calc(14px * var(--ui-font-scale, 1));
+}
+
+.hud-student-info {
+  font-size: calc(12px * var(--ui-font-scale, 1));
+}
+
+.hud-btn {
+  font-size: calc(12px * var(--ui-font-scale, 1));
+}
+
+.hud-dropdown-item {
+  font-size: calc(12px * var(--ui-font-scale, 1));
+}
+
+.hud-dropdown-header {
+  font-size: calc(11px * var(--ui-font-scale, 1));
+}
+
+.hud-dropdown-font-btn {
+  font-size: calc(11.5px * var(--ui-font-scale, 1));
 }
 
 .pedagogical-stepper-bar {
   font-size: calc(12px * var(--ui-font-scale, 1));
 }
 
+.stepper-item {
+  font-size: calc(12px * var(--ui-font-scale, 1));
+}
+
+.stepper-time-box {
+  font-size: calc(12px * var(--ui-font-scale, 1));
+}
+
+.shelf-guidance-title {
+  font-size: calc(12px * var(--ui-font-scale, 1));
+}
+
+.interactive-media-card .media-title {
+  font-size: calc(12px * var(--ui-font-scale, 1));
+}
+
+.interactive-media-card .media-desc {
+  font-size: calc(11px * var(--ui-font-scale, 1));
+}
+
+.pc-tower-label {
+  font-size: calc(12px * var(--ui-font-scale, 1));
+}
+
+.tower-power-btn span {
+  font-size: calc(11px * var(--ui-font-scale, 1));
+}
+
 .modal-dialog {
+  font-size: calc(13.5px * var(--ui-font-scale, 1));
+}
+
+.modal-title {
+  font-size: calc(16px * var(--ui-font-scale, 1));
+}
+
+.modal-body {
   font-size: calc(13.5px * var(--ui-font-scale, 1));
 }
 
 .draggable-hint-bar {
   font-size: calc(13px * var(--ui-font-scale, 1));
+}
+
+.hint-handle {
+  font-size: calc(13px * var(--ui-font-scale, 1));
+}
+
+.hint-text {
+  font-size: calc(12.5px * var(--ui-font-scale, 1));
+}
+
+.virtual-keyboard-hint-display {
+  font-size: calc(11px * var(--ui-font-scale, 1));
+}
+
+.hint-reset-btn {
+  font-size: calc(11px * var(--ui-font-scale, 1));
 }
 
 *, *::before, *::after {
@@ -403,18 +484,20 @@ html, body {
 /* 1. HUD Top Bar */
 .hud-top-bar {
   flex-shrink: 0;
-  height: var(--hud-height);
+  min-height: var(--hud-height);
+  height: auto;
   background: var(--bg-hud);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 4px 16px;
   z-index: 200;
   pointer-events: auto;
   position: relative;
   overflow: visible !important;
   backdrop-filter: blur(10px);
+  gap: 10px;
 }
 
 
@@ -502,6 +585,8 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .hud-btn {
@@ -681,6 +766,22 @@ html, body {
   background: var(--border-color);
   margin: 6px 0;
   opacity: 0.6;
+}
+
+.hud-font-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: var(--accent-color);
+  text-align: center;
+  user-select: none;
 }
 
 .hud-dropdown-font-box {
@@ -1262,20 +1363,26 @@ html, body {
 /* 3. Pedagogical Stepper Bar */
 .pedagogical-stepper-bar {
   flex-shrink: 0;
-  height: var(--stepper-height);
+  min-height: var(--stepper-height);
+  height: auto;
   background: var(--stepper-bg);
   border-top: 1px solid var(--stepper-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 4px 16px;
   z-index: 90;
+  gap: 10px;
 }
 
 .stepper-phases-container {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
 .stepper-item {
@@ -1284,11 +1391,13 @@ html, body {
   gap: 6px;
   padding: 4px 10px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-font-scale, 1));
   color: var(--stepper-item-text);
   background: var(--stepper-item-bg);
   border: 1px solid transparent;
   transition: all 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .stepper-item .step-num {
@@ -1376,4 +1485,130 @@ html, body {
 
 .stepper-penalties-value {
   font-weight: 700;
+}
+
+
+/* ==========================================================================
+   Responsive Architecture for Tablets & Mobile Screens (<= 900px)
+   (Note: Standard desktop layout >= 901px remains 100% unaltered)
+   ========================================================================== */
+@media (max-width: 900px) {
+  /* HUD Bar Responsiveness */
+  .hud-top-bar {
+    padding: 4px 8px;
+    gap: 6px;
+    min-height: 48px;
+  }
+  .hud-identity-section {
+    gap: 6px;
+  }
+  .hud-app-logo {
+    font-size: 12px;
+  }
+  .hud-app-logo svg,
+  .hud-app-logo img {
+    width: 18px;
+    height: 18px;
+  }
+  .hud-student-info {
+    padding: 2px 6px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .hud-actions-section {
+    gap: 4px;
+  }
+  .hud-btn {
+    min-height: 30px;
+    min-width: 50px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+  
+  /* Stepper Bar Responsiveness */
+  .pedagogical-stepper-bar {
+    padding: 2px 8px;
+    min-height: 36px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .pedagogical-stepper-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .stepper-phases-container {
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .stepper-item {
+    padding: 3px 6px;
+    font-size: 10.5px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .stepper-item .step-num {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
+  .stepper-time-box {
+    font-size: 11px;
+    margin-right: 6px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  /* Workstation Rig Stage Responsiveness */
+  .virtual-monitor-wrapper.view-mode-rig .workstation-rig-stage {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0 8px 12px;
+  }
+  .workstation-rig-layout {
+    min-width: 720px;
+    justify-content: flex-start;
+  }
+  .virtual-monitor-wrapper.view-mode-rig .monitor-frame {
+    min-height: 280px;
+  }
+
+  /* Draggable Hint Bar on Mobile & Tablet */
+  .draggable-hint-bar {
+    width: calc(100% - 20px) !important;
+    max-width: calc(100% - 20px) !important;
+    bottom: 8px !important;
+    padding: 6px 10px;
+  }
+  .draggable-hint-bar.is-collapsed {
+    width: auto !important;
+    max-width: 90% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    padding: 4px 12px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .hud-app-logo span {
+    display: none;
+  }
+  .hud-actions-section {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .modal-dialog {
+    width: 95% !important;
+    max-width: 95% !important;
+    margin: 8px auto !important;
+  }
+  .modal-body {
+    padding: 12px !important;
+  }
+  .hud-dropdown-menu {
+    right: 4px !important;
+    left: auto !important;
+    max-width: calc(100vw - 16px) !important;
+  }
 }
