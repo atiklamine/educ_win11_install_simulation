@@ -193,8 +193,26 @@ console.log('\n[Check 9] Verifying dist/inf.dll Size & Offline Integrity...');
 const infPath = path.join(rootDir, 'dist', 'inf.dll');
 assert(fs.existsSync(infPath), 'dist/inf.dll exists');
 const infStats = fs.statSync(infPath);
-assert.strictEqual(infStats.size, 689, `dist/inf.dll must be exactly 689 bytes (got ${infStats.size})`);
-console.log(`  ✓ PASS: dist/inf.dll strictly verified (${infStats.size} bytes).`);
+assert(infStats.size >= 100, `dist/inf.dll must be non-empty (got ${infStats.size} bytes)`);
+
+// Verify AES-256-CBC format: base64(IV) : base64(ciphertext)
+const rawEncrypted = fs.readFileSync(infPath, 'utf8').trim();
+const encParts = rawEncrypted.split(':');
+assert.strictEqual(encParts.length, 2, 'dist/inf.dll must follow IV:Ciphertext structure');
+assert.strictEqual(Buffer.from(encParts[0], 'base64').length, 16, 'IV must be 16 bytes');
+
+// Verify decryption of the teacher settings payload
+{
+  const infSettingsKey = crypto.createHash('sha256').update('DZ-WIN11-EDU-SIMULATOR-TEACHER-KEY-2026-ALG').digest();
+  const ivBuf = Buffer.from(encParts[0], 'base64');
+  const infDecipher = crypto.createDecipheriv('aes-256-cbc', infSettingsKey, ivBuf);
+  let decryptedPayload = infDecipher.update(encParts[1], 'base64', 'utf8');
+  decryptedPayload += infDecipher.final('utf8');
+  const parsedSettings = JSON.parse(decryptedPayload);
+  assert(parsedSettings.version >= 1, 'Settings version must be valid');
+  assert(parsedSettings.teacher && typeof parsedSettings.teacher === 'object', 'Teacher object present');
+  console.log(`  ✓ PASS: dist/inf.dll strictly verified (${infStats.size} bytes, AES-256 valid encrypted format).`);
+}
 
 // -----------------------------------------------------------------------------
 // [Check 10] Cumulative Milestone Scoring & Incomplete Simulation Protection
@@ -292,6 +310,52 @@ let pEnd = rp.buildReportPayload();
 assert.strictEqual(pEnd.evaluation.isCompleted, true, 'isCompleted is true when all 8 phases done');
 se.stopTimer();
 console.log('  ✓ PASS: Progressive scoring, early termination protection, and competencies strictly verified.');
+
+// -----------------------------------------------------------------------------
+// [Check 11] Permitted ASCII PDF Filename Generation & Format
+// -----------------------------------------------------------------------------
+console.log('\n[Check 11] Testing Permitted ASCII PDF Filename Generation & Format...');
+
+const asciiFilenameRegex = /^[A-Za-z0-9_.-]+\.pdf$/;
+
+// Test Case A: User's exact scenario from screenshot
+const fnA = rp.generateReportFilename(
+  { group: '1AS-01 (جذع مشترك علوم)', pcNumber: 'حاسوب 01', firstName: 'Abdellah', lastName: 'MOHAMMEDI' },
+  { sortableGrade: '13.50', sortableTime: '00-01-44' }
+);
+console.log('  Test Case A filename:', fnA);
+assert.strictEqual(fnA, '1AS-01-PC01_13.50_00-01-44_Abdellah_MOHAMMEDI.pdf', 'Matches expected permitted ASCII filename');
+assert(asciiFilenameRegex.test(fnA), 'Contains strictly permitted ASCII characters');
+assert(!/[\u0600-\u06FF\s()\[\]]/.test(fnA), 'No Arabic, spaces, or parentheses in filename');
+
+// Test Case B: Accented French names
+const fnB = rp.generateReportFilename(
+  { group: '1AS-02 (جذع مشترك علوم)', pcNumber: 'حاسوب 05', firstName: 'Chloé', lastName: 'LÉVÊQUE' },
+  { sortableGrade: '18.75', sortableTime: '00-12-30' }
+);
+console.log('  Test Case B filename:', fnB);
+assert.strictEqual(fnB, '1AS-02-PC05_18.75_00-12-30_Chloe_LEVEQUE.pdf', 'Accents cleanly normalized to basic Latin');
+assert(asciiFilenameRegex.test(fnB), 'Accented names produce valid ASCII filename');
+
+// Test Case C: No PC number specified
+const fnC = rp.generateReportFilename(
+  { group: '2AS-GE', pcNumber: '', firstName: 'Karim', lastName: 'BENALI' },
+  { sortableGrade: '20.00', sortableTime: '00-15-00' }
+);
+console.log('  Test Case C filename:', fnC);
+assert.strictEqual(fnC, '2AS-GE_20.00_00-15-00_Karim_BENALI.pdf', 'Handles empty PC number seamlessly');
+assert(asciiFilenameRegex.test(fnC), 'Valid ASCII filename without PC');
+
+// Test Case D: Arabic name transliteration fallback
+const fnD = rp.generateReportFilename(
+  { group: '1AS-03', pcNumber: 'حاسوب 12', firstName: 'عبد الله', lastName: 'محمدي' },
+  { sortableGrade: '16.00', sortableTime: '00-10-20' }
+);
+console.log('  Test Case D filename:', fnD);
+assert(asciiFilenameRegex.test(fnD), 'Transliterated Arabic produces valid ASCII filename');
+assert(!/[\u0600-\u06FF]/.test(fnD), 'Arabic characters cleanly transliterated');
+
+console.log('  ✓ PASS: All PDF filenames strictly adhere to [Section]_[EvaluationNote]_[Time]_[FirstName]_[LastName].pdf and permitted ASCII characters.');
 
 console.log('\n================================================================');
 console.log('ALL MASTER SIMULATOR VALIDATION CHECKS PASSED WITH 100% SUCCESS!');

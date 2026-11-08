@@ -1292,7 +1292,7 @@
       // New Session Button (Prompt 3: Full Session State Reset & Confirm)
       const btnNew = document.getElementById('btnNewSession');
       if (btnNew) {
-        btnNew.addEventListener('click', () => {
+        btnNew.addEventListener('click', async () => {
           const hasActiveProgress = window.stateEngine && (
             window.stateEngine.isSessionActive ||
             window.stateEngine.isCompleted ||
@@ -1303,7 +1303,17 @@
           );
 
           if (hasActiveProgress) {
-            const confirmed = confirm('هل أنت متأكد من رغبتك في بدء جلسة جديدة؟\nسيتم فقدان كافة التقدّم والبيانات الحالية وتصفير المحاكي إلى نقطة الصفر.');
+            const confirmed = (typeof window.showPedagogicalConfirm === 'function')
+              ? await window.showPedagogicalConfirm({
+                  title: 'بدء جلسة عمل جديدة',
+                  icon: '🔄',
+                  message: 'هل أنت متأكد من رغبتك في بدء جلسة تقييم جديدة؟',
+                  details: 'سيتم فقدان كافة التقدّم والبيانات والدرجات الحالية وتصفير المحاكي إلى نقطة البداية.',
+                  confirmText: 'نعم، بدء جلسة جديدة 🔄',
+                  cancelText: 'إلغاء والتراجع ✔',
+                  isDanger: true
+                })
+              : confirm('هل أنت متأكد من رغبتك في بدء جلسة جديدة؟\nسيتم فقدان كافة التقدّم والبيانات الحالية وتصفير المحاكي إلى نقطة الصفر.');
             if (!confirmed) return;
           }
 
@@ -1438,7 +1448,16 @@
           const firstNameError = document.getElementById('firstNameError');
 
           if (!lastName || !firstName) {
-            alert('يرجى كتابة الاسم واللقب لمواصلة الجلسة.');
+            if (typeof window.showPedagogicalAlert === 'function') {
+              window.showPedagogicalAlert({
+                title: 'بيانات غير مكتملة',
+                icon: '✏️',
+                message: 'يرجى كتابة الاسم واللقب لمواصلة الجلسة التعليمية.',
+                okText: 'حسناً'
+              });
+            } else {
+              alert('يرجى كتابة الاسم واللقب لمواصلة الجلسة.');
+            }
             return;
           }
 
@@ -1788,7 +1807,16 @@
         vkbHint.addEventListener('click', (e) => {
           e.stopPropagation();
           if (window.soundSynth) window.soundSynth.playWarning();
-          alert('هذا تلميح بصري فقط يوضح الزر المطلوب!\nيجب عليك الضغط على المفتاح الفعلي في لوحة المفاتيح الحقيقية لحاسوبك.');
+          if (typeof window.showPedagogicalAlert === 'function') {
+            window.showPedagogicalAlert({
+              title: 'تنبيه حول لوحة المفاتيح',
+              icon: '⌨️',
+              message: 'هذا تلميح بصري فقط يوضح الزر المطلوب!\nيجب عليك الضغط على المفتاح الفعلي في لوحة المفاتيح الحقيقية لحاسوبك.',
+              okText: 'فهمت ذلك ✔'
+            });
+          } else {
+            alert('هذا تلميح بصري فقط يوضح الزر المطلوب!\nيجب عليك الضغط على المفتاح الفعلي في لوحة المفاتيح الحقيقية لحاسوبك.');
+          }
         });
       }
 

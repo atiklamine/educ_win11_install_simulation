@@ -30,15 +30,91 @@ class ReportPdf {
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 
-  // Helper: Clean filename string (replace illegal chars with '-', multiple spaces with '_')
-  cleanFilenamePart(str, fallback = 'unknown') {
+  // Arabic transliteration map for generating portable, permitted ASCII filenames
+  transliterateArabic(str) {
+    if (!str || typeof str !== 'string') return '';
+    const map = {
+      'أ': 'A', 'إ': 'I', 'آ': 'A', 'ا': 'A', 'ب': 'B', 'ت': 'T', 'ث': 'Th',
+      'ج': 'J', 'ح': 'H', 'خ': 'Kh', 'د': 'D', 'ذ': 'Dh', 'ر': 'R', 'ز': 'Z',
+      'س': 'S', 'ش': 'Ch', 'ص': 'S', 'ض': 'D', 'ط': 'T', 'ظ': 'Dh', 'ع': 'A',
+      'غ': 'Gh', 'ف': 'F', 'ق': 'Q', 'ك': 'K', 'ل': 'L', 'م': 'M', 'ن': 'N',
+      'ه': 'H', 'و': 'Ou', 'ي': 'Y', 'ى': 'A', 'ة': 'a', 'ء': '', 'ئ': 'y', 'ؤ': 'ou',
+      '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+    };
+    return str.split('').map(ch => map[ch] !== undefined ? map[ch] : ch).join('');
+  }
+
+  // Remove diacritical marks (accents) for clean French/Latin ASCII portability
+  removeDiacritics(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  // Convert name (first or last) to strictly permitted ASCII characters [A-Za-z0-9]
+  toPermittedAsciiName(str, fallback = 'Eleve') {
     if (!str || typeof str !== 'string' || !str.trim()) return fallback;
-    let cleaned = String(str)
-      .replace(/[\\/:*?"<>|]/g, '-')
-      .trim()
-      .replace(/\s+/g, '_')
-      .replace(/[.\s]+$/g, '');
-    return cleaned || fallback;
+    let s = str.trim();
+    s = this.removeDiacritics(s);
+    s = this.transliterateArabic(s);
+    s = s.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return s || fallback;
+  }
+
+  // Convert section / class group and optional PC workstation to strictly permitted ASCII
+  toPermittedAsciiSection(groupStr, pcStr) {
+    let g = (groupStr || '').trim();
+    // 1. Strip parenthesized Arabic / description (e.g. "(جذع مشترك علوم)")
+    g = g.replace(/\(.*?\)/g, '').trim();
+
+    // 2. Extract leading alphanumeric/code pattern like "1AS-01", "2AS-GE", "TC-1"
+    let sectionCode = '';
+    const codeMatch = g.match(/^[A-Za-z0-9]+(?:[-_][A-Za-z0-9]+)*/);
+    if (codeMatch) {
+      sectionCode = codeMatch[0];
+    } else {
+      g = this.removeDiacritics(g);
+      g = this.transliterateArabic(g);
+      sectionCode = g.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    if (!sectionCode) sectionCode = '1AS';
+
+    // 3. Workstation / PC number handling (e.g. "حاسوب 05", "PC05", "05")
+    let pcSuffix = '';
+    if (pcStr && typeof pcStr === 'string' && pcStr.trim()) {
+      const numMatch = pcStr.match(/\d+/);
+      if (numMatch) {
+        const pcNum = numMatch[0].padStart(2, '0');
+        if (!new RegExp(`PC0*${parseInt(pcNum, 10)}\\b`, 'i').test(sectionCode)) {
+          pcSuffix = `-PC${pcNum}`;
+        }
+      }
+    }
+
+    return `${sectionCode}${pcSuffix}`;
+  }
+
+  // Build standard casual filename: [Section]_[EvaluationNote]_[Time]_[FirstName]_[LastName].pdf
+  generateReportFilename(student, evaluation) {
+    student = student || {};
+    evaluation = evaluation || {};
+    const cleanSection = this.toPermittedAsciiSection(student.group, student.pcNumber);
+    const gradeStr = evaluation.sortableGrade || '00.00';
+    const timeStr = evaluation.sortableTime || '00-00-00';
+    const cleanFirstName = this.toPermittedAsciiName(student.firstName, 'Eleve');
+    const cleanLastName = this.toPermittedAsciiName(student.lastName, 'Nom');
+
+    let baseFileName = `${cleanSection}_${gradeStr}_${timeStr}_${cleanFirstName}_${cleanLastName}`;
+    // Strictly enforce permitted characters [A-Za-z0-9_.-]
+    baseFileName = baseFileName.replace(/[^A-Za-z0-9_.-]/g, '_').replace(/_+/g, '_');
+    if (baseFileName.length > 195) {
+      baseFileName = baseFileName.substring(0, 195).replace(/[.\s_]+$/g, '');
+    }
+    return `${baseFileName}.pdf`;
+  }
+
+  // Legacy helper: Clean filename string
+  cleanFilenamePart(str, fallback = 'unknown') {
+    return this.toPermittedAsciiName(str, fallback);
   }
 
   buildReportPayload() {
@@ -232,20 +308,8 @@ class ReportPdf {
     }
 
     const payload = this.buildReportPayload();
-    const student = payload.student;
-    const gradeStr = payload.evaluation.sortableGrade || '00.00';
-    const timeStr = payload.evaluation.sortableTime || '00-00-00';
-    const safeGroup = this.cleanFilenamePart(student.group, 'unknown');
-    const safePc = this.cleanFilenamePart(student.pcNumber, 'PC01');
-    const safeLastName = this.cleanFilenamePart(student.lastName, 'unknown');
-    const safeFirstName = this.cleanFilenamePart(student.firstName, 'unknown');
-
-    // Strict formula: [group]_[pc]_[grade]_[time]_[lastname]_[firstname].pdf (Max length <= 200)
-    let baseFileName = `${safeGroup}_${safePc}_${gradeStr}_${timeStr}_${safeLastName}_${safeFirstName}`;
-    if (baseFileName.length > 195) {
-      baseFileName = baseFileName.substring(0, 195).replace(/[.\s_]+$/g, '');
-    }
-    const suggestedFileName = `${baseFileName}.pdf`;
+    // Standard casual permitted ASCII filename: [Section]_[EvaluationNote]_[Time]_[FirstName]_[LastName].pdf
+    const suggestedFileName = this.generateReportFilename(payload.student, payload.evaluation);
 
     if (window.electronAPI && typeof window.electronAPI.savePdfReport === 'function') {
       try {
@@ -315,6 +379,9 @@ class ReportPdf {
             printWin.document.open();
             printWin.document.write(htmlText);
             printWin.document.close();
+            try {
+              printWin.document.title = suggestedFileName.replace(/\.pdf$/i, '');
+            } catch (e) {}
             printWin.onload = () => {
               try {
                 if (typeof printWin.__injectReport === 'function') {

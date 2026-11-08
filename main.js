@@ -291,14 +291,72 @@ app.on('window-all-closed', () => {
   }
 });
 
-// Helper: Sanitize filename for Windows (preserves UTF-8 Arabic)
-function sanitizeFilename(name, fallback = 'unknown') {
+// Arabic transliteration map for generating portable, permitted ASCII filenames
+function transliterateArabic(str) {
+  if (!str || typeof str !== 'string') return '';
+  const map = {
+    'أ': 'A', 'إ': 'I', 'آ': 'A', 'ا': 'A', 'ب': 'B', 'ت': 'T', 'ث': 'Th',
+    'ج': 'J', 'ح': 'H', 'خ': 'Kh', 'د': 'D', 'ذ': 'Dh', 'ر': 'R', 'ز': 'Z',
+    'س': 'S', 'ش': 'Ch', 'ص': 'S', 'ض': 'D', 'ط': 'T', 'ظ': 'Dh', 'ع': 'A',
+    'غ': 'Gh', 'ف': 'F', 'ق': 'Q', 'ك': 'K', 'ل': 'L', 'م': 'M', 'ن': 'N',
+    'ه': 'H', 'و': 'Ou', 'ي': 'Y', 'ى': 'A', 'ة': 'a', 'ء': '', 'ئ': 'y', 'ؤ': 'ou',
+    '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+  };
+  return str.split('').map(ch => map[ch] !== undefined ? map[ch] : ch).join('');
+}
+
+function removeDiacritics(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function toPermittedAsciiName(str, fallback = 'Eleve') {
+  if (!str || typeof str !== 'string' || !str.trim()) return fallback;
+  let s = str.trim();
+  s = removeDiacritics(s);
+  s = transliterateArabic(s);
+  s = s.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return s || fallback;
+}
+
+function toPermittedAsciiSection(groupStr, pcStr) {
+  let g = (groupStr || '').trim();
+  g = g.replace(/\(.*?\)/g, '').trim();
+
+  let sectionCode = '';
+  const codeMatch = g.match(/^[A-Za-z0-9]+(?:[-_][A-Za-z0-9]+)*/);
+  if (codeMatch) {
+    sectionCode = codeMatch[0];
+  } else {
+    g = removeDiacritics(g);
+    g = transliterateArabic(g);
+    sectionCode = g.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+  if (!sectionCode) sectionCode = '1AS';
+
+  let pcSuffix = '';
+  if (pcStr && typeof pcStr === 'string' && pcStr.trim()) {
+    const numMatch = pcStr.match(/\d+/);
+    if (numMatch) {
+      const pcNum = numMatch[0].padStart(2, '0');
+      if (!new RegExp(`PC0*${parseInt(pcNum, 10)}\\b`, 'i').test(sectionCode)) {
+        pcSuffix = `-PC${pcNum}`;
+      }
+    }
+  }
+
+  return `${sectionCode}${pcSuffix}`;
+}
+
+// Helper: Sanitize filename for casual cross-platform network portability (strictly permitted ASCII)
+function sanitizeFilename(name, fallback = 'report') {
   if (!name || typeof name !== 'string' || !name.trim()) return fallback;
-  return name
-    .replace(/[<>:"/\\|?*\x00-\x1F]/g, '-')
-    .trim()
-    .replace(/\s+/g, '_')
-    .replace(/[.\s]+$/g, '') || fallback;
+  let s = removeDiacritics(name.trim());
+  s = transliterateArabic(s);
+  s = s.replace(/[^A-Za-z0-9_.-]/g, '_')
+       .replace(/_+/g, '_')
+       .replace(/^[-_.]+|[-_.]+$/g, '');
+  return s || fallback;
 }
 
 // IPC: PDF Generation & Direct Save to Desktop
@@ -307,14 +365,15 @@ ipcMain.handle('save-pdf-report', async (_event, data) => {
     const payload = data.payload || data;
     const student = payload.student || {};
     const evalData = payload.evaluation || {};
-    const safeGroup = sanitizeFilename(student.group, 'unknown');
-    const safePc = sanitizeFilename(student.pcNumber, 'PC01');
+    
+    // Standard casual permitted ASCII filename: [Section]_[EvaluationNote]_[Time]_[FirstName]_[LastName].pdf
+    const cleanSection = toPermittedAsciiSection(student.group, student.pcNumber);
     const gradeStr = evalData.sortableGrade || '00.00';
     const timeStr = evalData.sortableTime || '00-00-00';
-    const safeLastName = sanitizeFilename(student.lastName, 'unknown');
-    const safeFirstName = sanitizeFilename(student.firstName, 'unknown');
+    const cleanFirstName = toPermittedAsciiName(student.firstName, 'Eleve');
+    const cleanLastName = toPermittedAsciiName(student.lastName, 'Nom');
 
-    const defaultFilename = `${safeGroup}_${safePc}_${gradeStr}_${timeStr}_${safeLastName}_${safeFirstName}.pdf`;
+    const defaultFilename = `${cleanSection}_${gradeStr}_${timeStr}_${cleanFirstName}_${cleanLastName}.pdf`;
     let targetFilename = (data && data.fileName && typeof data.fileName === 'string' && data.fileName.trim())
       ? data.fileName.trim()
       : defaultFilename;
