@@ -196,6 +196,92 @@ const infStats = fs.statSync(infPath);
 assert.strictEqual(infStats.size, 689, `dist/inf.dll must be exactly 689 bytes (got ${infStats.size})`);
 console.log(`  ✓ PASS: dist/inf.dll strictly verified (${infStats.size} bytes).`);
 
+// -----------------------------------------------------------------------------
+// [Check 10] Cumulative Milestone Scoring & Incomplete Simulation Protection
+// -----------------------------------------------------------------------------
+console.log('\n[Check 10] Verifying Cumulative Milestone Scoring & Incomplete Simulation Protection...');
+const vm = require('vm');
+const sandbox = {
+  window: {},
+  document: {
+    getElementById: () => null,
+    querySelector: () => null
+  },
+  confirm: () => true,
+  alert: () => {},
+  console: console,
+  Set: Set,
+  Date: Date,
+  Math: Math,
+  setInterval: setInterval,
+  clearInterval: clearInterval,
+  setTimeout: setTimeout,
+  clearTimeout: clearTimeout
+};
+sandbox.window = sandbox;
+vm.createContext(sandbox);
+
+vm.runInContext(stateJs, sandbox);
+vm.runInContext(reportPdfJs, sandbox);
+
+const se = sandbox.window.stateEngine;
+const rp = sandbox.window.reportPdf;
+
+se.initSession({ firstName: 'تلميذ', lastName: 'تجريبي', group: '1AS-01' });
+
+// 1. Initial State: Must be strictly 0.00 / 20.00
+assert.strictEqual(se.practicalScore, 0.00, 'Practical score must start at 0.00');
+assert.strictEqual(se.cognitiveScore, 0.00, 'Cognitive score must start at 0.00');
+assert.strictEqual(se.getCalculatedScore(), 0.00, 'Calculated score must start at 0.00');
+
+let pStart = rp.buildReportPayload();
+assert.strictEqual(pStart.evaluation.totalScore, '0.00', 'Report total score at start must be 0.00');
+assert.strictEqual(pStart.evaluation.practicalScore, '0.00', 'Report practical score at start must be 0.00');
+assert.strictEqual(pStart.evaluation.competencies[0].score, '0.00', 'Competency 1 must be 0.00 at start');
+assert.strictEqual(pStart.evaluation.competencies[1].score, '0.00', 'Competency 2 must be 0.00 at start');
+assert.strictEqual(pStart.evaluation.competencies[2].score, '0.00', 'Competency 3 must be 0.00 at start');
+assert.strictEqual(pStart.evaluation.competencies[3].score, '0.00', 'Competency 4 must be 0.00 at start');
+assert.strictEqual(pStart.evaluation.isCompleted, false, 'isCompleted must be false at start');
+
+// 2. Progression: Completing Phase 1 (1.50) + Q1 (1.00)
+se.completePhase(1);
+se.cognitiveScore += 1.00;
+se.quizScores.bank_first_boot = 1.00;
+assert.strictEqual(se.practicalScore, 1.50, 'Completing phase 1 earns 1.50 practical');
+assert.strictEqual(se.getCalculatedScore(), 2.50, 'Phase 1 + Q1 = 2.50 total');
+
+let pPhase1 = rp.buildReportPayload();
+assert.strictEqual(pPhase1.evaluation.totalScore, '2.50', 'Report reflects 2.50');
+assert.strictEqual(pPhase1.evaluation.competencies[0].score, '2.50', 'Comp 1 reflects 2.50');
+
+// 3. Penalty deduction: e.g. -0.50 in Phase 1
+se.recordPenalty(1, 0.50, 'خطأ تجريبي');
+assert.strictEqual(se.practicalScore, 1.00, 'Practical score reduced by penalty');
+assert.strictEqual(se.getCalculatedScore(), 2.00, 'Total score reduced by penalty');
+
+// 4. Complete all remaining phases perfectly
+for (let i = 2; i <= 8; i++) {
+  se.completePhase(i);
+}
+se.cognitiveScore = 6.00;
+se.quizScores = {
+  bank_first_boot: 1.00,
+  bank_bios: 1.00,
+  bank_partition: 1.00,
+  bank_second_boot: 1.00,
+  bank_oobe: 1.00,
+  bank_final: 1.00
+};
+se.isCompleted = true;
+
+// Total should be 14.00 (practical) + 6.00 (cognitive) - 0.50 (penalty) = 19.50
+assert.strictEqual(se.completedPhases.size, 8, 'All 8 phases completed');
+assert.strictEqual(se.getCalculatedScore(), 19.50, 'Final score with 1 error = 19.50');
+let pEnd = rp.buildReportPayload();
+assert.strictEqual(pEnd.evaluation.isCompleted, true, 'isCompleted is true when all 8 phases done');
+se.stopTimer();
+console.log('  ✓ PASS: Progressive scoring, early termination protection, and competencies strictly verified.');
+
 console.log('\n================================================================');
 console.log('ALL MASTER SIMULATOR VALIDATION CHECKS PASSED WITH 100% SUCCESS!');
 console.log('================================================================\n');

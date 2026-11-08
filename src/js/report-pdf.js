@@ -47,18 +47,44 @@ class ReportPdf {
     const apprec = se.getAppreciation(score);
     const settings = (window.settingsManager && window.settingsManager.getSettings()) || {};
 
-    // Calculate competency scores (out of 5.00 each)
-    let compBios = 5.00;
-    let compPart = 5.00;
-    let compPriv = 5.00;
-    let compBoot = 5.00;
+    // Calculate progressive competency scores (out of 5.00 each)
+    const cp = se.completedPhases || new Set();
+    const weights = se.phaseWeights || { 1: 1.50, 2: 1.50, 3: 1.00, 4: 1.00, 5: 2.00, 6: 1.50, 7: 4.00, 8: 1.50 };
+    const qs = se.quizScores || {};
 
-    se.penalties.forEach(p => {
-      if (p.phase === 1 || p.phase === 2) compBios = Math.max(0, compBios - p.deduction);
-      if (p.phase === 3 || p.phase === 4 || p.phase === 5) compPart = Math.max(0, compPart - p.deduction);
-      if (p.phase === 7) compPriv = Math.max(0, compPriv - p.deduction);
-      if (p.phase === 6 || p.phase === 8) compBoot = Math.max(0, compBoot - p.deduction);
-    });
+    const getPhaseDeductions = (phases) => {
+      return se.penalties
+        .filter(p => phases.includes(p.phase))
+        .reduce((sum, p) => sum + (Number(p.deduction) || 0), 0);
+    };
+
+    // Competency 1: BIOS/UEFI Configuration (Max: 5.00)
+    // Practical: Phase 1 (1.50) + Phase 2 (1.50) = 3.00 max
+    // Cognitive: bank_first_boot (1.00) + bank_bios (1.00) = 2.00 max
+    const compBiosPrac = (cp.has(1) ? weights[1] : 0) + (cp.has(2) ? weights[2] : 0);
+    const compBiosCog = (qs.bank_first_boot || 0) + (qs.bank_bios || 0);
+    const compBios = Math.max(0, Math.min(5.00, parseFloat((compBiosPrac + compBiosCog - getPhaseDeductions([1, 2])).toFixed(2))));
+
+    // Competency 2: Partitioning & Filesystem (Max: 5.00)
+    // Practical: Phase 3 (1.00) + Phase 4 (1.00) + Phase 5 (2.00) = 4.00 max
+    // Cognitive: bank_partition (1.00) = 1.00 max
+    const compPartPrac = (cp.has(3) ? weights[3] : 0) + (cp.has(4) ? weights[4] : 0) + (cp.has(5) ? weights[5] : 0);
+    const compPartCog = (qs.bank_partition || 0);
+    const compPart = Math.max(0, Math.min(5.00, parseFloat((compPartPrac + compPartCog - getPhaseDeductions([3, 4, 5])).toFixed(2))));
+
+    // Competency 3: Privacy & User Setup (Max: 5.00)
+    // Practical: Phase 7 (4.00) = 4.00 max
+    // Cognitive: bank_oobe (1.00) = 1.00 max
+    const compPrivPrac = (cp.has(7) ? weights[7] : 0);
+    const compPrivCog = (qs.bank_oobe || 0);
+    const compPriv = Math.max(0, Math.min(5.00, parseFloat((compPrivPrac + compPrivCog - getPhaseDeductions([7])).toFixed(2))));
+
+    // Competency 4: Clean Independent SSD Boot (Max: 5.00)
+    // Practical: Phase 6 (1.50) + Phase 8 (1.50) = 3.00 max
+    // Cognitive: bank_second_boot (1.00) + bank_final (1.00) = 2.00 max
+    const compBootPrac = (cp.has(6) ? weights[6] : 0) + (cp.has(8) ? weights[8] : 0);
+    const compBootCog = (qs.bank_second_boot || 0) + (qs.bank_final || 0);
+    const compBoot = Math.max(0, Math.min(5.00, parseFloat((compBootPrac + compBootCog - getPhaseDeductions([6, 8])).toFixed(2))));
 
     const now = new Date();
     const mins = Math.floor(se.elapsedSeconds / 60);
@@ -67,6 +93,21 @@ class ReportPdf {
 
     // Ensure all penalties and deductions are represented in diagnosticLog with full pedagogical details
     const fullDiagnosticLog = [...se.diagnosticErrors];
+    if (cp.size < se.totalPhases) {
+      const missingPhases = [];
+      for (let i = 1; i <= se.totalPhases; i++) {
+        if (!cp.has(i)) missingPhases.push(`م ${i}`);
+      }
+      fullDiagnosticLog.push({
+        phase: 'عام',
+        title: 'إنهاء مبكر / مهام ومراحل غير منجزة',
+        errorChoice: `توقف عند المرحلة ${se.currentPhase} (المراحل غير المنجزة: ${missingPhases.join('، ')})`,
+        expectedChoice: 'إنجاز كافة المراحل الثمانية للتثبيت النظيف حتى سطح المكتب',
+        rationale: 'مُنحت علامة (0.00) لكافة المراحل والأسئلة غير المنجزة؛ يُشترط إتمام جميع الإجراءات العملية ونيل أسئلتها التقييمية لاكتساب الكفاءات.',
+        deduction: 0,
+        timestamp: new Date().toLocaleTimeString()
+      });
+    }
     if (Array.isArray(se.penalties)) {
       se.penalties.forEach(p => {
         if (!p || p.phase === 'عام' || p.phase === 'شامل' || String(p.reason).includes('تخطي الأسئلة')) return;
@@ -115,6 +156,9 @@ class ReportPdf {
         displayTime: displayTime,
         sortableTime: this.formatSortableTime(se.elapsedSeconds),
         skipQuiz: !!se.skipQuiz,
+        isCompleted: se.isCompleted && cp.size === se.totalPhases,
+        completedCount: cp.size,
+        totalPhases: se.totalPhases,
         cognitiveScore: se.cognitiveScore.toFixed(2),
         practicalScore: se.practicalScore.toFixed(2),
         appreciation: apprec.text,
@@ -166,6 +210,22 @@ class ReportPdf {
   }
 
   async exportPdf() {
+    const se = window.stateEngine;
+    if (se && !se.isCompleted && se.completedPhases.size < se.totalPhases) {
+      const confirmExport = confirm(
+        `تنبيه بيداغوجي هام:\n\n` +
+        `أنت حالياً في المرحلة (${se.currentPhase}) ولم تكتمل بعد كافة مراحل تنصيب النظام (المراحل المنجزة: ${se.completedPhases.size} من أصل ${se.totalPhases}).\n\n` +
+        `استخراج التقرير الآن سيُعتبر إنهاءً مبكراً للمحاكاة، ولن تتحصل على علامة المراحل المتبقية غير المنجزة (0.00).\n\n` +
+        `هل أنت متأكد من رغبتك في إنهاء المحاكاة الآن واستخراج التقرير غير المكتمل؟`
+      );
+      if (!confirmExport) {
+        return;
+      }
+      se.isCompleted = true;
+      se.stopTimer();
+      se.updateHUD();
+    }
+
     const payload = this.buildReportPayload();
     const student = payload.student;
     const gradeStr = payload.evaluation.sortableGrade || '00.00';

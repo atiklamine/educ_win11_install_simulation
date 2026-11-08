@@ -502,11 +502,16 @@
 
       const isQuizSkipped = !!(data.skipQuiz || ev.skipQuiz || (data.penalties && data.penalties.some(p => p.phase === 'عام' || p.phase === 'شامل')));
 
+      const isCompleted = ev.isCompleted !== false && (ev.completedCount === undefined || ev.completedCount >= 8);
+
       // Cognitive & Practical Notes
       const cogNoteEl = document.getElementById('rCognitiveNote');
       if (cogNoteEl) {
         if (isQuizSkipped) {
           cogNoteEl.textContent = 'تم تخطي كافة الأسئلة بطلب من التلميذ (خصم 6.00 نقاط)';
+          cogNoteEl.style.color = '#b91c1c';
+        } else if (!isCompleted && Number(ev.cognitiveScore) === 0) {
+          cogNoteEl.textContent = 'لم يتم خوض الأسئلة التقويمية أو الإجابة عليها';
           cogNoteEl.style.color = '#b91c1c';
         } else if (Number(ev.cognitiveScore) >= 5.0) {
           cogNoteEl.textContent = 'استيعاب دقيق للمفاهيم المجردة ونظم الملفات والبيوس';
@@ -523,7 +528,10 @@
       const pracNoteEl = document.getElementById('rPracticalNote');
       if (pracNoteEl) {
         const pracNum = Number(ev.practicalScore) || 0;
-        if (pracNum >= 13.5) {
+        if (!isCompleted) {
+          pracNoteEl.textContent = 'المحاكاة غير مكتملة (لم يتم إنجاز كافة خطوات التنصيب العملية)';
+          pracNoteEl.style.color = '#b91c1c';
+        } else if (pracNum >= 13.5) {
           pracNoteEl.textContent = 'تحكم ممتاز في البيوس، التجزئة، وتأمين الخصوصية';
           pracNoteEl.style.color = '#15803d';
         } else if (pracNum >= 10.0) {
@@ -558,13 +566,17 @@
       // Render Competencies
       const compBody = document.getElementById('rCompetenciesBody');
       if (compBody && ev.competencies && ev.competencies.length > 0) {
-        compBody.innerHTML = ev.competencies.map(c => `
-          <tr>
-            <td><strong>${c.name}</strong></td>
-            <td>${c.description}</td>
-            <td style="text-align: center; font-weight: bold;">${c.score} / ${c.max}</td>
-          </tr>
-        `).join('');
+        compBody.innerHTML = ev.competencies.map(c => {
+          const sc = Number(c.score) || 0;
+          const scoreColor = sc >= 4.0 ? '#15803d' : (sc >= 2.5 ? '#b45309' : '#b91c1c');
+          return `
+            <tr>
+              <td><strong>${c.name}</strong></td>
+              <td>${c.description}</td>
+              <td style="text-align: center; font-weight: bold; color: ${scoreColor};">${c.score} / ${c.max}</td>
+            </tr>
+          `;
+        }).join('');
       }
 
       // Render Diagnostic Misconceptions Log
@@ -623,7 +635,9 @@
       const customNoteEl = document.getElementById('rTeacherCustomNote');
       if (customNoteEl) {
         const total = Number(ev.totalScore) || 0;
-        if (isQuizSkipped) {
+        if (!isCompleted) {
+          customNoteEl.textContent = `محاكاة غير مكتملة (تم إنجاز ${ev.completedCount || 0} من أصل 8 مراحل). لم يستكمل التلميذ بقية متطلبات التثبيت والتطبيق العملي، ومُنحت علامة 0.00 لكافة المراحل غير المنجزة.`;
+        } else if (isQuizSkipped) {
           customNoteEl.textContent = 'أظهر التلميذ تحكماً مهارياً جيداً في الإجراءات العملية، مع التنبيه بضرورة خوض الأسئلة النظرية مستقبلاً لتثبيت المفاهيم ونيل العلامة الكاملة.';
         } else if (total >= 18) {
           customNoteEl.textContent = 'تلميذ متميز جداً، أبدى تمكناً عالياً في اتباع خطوات التثبيت النظيف واستيعاب معايير الأمان ونظم الملفات.';

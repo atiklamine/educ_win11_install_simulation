@@ -263,6 +263,8 @@ class QuizManager {
       }
 
       window.stateEngine.cognitiveScore += pointsAwarded;
+      if (!window.stateEngine.quizScores) window.stateEngine.quizScores = {};
+      window.stateEngine.quizScores[this.currentBankKey] = pointsAwarded;
       window.stateEngine.updateHUD();
 
       if (window.soundSynth) window.soundSynth.playSuccess();

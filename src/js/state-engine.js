@@ -17,9 +17,27 @@ class StateEngine {
 
     // Scoring Breakdown (Total: 20.00)
     // Cognitive: 6.00 (6 checkpoints * 1.00)
-    // Practical: 14.00
+    // Practical: 14.00 (Earned progressively upon completing phases, minus procedural deductions)
+    this.phaseWeights = {
+      1: 1.50,
+      2: 1.50,
+      3: 1.00,
+      4: 1.00,
+      5: 2.00,
+      6: 1.50,
+      7: 4.00,
+      8: 1.50
+    };
     this.cognitiveScore = 0;
-    this.practicalScore = 14.00; // starts full, penalized on procedural errors
+    this.practicalScore = 0.00;
+    this.quizScores = {
+      bank_first_boot: 0,
+      bank_bios: 0,
+      bank_partition: 0,
+      bank_second_boot: 0,
+      bank_oobe: 0,
+      bank_final: 0
+    };
     this.penalties = [];
     this.diagnosticErrors = [];
     this.skipQuiz = false;
@@ -118,7 +136,15 @@ class StateEngine {
     this.currentPhase = 1;
     this.completedPhases.clear();
     this.cognitiveScore = 0;
-    this.practicalScore = 14.00;
+    this.practicalScore = 0.00;
+    this.quizScores = {
+      bank_first_boot: 0,
+      bank_bios: 0,
+      bank_partition: 0,
+      bank_second_boot: 0,
+      bank_oobe: 0,
+      bank_final: 0
+    };
     this.penalties = [];
     this.diagnosticErrors = [];
     this.skipQuiz = false;
@@ -291,7 +317,15 @@ class StateEngine {
     this.currentPhase = 1;
     this.completedPhases.clear();
     this.cognitiveScore = 0;
-    this.practicalScore = 14.00;
+    this.practicalScore = 0.00;
+    this.quizScores = {
+      bank_first_boot: 0,
+      bank_bios: 0,
+      bank_partition: 0,
+      bank_second_boot: 0,
+      bank_oobe: 0,
+      bank_final: 0
+    };
     this.penalties = [];
     this.diagnosticErrors = [];
     this.skipQuiz = !!(studentData && (studentData.skipQuiz === true || studentData.quizMode === 'without_quiz'));
@@ -407,13 +441,13 @@ class StateEngine {
   }
 
   recordPenalty(phaseNum, deduction, reason, pedagogicalRemediation = '') {
-    this.practicalScore = Math.max(0, this.practicalScore - deduction);
     this.penalties.push({
       phase: phaseNum,
       deduction: deduction,
       reason: reason,
       timestamp: new Date().toLocaleTimeString()
     });
+    this.practicalScore = this.getEarnedPracticalScore();
 
     // Always record procedural mistakes in diagnosticErrors for complete transparency in the report
     if (!String(reason).startsWith('إجابة خاطئة في السؤال التقويمي')) {
@@ -457,8 +491,30 @@ class StateEngine {
     });
   }
 
+  getEarnedPracticalScore() {
+    let earned = 0;
+    for (const phaseNum of this.completedPhases) {
+      earned += (this.phaseWeights[phaseNum] || 0);
+    }
+    const totalDeductions = this.penalties.reduce((sum, p) => {
+      if (p.phase === 'عام' || p.phase === 'شامل' || String(p.reason).includes('تخطي الأسئلة') || String(p.reason).startsWith('إجابة خاطئة في السؤال التقويمي')) {
+        return sum;
+      }
+      return sum + (Number(p.deduction) || 0);
+    }, 0);
+    return Math.max(0, parseFloat((earned - totalDeductions).toFixed(2)));
+  }
+
   getCalculatedScore() {
-    let raw = this.cognitiveScore + this.practicalScore;
+    this.practicalScore = this.getEarnedPracticalScore();
+    const mcqDeductions = this.penalties.reduce((sum, p) => {
+      if (typeof p.reason === 'string' && p.reason.startsWith('إجابة خاطئة في السؤال التقويمي')) {
+        return sum + (Number(p.deduction) || 0);
+      }
+      return sum;
+    }, 0);
+    const netCognitive = Math.max(0, this.cognitiveScore - mcqDeductions);
+    let raw = netCognitive + this.practicalScore;
     // Strict Penalty Rule: "استحالة نيل 20/20 عند ارتكاب أي خطأ"
     if (this.penalties.length > 0 && raw >= 19.75) {
       raw = 19.50;
@@ -467,6 +523,9 @@ class StateEngine {
   }
 
   getAppreciation(score) {
+    if (!this.isCompleted && this.completedPhases.size < this.totalPhases) {
+      return { text: 'غير مكتمل (محاكاة منتهية مبكراً)', class: 'grade-remedial' };
+    }
     if (score >= 18.0) return { text: 'متحكم جداً (ممتاز)', class: 'grade-excellent' };
     if (score >= 14.0) return { text: 'متحكم (جيد)', class: 'grade-good' };
     if (score >= 10.0) return { text: 'في طريق التحكم (متوسط)', class: 'grade-average' };
@@ -475,6 +534,7 @@ class StateEngine {
 
   completePhase(phaseNum) {
     this.completedPhases.add(phaseNum);
+    this.practicalScore = this.getEarnedPracticalScore();
     if (window.soundSynth) window.soundSynth.playSuccess();
     this.updateStepper();
 
