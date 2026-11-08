@@ -152,6 +152,15 @@ ipcMain.handle('settings:save', async (_event, updateData) => {
     if (typeof updateData.force_french_names === 'boolean') {
       current.force_french_names = updateData.force_french_names;
     }
+    if (typeof updateData.pc_min === 'number') {
+      current.pc_min = updateData.pc_min;
+    }
+    if (typeof updateData.pc_max === 'number') {
+      current.pc_max = updateData.pc_max;
+    }
+    if (typeof updateData.pc_prefix === 'string') {
+      current.pc_prefix = updateData.pc_prefix.trim();
+    }
 
     writeSettingsFile(current);
     return { success: true };
@@ -183,7 +192,10 @@ ipcMain.handle('settings:createInitial', async (_event, initialData) => {
         ? initialData.groups.map(g => String(g).trim()).filter(Boolean)
         : ['1AS-01 (جذع مشترك علوم)', '1AS-02 (جذع مشترك علوم)', '1AS-03 (جذع مشترك آداب)'],
       session_mode_enabled: initialData.session_mode_enabled !== false,
-      force_french_names: initialData.force_french_names !== false
+      force_french_names: initialData.force_french_names !== false,
+      pc_min: typeof initialData.pc_min === 'number' ? initialData.pc_min : 1,
+      pc_max: typeof initialData.pc_max === 'number' ? initialData.pc_max : 20,
+      pc_prefix: typeof initialData.pc_prefix === 'string' ? initialData.pc_prefix.trim() : 'حاسوب'
     };
 
     writeSettingsFile(initialSettings);
@@ -296,12 +308,13 @@ ipcMain.handle('save-pdf-report', async (_event, data) => {
     const student = payload.student || {};
     const evalData = payload.evaluation || {};
     const safeGroup = sanitizeFilename(student.group, 'unknown');
+    const safePc = sanitizeFilename(student.pcNumber, 'PC01');
     const gradeStr = evalData.sortableGrade || '00.00';
     const timeStr = evalData.sortableTime || '00-00-00';
     const safeLastName = sanitizeFilename(student.lastName, 'unknown');
     const safeFirstName = sanitizeFilename(student.firstName, 'unknown');
 
-    const defaultFilename = `${safeGroup}_${gradeStr}_${timeStr}_${safeLastName}_${safeFirstName}.pdf`;
+    const defaultFilename = `${safeGroup}_${safePc}_${gradeStr}_${timeStr}_${safeLastName}_${safeFirstName}.pdf`;
     let targetFilename = (data && data.fileName && typeof data.fileName === 'string' && data.fileName.trim())
       ? data.fileName.trim()
       : defaultFilename;

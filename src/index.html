@@ -29,6 +29,7 @@
         <div class="hud-student-info">
           <span>التلميذ:</span>
           <strong id="hudStudentName">تلميذ (غير مسجل)</strong>
+          <span class="hud-badge pc-badge" id="hudPcNumber" style="background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.4); color: #38bdf8;">🖥️ حاسوب 01</span>
           <span class="hud-badge" id="hudStudentGroup">1AS-01</span>
           <span class="hud-badge" id="hudStudentMode" style="background: #0284c7; color: #fff;">امتحان (صارم)</span>
           <span class="hud-badge" id="hudQuizModeBadge" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; display: none;" title="المحاكاة في نمط تخطي الأسئلة (الجانب المعرفي 0/6)">⚡ دون أسئلة (-6.00)</span>
@@ -407,6 +408,12 @@
           </select>
           <div id="regGroupNotice" style="color: #f59e0b; font-size: 11.5px; margin-top: 4px; display: none;"></div>
         </div>
+        <div style="margin-bottom: 14px;">
+          <label for="regPcNumber" class="win11-label" style="cursor: pointer;">رقم الحاسوب / المحطة في المخبر:</label>
+          <select class="win11-select" id="regPcNumber">
+            <!-- Populated dynamically from settings pc_min to pc_max -->
+          </select>
+        </div>
         <!-- Modification 6: Session mode container toggled via session_mode_enabled -->
         <div id="regModeContainer" style="margin-bottom: 14px;">
           <label for="regMode" class="win11-label" style="cursor: pointer;">نمط الحصة التعليمية:</label>
@@ -500,6 +507,24 @@
           </div>
         </div>
 
+        <!-- Star on GitHub & Community Discussion Call-to-Action -->
+        <div style="margin-top: 10px; margin-bottom: 12px; padding: 12px 14px; background: linear-gradient(135deg, rgba(234, 179, 8, 0.12), rgba(245, 158, 11, 0.05)); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: 8px;">
+          <div style="font-weight: 700; font-size: 13px; color: #f59e0b; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+            <span>⭐</span> <span>دعوة لدعم المشروع والمساهمة البيداغوجية:</span>
+          </div>
+          <p style="font-size: 12px; line-height: 1.6; color: var(--text-main); margin-bottom: 8px;">
+            زميلي الأستاذ الفاضل، مستخدمنا الكريم: تشجيعك لنا عبر وضع نجمة <strong>(Star ⭐)</strong> على مستودع المشروع ومشاركة اقتراحاتك وملاحظاتك هو أكبر دافع لمواصلة تطوير هذا العمل التعليمي المجاني لخدمة أساتذة وتلاميذ الجزائر!
+          </p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a href="https://github.com/atiklamine/educ_win11_install_simulation" class="external-link" target="_blank" rel="noopener noreferrer" style="color: #fbbf24; text-decoration: none; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(245, 158, 11, 0.2); border-radius: 5px; border: 1px solid rgba(245, 158, 11, 0.4); font-weight: 700;">
+              <span>⭐</span> اضغط هنا لدعم المشروع بنجمة (Star) على GitHub
+            </a>
+            <a href="https://github.com/atiklamine/educ_win11_install_simulation/issues" class="external-link" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: none; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(56, 189, 248, 0.15); border-radius: 5px; border: 1px solid rgba(56, 189, 248, 0.35); font-weight: 600;">
+              <span>💬</span> شاركنا ملاحظاتك واقتراحاتك (Issues / Feedback)
+            </a>
+          </div>
+        </div>
+
         <div class="about-quote-box">
           "نحو تعليم رقمي جزائري رائد، نؤمن بأن العلم هو أساس النهضة، وأن المبادرة الفردية وروح المسؤولية هما محرك التقدم. هذا العمل المتواضع هو بذرة نضعها بين أيدي أساتذتنا الأفاضل وتلاميذنا الأعزاء، لعلها تسهم في تذليل الصعاب، وربح الوقت والجهد، واستخدام الوسائل الحديثة التي ترفع من كفاءة أدائنا التربوي. نفتخر بانتمائنا لوزارة التربية الوطنية ولجزائر العلم والمعرفة، ونشجع كل مبادرات التطوير والتحديث. معاً، نحو أفق تعليمي أكثر إشراقاً وتطوراً."
         </div>
@@ -530,6 +555,9 @@
           </button>
           <button class="guide-tab-btn" id="btnTabGuideGlossary" type="button">
             <span>📖</span> <span>شرح مصطلحات تنصيب الأنظمة والشبكات</span>
+          </button>
+          <button class="guide-tab-btn" id="btnTabGuideTeacher" type="button">
+            <span>⚙️</span> <span>دليل الأستاذ وملف الإعدادات (inf.dll)</span>
           </button>
         </div>
 
@@ -710,6 +738,67 @@
           </div>
         </div>
 
+        <!-- TAB 3: Teacher Guide & inf.dll Configuration -->
+        <div id="guideTabTeacherContent" style="display: none;">
+          <p style="color: var(--text-muted); margin-bottom: 14px; font-weight: 500;">
+            دليل الأستاذ لتخصيص المحاكي لمخبر الإعلام الآلي وطريقة عمل ملف الإعدادات المشفر <code>inf.dll</code>:
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="guide-card guide-card-blue">
+              <strong style="font-size: 14.5px;">1. ما هو ملف الإعدادات <code>inf.dll</code>؟</strong>
+              <span>
+                هو ملف مشفر عالي الأمان بخوارزمية <strong>AES-256-CBC</strong> يتم حفظه بجانب البرنامج المحمول. وظيفته حفظ إعدادات الأستاذ بخصوصية تامة، وتشمل: كلمة مرور الأستاذ، اسم المؤسسة التعليمية، السنة الدراسية، قائمة الأفواج التربوية، ونطاق أرقام الحواسيب بالمخبر.
+              </span>
+            </div>
+
+            <div class="guide-card guide-card-amber">
+              <strong style="font-size: 14.5px;">2. كيفية الوصول لنافذة الإعدادات وتغيير الخيارات</strong>
+              <span>
+                • اضغط في أي وقت من لوحة المفاتيح على الاختصار: <strong>[Ctrl + Shift + S]</strong>.<br>
+                • أدخل كلمة مرور الأستاذ الافتراضية (أو التي خصصتها سابقاً).<br>
+                • يمكنك تعديل اسم الثانوية، إضافة وحذف الأفواج التربوية، ضبط نطاق أرقام الحواسيب (مثلاً من 1 إلى 20، أو من 2 إلى 30)، وتغيير كلمة المرور في أي وقت.
+              </span>
+            </div>
+
+            <div class="guide-card guide-card-green">
+              <strong style="font-size: 14.5px;">3. الميزة الذهبية: النشر السريع لكافة حواسيب المخبر (Portable Lab Sync)</strong>
+              <span>
+                عند ضبط الإعدادات على حاسوبك الشخصي أو حاسوب الأستاذ، يُحفظ ملف <code>inf.dll</code> تلقائياً.<br>
+                <strong>يكفي نسخ الملفين معاً:</strong><br>
+                <code>Win11_Edu_Simulator.exe</code> + <code>inf.dll</code><br>
+                على فلاش ديسك، ولصقهما في باقي حواسيب مخبر الإعلام الآلي. سيشتغل المحاكي على كافة الأجهزة بذات الإعدادات والبيانات الرسمية وبنفس كلمة المرور فورياً ودون الحاجة لإعادة كتابتها يدوياً في كل جهاز!
+              </span>
+            </div>
+
+            <div class="guide-card guide-card-purple">
+              <strong style="font-size: 14.5px;">4. خصوصية الأستاذ وحماية المستودع</strong>
+              <span>
+                ملف <code>inf.dll</code> مشفر ومحمي برمجياً، وتم استبعاده برمجياً من مستودع GitHub العام لضمان عدم تسريب أي كلمات مرور أو إعدادات محلية تخص المؤسسات التعليمية.
+              </span>
+            </div>
+
+            <!-- Star & Feedback Call-to-action in Guide -->
+            <div style="padding: 12px 14px; background: linear-gradient(135deg, rgba(234, 179, 8, 0.12), rgba(245, 158, 11, 0.05)); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: 8px;">
+              <div style="font-weight: 700; font-size: 13px; color: #f59e0b; margin-bottom: 6px;">
+                ⭐ ساهم في دعم المشروع التعليمي بنجمة على GitHub:
+              </div>
+              <p style="font-size: 12px; line-height: 1.6; color: var(--text-main); margin-bottom: 8px;">
+                تشجيعكم لنا بوضع نجمة على مستودع المشروع ومشاركة الملاحظات البيداغوجية هو حافزنا للاستمرار في تطوير المنظومة التعليمية الرقمية الجزائرية وإضافة المزيد من الأدوات المبتكرة.
+              </p>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <a href="https://github.com/atiklamine/educ_win11_install_simulation" target="_blank" rel="noopener noreferrer" class="fluent-btn fluent-btn-standard" style="text-decoration: none; font-size: 11.5px; padding: 5px 12px; color: #fbbf24; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.15);">
+                  ⭐ وضع نجمة على المستودع
+                </a>
+                <a href="https://github.com/atiklamine/educ_win11_install_simulation/issues" target="_blank" rel="noopener noreferrer" class="fluent-btn fluent-btn-standard" style="text-decoration: none; font-size: 11.5px; padding: 5px 12px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.1);">
+                  💬 إرسال اقتراح وتواصل
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
       <div class="modal-footer" style="justify-content: space-between;">
         <span style="font-size: 12px; color: var(--text-muted);">نظام محاكاة Windows 11 — مادة المعلوماتية (1AS)</span>
@@ -764,6 +853,21 @@
             </ul>
           </div>
         </div>
+
+        <!-- Star on GitHub & Community Discussion Call-to-Action -->
+        <div style="margin-top: 14px; padding: 10px 14px; background: linear-gradient(135deg, rgba(234, 179, 8, 0.12), rgba(245, 158, 11, 0.05)); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="font-size: 12px; color: var(--modal-text);">
+            <strong style="color: #f59e0b;">⭐ أعجبك المحاكي؟</strong> ساهم في دعم استمرار هذا المشروع الجزائري بنجمة على GitHub ومشاركة رأيك!
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <a href="https://github.com/atiklamine/educ_win11_install_simulation" target="_blank" rel="noopener noreferrer" class="fluent-btn fluent-btn-standard" style="text-decoration: none; font-size: 11.5px; padding: 4px 10px; color: #fbbf24; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.15);">
+              ⭐ وضع نجمة على GitHub
+            </a>
+            <a href="https://github.com/atiklamine/educ_win11_install_simulation/issues" target="_blank" rel="noopener noreferrer" class="fluent-btn fluent-btn-standard" style="text-decoration: none; font-size: 11.5px; padding: 4px 10px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.1);">
+              💬 شاركنا رأيك
+            </a>
+          </div>
+        </div>
       </div>
       <div class="modal-footer" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; gap: 8px;">
@@ -796,6 +900,27 @@
       <div class="modal-footer">
         <button class="fluent-btn fluent-btn-standard" id="btnCancelExit">إلغاء</button>
         <button class="fluent-btn fluent-btn-danger" id="btnConfirmExit">تأكيد الخروج</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pedagogical Confirmation & Alert Modal (Strict RTL & Native Dialog Replacement) -->
+  <div class="modal-overlay" id="pedagogicalModal">
+    <div class="modal-dialog" style="max-width: 520px; direction: rtl; text-align: right;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+          <span id="pedagogicalIcon" style="font-size: 18px;">⚠️</span>
+          <span id="pedagogicalTitleText">تنبيه بيداغوجي</span>
+        </h3>
+        <button class="modal-close-btn" id="btnClosePedagogicalModal">&times;</button>
+      </div>
+      <div class="modal-body" style="font-size: 13.5px; line-height: 1.8; color: var(--modal-text); direction: rtl; text-align: right;">
+        <div id="pedagogicalMessage" style="font-weight: 600; margin-bottom: 10px; color: var(--modal-title-text);"></div>
+        <div id="pedagogicalDetails" style="background: rgba(245, 158, 11, 0.08); padding: 10px 14px; border-radius: 6px; border-right: 4px solid #f59e0b; font-size: 12.5px; color: var(--text-main); line-height: 1.6; white-space: pre-line;"></div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; direction: rtl;">
+        <button class="fluent-btn fluent-btn-standard" id="btnPedagogicalCancel">إلغاء والعودة للمحاكاة</button>
+        <button class="fluent-btn fluent-btn-accent" id="btnPedagogicalConfirm">تأكيد الإجراء</button>
       </div>
     </div>
   </div>
@@ -865,6 +990,28 @@
           <div style="display: flex; gap: 8px; margin-top: 8px;">
             <input type="text" class="win11-input" id="newGroupInput" placeholder="أدخل اسم الفوج (مثال: 1AS-04)">
             <button type="button" class="fluent-btn fluent-btn-standard" id="btnAddGroup" style="min-width: 90px;">+ إضافة</button>
+          </div>
+        </div>
+
+        <!-- PC / Workstation Numbers Configuration -->
+        <div style="background: var(--info-box-bg); border: 1px solid var(--info-box-border); padding: 12px; border-radius: 6px;">
+          <div style="font-weight: 700; font-size: 13px; color: var(--accent-color); margin-bottom: 8px;">🖥️ نطاق أرقام الحواسيب في المخبر:</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div>
+              <label for="setPcMin" class="win11-label" style="cursor: pointer;">من رقم:</label>
+              <input type="number" class="win11-input" id="setPcMin" min="1" max="100" value="1">
+            </div>
+            <div>
+              <label for="setPcMax" class="win11-label" style="cursor: pointer;">إلى رقم:</label>
+              <input type="number" class="win11-input" id="setPcMax" min="1" max="100" value="20">
+            </div>
+            <div>
+              <label for="setPcPrefix" class="win11-label" style="cursor: pointer;">تسمية الحاسوب:</label>
+              <input type="text" class="win11-input" id="setPcPrefix" placeholder="مثال: حاسوب" value="حاسوب">
+            </div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+            تتيح للأستاذ تخصيص قائمة الحواسيب المتاحة للمتعلمين (مثلاً من 1 إلى 20، أو من 2 إلى 30)، لتظهر تلقائياً في قائمة الاختيار عند تسجيل التلميذ وتُدرج في التقرير الرسمي.
           </div>
         </div>
 
@@ -943,6 +1090,25 @@
           <div style="display: flex; gap: 8px; margin-top: 8px;">
             <input type="text" class="win11-input" id="newInitGroupInput" placeholder="اسم الفوج (مثال: 1AS-04)">
             <button type="button" class="fluent-btn fluent-btn-standard" id="btnAddInitGroup" style="min-width: 90px;">+ إضافة</button>
+          </div>
+        </div>
+
+        <!-- Initial Workstation / PC Numbers Configuration -->
+        <div style="background: var(--info-box-bg); border: 1px solid var(--info-box-border); padding: 12px; border-radius: 6px;">
+          <div style="font-weight: 700; font-size: 13px; color: var(--accent-color); margin-bottom: 8px;">🖥️ نطاق أرقام الحواسيب في المخبر:</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div>
+              <label for="initPcMin" class="win11-label" style="cursor: pointer;">من رقم:</label>
+              <input type="number" class="win11-input" id="initPcMin" min="1" max="100" value="1">
+            </div>
+            <div>
+              <label for="initPcMax" class="win11-label" style="cursor: pointer;">إلى رقم:</label>
+              <input type="number" class="win11-input" id="initPcMax" min="1" max="100" value="20">
+            </div>
+            <div>
+              <label for="initPcPrefix" class="win11-label" style="cursor: pointer;">تسمية الحاسوب:</label>
+              <input type="text" class="win11-input" id="initPcPrefix" placeholder="مثال: حاسوب" value="حاسوب">
+            </div>
           </div>
         </div>
 
@@ -1304,6 +1470,9 @@
           const quizMode = quizModeEl ? quizModeEl.value : 'with_quiz';
           const skipQuiz = (quizMode === 'without_quiz');
 
+          const pcNumberEl = document.getElementById('regPcNumber');
+          const pcNumber = (pcNumberEl && pcNumberEl.value) ? pcNumberEl.value : 'حاسوب 01';
+
           if (window.soundSynth) window.soundSynth.playClick();
           window.stateEngine.initSession({
             firstName,
@@ -1311,7 +1480,8 @@
             group,
             mode,
             quizMode,
-            skipQuiz
+            skipQuiz,
+            pcNumber
           });
 
           closeSessionModal();
@@ -1339,29 +1509,25 @@
       if (btnCloseAbout) btnCloseAbout.addEventListener('click', closeAbout);
       if (btnOkAbout) btnOkAbout.addEventListener('click', closeAbout);
 
-      // Guide Modal Tabs Switcher
+      // Guide Modal Tabs Switcher (3 Tabs: Steps, Glossary, Teacher inf.dll)
       const btnTabSteps = document.getElementById('btnTabGuideSteps');
       const btnTabGlossary = document.getElementById('btnTabGuideGlossary');
+      const btnTabTeacher = document.getElementById('btnTabGuideTeacher');
       const tabStepsContent = document.getElementById('guideTabStepsContent');
       const tabGlossaryContent = document.getElementById('guideTabGlossaryContent');
+      const tabTeacherContent = document.getElementById('guideTabTeacherContent');
 
-      if (btnTabSteps && btnTabGlossary && tabStepsContent && tabGlossaryContent) {
-        btnTabSteps.addEventListener('click', () => {
-          btnTabSteps.classList.add('active');
-          btnTabGlossary.classList.remove('active');
-          tabStepsContent.style.display = 'block';
-          tabGlossaryContent.style.display = 'none';
-          if (window.soundSynth) window.soundSynth.playClick();
-        });
+      const switchGuideTab = (activeBtn, activeContent) => {
+        [btnTabSteps, btnTabGlossary, btnTabTeacher].forEach(b => { if (b) b.classList.remove('active'); });
+        [tabStepsContent, tabGlossaryContent, tabTeacherContent].forEach(c => { if (c) c.style.display = 'none'; });
+        if (activeBtn) activeBtn.classList.add('active');
+        if (activeContent) activeContent.style.display = 'block';
+        if (window.soundSynth) window.soundSynth.playClick();
+      };
 
-        btnTabGlossary.addEventListener('click', () => {
-          btnTabGlossary.classList.add('active');
-          btnTabSteps.classList.remove('active');
-          tabStepsContent.style.display = 'none';
-          tabGlossaryContent.style.display = 'block';
-          if (window.soundSynth) window.soundSynth.playClick();
-        });
-      }
+      if (btnTabSteps) btnTabSteps.addEventListener('click', () => switchGuideTab(btnTabSteps, tabStepsContent));
+      if (btnTabGlossary) btnTabGlossary.addEventListener('click', () => switchGuideTab(btnTabGlossary, tabGlossaryContent));
+      if (btnTabTeacher) btnTabTeacher.addEventListener('click', () => switchGuideTab(btnTabTeacher, tabTeacherContent));
 
       // Guide Modal
       const guideModal = document.getElementById('expertGuideModal');
@@ -1714,6 +1880,119 @@
       window.setViewMode = updateUI;
       window.getViewMode = () => currentMode;
     }
+
+    // =========================================================================
+    // Pedagogical Custom Confirmation & Alert Modals (Strict RTL Fluent UI)
+    // =========================================================================
+    window.showPedagogicalConfirm = function({ title, message, details, confirmText, cancelText, icon, isDanger }) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('pedagogicalModal');
+        const titleEl = document.getElementById('pedagogicalTitleText');
+        const iconEl = document.getElementById('pedagogicalIcon');
+        const msgEl = document.getElementById('pedagogicalMessage');
+        const detEl = document.getElementById('pedagogicalDetails');
+        const btnOk = document.getElementById('btnPedagogicalConfirm');
+        const btnCancel = document.getElementById('btnPedagogicalCancel');
+        const btnClose = document.getElementById('btnClosePedagogicalModal');
+
+        if (!modal) {
+          const ok = window.confirm((message || '') + (details ? '\n\n' + details : ''));
+          return resolve(ok);
+        }
+
+        if (titleEl) titleEl.textContent = title || 'تنبيه بيداغوجي';
+        if (iconEl) iconEl.textContent = icon || '⚠️';
+        if (msgEl) msgEl.textContent = message || '';
+        if (detEl) {
+          if (details) {
+            detEl.textContent = details;
+            detEl.style.display = 'block';
+          } else {
+            detEl.style.display = 'none';
+          }
+        }
+
+        if (btnOk) {
+          btnOk.textContent = confirmText || 'تأكيد';
+          if (isDanger) {
+            btnOk.style.background = '#d97706';
+            btnOk.style.borderColor = '#b45309';
+          } else {
+            btnOk.style.background = 'var(--accent-color)';
+            btnOk.style.borderColor = 'var(--accent-color)';
+          }
+        }
+
+        if (btnCancel) {
+          btnCancel.textContent = cancelText || 'إلغاء';
+          btnCancel.style.display = 'inline-block';
+        }
+
+        const cleanup = () => {
+          modal.classList.remove('modal-visible');
+          if (btnOk) btnOk.onclick = null;
+          if (btnCancel) btnCancel.onclick = null;
+          if (btnClose) btnClose.onclick = null;
+        };
+
+        if (btnOk) btnOk.onclick = () => { cleanup(); resolve(true); };
+        if (btnCancel) btnCancel.onclick = () => { cleanup(); resolve(false); };
+        if (btnClose) btnClose.onclick = () => { cleanup(); resolve(false); };
+
+        modal.classList.add('modal-visible');
+      });
+    };
+
+    window.showPedagogicalAlert = function({ title, message, details, okText, icon }) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('pedagogicalModal');
+        const titleEl = document.getElementById('pedagogicalTitleText');
+        const iconEl = document.getElementById('pedagogicalIcon');
+        const msgEl = document.getElementById('pedagogicalMessage');
+        const detEl = document.getElementById('pedagogicalDetails');
+        const btnOk = document.getElementById('btnPedagogicalConfirm');
+        const btnCancel = document.getElementById('btnPedagogicalCancel');
+        const btnClose = document.getElementById('btnClosePedagogicalModal');
+
+        if (!modal) {
+          window.alert((message || '') + (details ? '\n\n' + details : ''));
+          return resolve(true);
+        }
+
+        if (titleEl) titleEl.textContent = title || 'إشعار بيداغوجي';
+        if (iconEl) iconEl.textContent = icon || 'ℹ️';
+        if (msgEl) msgEl.textContent = message || '';
+        if (detEl) {
+          if (details) {
+            detEl.textContent = details;
+            detEl.style.display = 'block';
+          } else {
+            detEl.style.display = 'none';
+          }
+        }
+
+        if (btnOk) {
+          btnOk.textContent = okText || 'حسناً';
+          btnOk.style.background = 'var(--accent-color)';
+          btnOk.style.borderColor = 'var(--accent-color)';
+        }
+
+        if (btnCancel) {
+          btnCancel.style.display = 'none';
+        }
+
+        const cleanup = () => {
+          modal.classList.remove('modal-visible');
+          if (btnOk) btnOk.onclick = null;
+          if (btnClose) btnClose.onclick = null;
+        };
+
+        if (btnOk) btnOk.onclick = () => { cleanup(); resolve(true); };
+        if (btnClose) btnClose.onclick = () => { cleanup(); resolve(true); };
+
+        modal.classList.add('modal-visible');
+      });
+    };
   </script>
 </body>
 </html>

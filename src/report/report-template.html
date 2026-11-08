@@ -327,10 +327,10 @@
       <div class="meta-grid">
         <div class="meta-item"><strong>اسم ولقب التلميذ:</strong> <span id="rStudentFullName">بن عيسى محمد</span></div>
         <div class="meta-item"><strong>الفوج / القسم:</strong> <span id="rStudentGroup">1AS-02 (علوم)</span></div>
+        <div class="meta-item"><strong>رقم الحاسوب / المحطة:</strong> <span id="rStudentPc">حاسوب 01</span></div>
         <div class="meta-item"><strong>الوقت المستغرق:</strong> <span id="rMetaTime" style="font-weight: 700; color: #0f172a;">00:22:15</span></div>
         <div class="meta-item"><strong>تاريخ الإجراء:</strong> <span id="rSessionDate">24 أكتوبر 2026</span></div>
         <div class="meta-item"><strong>توقيت الحصة:</strong> <span id="rSessionTime">14:30</span></div>
-        <div class="meta-item"><strong>المدة المفصلة:</strong> <span id="rSessionDuration">22 دقيقة و 15 ثانية</span></div>
       </div>
     </div>
 
@@ -471,6 +471,9 @@
       // Student info
       document.getElementById('rStudentFullName').textContent = `${st.lastName || ''} ${st.firstName || ''}`.trim() || 'تلميذ (غير مسجل)';
       document.getElementById('rStudentGroup').textContent = st.group || '1AS-01';
+      if (document.getElementById('rStudentPc')) {
+        document.getElementById('rStudentPc').textContent = st.pcNumber || 'حاسوب 01';
+      }
 
       // Institution & Teacher info from Settings
       if (document.getElementById('rHeaderInstitution')) {
@@ -486,19 +489,22 @@
       // Session dates & times
       document.getElementById('rSessionDate').textContent = sm.date || new Date().toLocaleDateString('ar-DZ');
       document.getElementById('rSessionTime').textContent = sm.time || new Date().toLocaleTimeString('ar-DZ');
-      document.getElementById('rSessionDuration').textContent = sm.duration || 'غير محدد';
+      if (document.getElementById('rSessionDuration')) {
+        document.getElementById('rSessionDuration').textContent = sm.duration || 'غير محدد';
+      }
       if (document.getElementById('rMetaTime')) {
         document.getElementById('rMetaTime').textContent = ev.displayTime || sm.displayTime || '00:00:00';
       }
 
-      // Modification 4: Equal-Height Score & Time Cards
-      document.getElementById('rFinalScore').textContent = `${ev.totalScore || '0.00'} / ${ev.maxScore || '20.00'}`;
+      // Modification 4: Equal-Height Score & Time Cards (Strictly Non-Negative Clamping)
+      const finalScoreNum = Math.max(0, Number(ev.totalScore) || 0);
+      document.getElementById('rFinalScore').textContent = `${finalScoreNum.toFixed(2)} / ${ev.maxScore || '20.00'}`;
       if (document.getElementById('rFinalTime')) {
         document.getElementById('rFinalTime').textContent = ev.displayTime || sm.displayTime || '00:00:00';
       }
 
-      document.getElementById('rCognitiveScore').textContent = ev.cognitiveScore || '0.00';
-      document.getElementById('rPracticalScore').textContent = ev.practicalScore || '0.00';
+      document.getElementById('rCognitiveScore').textContent = Math.max(0, Number(ev.cognitiveScore) || 0).toFixed(2);
+      document.getElementById('rPracticalScore').textContent = Math.max(0, Number(ev.practicalScore) || 0).toFixed(2);
 
       const isQuizSkipped = !!(data.skipQuiz || ev.skipQuiz || (data.penalties && data.penalties.some(p => p.phase === 'عام' || p.phase === 'شامل')));
 

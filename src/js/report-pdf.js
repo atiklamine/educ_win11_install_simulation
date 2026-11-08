@@ -136,8 +136,8 @@ class ReportPdf {
       student: {
         firstName: se.student.firstName || 'مترشح',
         lastName: se.student.lastName || 'تلميذ',
-        group: se.student.group || '1AS-01'
-        // Session mode completely omitted as per Modification 6
+        group: se.student.group || '1AS-01',
+        pcNumber: se.student.pcNumber || 'حاسوب 01'
       },
       skipQuiz: !!se.skipQuiz,
       institution: {
@@ -212,12 +212,17 @@ class ReportPdf {
   async exportPdf() {
     const se = window.stateEngine;
     if (se && !se.isCompleted && se.completedPhases.size < se.totalPhases) {
-      const confirmExport = confirm(
-        `تنبيه بيداغوجي هام:\n\n` +
-        `أنت حالياً في المرحلة (${se.currentPhase}) ولم تكتمل بعد كافة مراحل تنصيب النظام (المراحل المنجزة: ${se.completedPhases.size} من أصل ${se.totalPhases}).\n\n` +
-        `استخراج التقرير الآن سيُعتبر إنهاءً مبكراً للمحاكاة، ولن تتحصل على علامة المراحل المتبقية غير المنجزة (0.00).\n\n` +
-        `هل أنت متأكد من رغبتك في إنهاء المحاكاة الآن واستخراج التقرير غير المكتمل؟`
-      );
+      const confirmExport = (typeof window.showPedagogicalConfirm === 'function')
+        ? await window.showPedagogicalConfirm({
+            title: 'تنبيه بيداغوجي: استخراج مبكر للتقرير',
+            icon: '⚠️',
+            message: `أنت حالياً في المرحلة (${se.currentPhase}) ولم تكتمل بعد كافة مراحل تنصيب النظام (المراحل المنجزة: ${se.completedPhases.size} من أصل ${se.totalPhases}).`,
+            details: 'استخراج التقرير الآن سيُعتبر إنهاءً مبكراً للمحاكاة، ولن تتحصل على علامة المراحل والأسئلة المتبقية غير المنجزة (0.00).\n\nهل أنت متأكد من رغبتك في إنهاء المحاكاة الآن واستخراج التقرير غير المكتمل؟',
+            confirmText: 'نعم، استخراج التقرير غير المكتمل ⚠️',
+            cancelText: 'إلغاء ومواصلة المحاكاة ✔',
+            isDanger: true
+          })
+        : confirm(`تنبيه بيداغوجي هام:\n\nأنت حالياً في المرحلة (${se.currentPhase}) ولم تكتمل بعد كافة مراحل تنصيب النظام.\nهل ترغب في إنهاء المحاكاة الآن واستخراج التقرير؟`);
       if (!confirmExport) {
         return;
       }
@@ -231,11 +236,12 @@ class ReportPdf {
     const gradeStr = payload.evaluation.sortableGrade || '00.00';
     const timeStr = payload.evaluation.sortableTime || '00-00-00';
     const safeGroup = this.cleanFilenamePart(student.group, 'unknown');
+    const safePc = this.cleanFilenamePart(student.pcNumber, 'PC01');
     const safeLastName = this.cleanFilenamePart(student.lastName, 'unknown');
     const safeFirstName = this.cleanFilenamePart(student.firstName, 'unknown');
 
-    // Strict formula: [group]_[grade]_[time]_[lastname]_[firstname].pdf (Max length <= 200)
-    let baseFileName = `${safeGroup}_${gradeStr}_${timeStr}_${safeLastName}_${safeFirstName}`;
+    // Strict formula: [group]_[pc]_[grade]_[time]_[lastname]_[firstname].pdf (Max length <= 200)
+    let baseFileName = `${safeGroup}_${safePc}_${gradeStr}_${timeStr}_${safeLastName}_${safeFirstName}`;
     if (baseFileName.length > 195) {
       baseFileName = baseFileName.substring(0, 195).replace(/[.\s_]+$/g, '');
     }
@@ -260,17 +266,43 @@ class ReportPdf {
 
         if (res && res.success) {
           if (window.soundSynth) window.soundSynth.playSuccess();
-          const openNow = confirm(
-            `تم استخراج تقرير تقييم الكفاءة الرسمي بنجاح!\n\nاسم الملف: ${res.fileName}\nالمسار: ${res.filePath}\n\nهل ترغب في فتح مكان الملف الآن؟`
-          );
+          const openNow = (typeof window.showPedagogicalConfirm === 'function')
+            ? await window.showPedagogicalConfirm({
+                title: 'تم استخراج وثيقة التقييم بنجاح',
+                icon: '📄',
+                message: 'تم استخراج تقرير تقييم الكفاءة الرسمي وحفظه مباشرة على سطح المكتب بنجاح!',
+                details: `اسم الملف: ${res.fileName}\nالمسار: ${res.filePath}\n\nهل ترغب في فتح مكان الملف الآن؟`,
+                confirmText: 'فتح مكان الملف (المجلد) 📁',
+                cancelText: 'إغلاق ومتابعة ✔',
+                isDanger: false
+              })
+            : confirm(`تم استخراج تقرير تقييم الكفاءة الرسمي بنجاح!\n\nاسم الملف: ${res.fileName}\nالمسار: ${res.filePath}\n\nهل ترغب في فتح مكان الملف الآن؟`);
           if (openNow && window.electronAPI.showInFolder) {
             window.electronAPI.showInFolder(res.filePath);
           }
         } else {
-          alert('تعذر استخراج ملف PDF: ' + (res.error || 'خطأ غير معروف'));
+          if (typeof window.showPedagogicalAlert === 'function') {
+            await window.showPedagogicalAlert({
+              title: 'تعذر استخراج ملف PDF',
+              icon: '❌',
+              message: res.error || 'خطأ غير معروف أثناء استخراج التقرير.',
+              okText: 'حسناً'
+            });
+          } else {
+            alert('تعذر استخراج ملف PDF: ' + (res.error || 'خطأ غير معروف'));
+          }
         }
       } catch (err) {
-        alert('حدث خطأ أثناء استخراج التقرير: ' + err.message);
+        if (typeof window.showPedagogicalAlert === 'function') {
+          await window.showPedagogicalAlert({
+            title: 'خطأ أثناء استخراج التقرير',
+            icon: '⚠️',
+            message: err.message,
+            okText: 'حسناً'
+          });
+        } else {
+          alert('حدث خطأ أثناء استخراج التقرير: ' + err.message);
+        }
       }
     } else {
       // Browser fallback (e.g. GitHub Pages / Web Browser)

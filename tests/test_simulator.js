@@ -209,6 +209,8 @@ const sandbox = {
   },
   confirm: () => true,
   alert: () => {},
+  showPedagogicalConfirm: () => Promise.resolve(true),
+  showPedagogicalAlert: () => Promise.resolve(true),
   console: console,
   Set: Set,
   Date: Date,
@@ -227,14 +229,23 @@ vm.runInContext(reportPdfJs, sandbox);
 const se = sandbox.window.stateEngine;
 const rp = sandbox.window.reportPdf;
 
-se.initSession({ firstName: 'تلميذ', lastName: 'تجريبي', group: '1AS-01' });
+se.initSession({ firstName: 'تلميذ', lastName: 'تجريبي', group: '1AS-01', pcNumber: 'حاسوب 05' });
 
-// 1. Initial State: Must be strictly 0.00 / 20.00
+// 1. Initial State: Must be strictly 0.00 / 20.00 and PC number verified
+assert.strictEqual(se.student.pcNumber, 'حاسوب 05', 'Student PC number preserved');
 assert.strictEqual(se.practicalScore, 0.00, 'Practical score must start at 0.00');
 assert.strictEqual(se.cognitiveScore, 0.00, 'Cognitive score must start at 0.00');
 assert.strictEqual(se.getCalculatedScore(), 0.00, 'Calculated score must start at 0.00');
 
+// Verify strictly non-negative score clamping
+se.recordPenalty(1, 1.00, 'خطأ اختبار علامة سالبة');
+assert.strictEqual(se.practicalScore, 0.00, 'Practical score cannot be negative');
+assert.strictEqual(se.getCalculatedScore(), 0.00, 'Calculated score cannot be negative');
+se.penalties = [];
+se.diagnosticErrors = [];
+
 let pStart = rp.buildReportPayload();
+assert.strictEqual(pStart.student.pcNumber, 'حاسوب 05', 'Report reflects PC number');
 assert.strictEqual(pStart.evaluation.totalScore, '0.00', 'Report total score at start must be 0.00');
 assert.strictEqual(pStart.evaluation.practicalScore, '0.00', 'Report practical score at start must be 0.00');
 assert.strictEqual(pStart.evaluation.competencies[0].score, '0.00', 'Competency 1 must be 0.00 at start');

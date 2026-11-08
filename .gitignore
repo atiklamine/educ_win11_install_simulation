@@ -15,9 +15,13 @@ dist/win-unpacked/
 dist/win-ia32-unpacked/
 dist/builder-debug.yml
 dist/builder-effective-config.yaml
-!dist/inf.dll
 dist - Copie/
 dist - Copy/
+
+# Teacher's encrypted local credentials & lab settings (Must NOT be exposed publicly)
+inf.dll
+*/inf.dll
+dist/inf.dll
 
 # Cache and temporary folders
 .cache/

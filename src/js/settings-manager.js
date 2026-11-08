@@ -13,7 +13,10 @@ class SettingsManager {
       school_year: '2025/2026',
       groups: ['1AS-01 (جذع مشترك علوم)', '1AS-02 (جذع مشترك علوم)', '1AS-03 (جذع مشترك آداب)'],
       session_mode_enabled: true,
-      force_french_names: true
+      force_french_names: true,
+      pc_min: 1,
+      pc_max: 20,
+      pc_prefix: 'حاسوب'
     };
 
     this.tempGroups = [];
@@ -91,6 +94,24 @@ class SettingsManager {
         if (groupNotice) {
           groupNotice.style.display = 'none';
         }
+      }
+    }
+
+    // 1.1 Populate Workstation / PC Numbers in Student Registration (#regPcNumber)
+    const pcSelect = document.getElementById('regPcNumber');
+    if (pcSelect) {
+      pcSelect.innerHTML = '';
+      const min = Math.max(1, parseInt(this.settings.pc_min, 10) || 1);
+      const max = Math.max(min, parseInt(this.settings.pc_max, 10) || 20);
+      const prefix = (this.settings.pc_prefix && this.settings.pc_prefix.trim()) ? this.settings.pc_prefix.trim() : 'حاسوب';
+
+      for (let i = min; i <= max; i++) {
+        const numStr = String(i).padStart(2, '0');
+        const opt = document.createElement('option');
+        opt.value = `${prefix} ${numStr}`;
+        opt.textContent = `${prefix} ${numStr}`;
+        if (i === min) opt.selected = true;
+        pcSelect.appendChild(opt);
       }
     }
 
@@ -265,6 +286,13 @@ class SettingsManager {
     if (yearInput) yearInput.value = this.settings.school_year || '';
     if (modeSwitch) modeSwitch.checked = this.settings.session_mode_enabled !== false;
     if (forceFrenchSwitch) forceFrenchSwitch.checked = this.settings.force_french_names !== false;
+
+    const setPcMin = document.getElementById('setPcMin');
+    const setPcMax = document.getElementById('setPcMax');
+    const setPcPrefix = document.getElementById('setPcPrefix');
+    if (setPcMin) setPcMin.value = this.settings.pc_min || 1;
+    if (setPcMax) setPcMax.value = this.settings.pc_max || 20;
+    if (setPcPrefix) setPcPrefix.value = this.settings.pc_prefix || 'حاسوب';
     if (statusMsg) {
       statusMsg.style.display = 'none';
       statusMsg.textContent = '';
@@ -333,6 +361,13 @@ class SettingsManager {
       }
     }
 
+    const setPcMin = document.getElementById('setPcMin');
+    const setPcMax = document.getElementById('setPcMax');
+    const setPcPrefix = document.getElementById('setPcPrefix');
+    const pcMinVal = setPcMin ? Math.max(1, parseInt(setPcMin.value, 10) || 1) : 1;
+    const pcMaxVal = setPcMax ? Math.max(pcMinVal, parseInt(setPcMax.value, 10) || 20) : 20;
+    const pcPrefixVal = setPcPrefix ? (setPcPrefix.value.trim() || 'حاسوب') : 'حاسوب';
+
     const payload = {
       teacher: {
         full_name: (nameInput ? nameInput.value : '').trim(),
@@ -342,7 +377,10 @@ class SettingsManager {
       school_year: (yearInput ? yearInput.value : '').trim(),
       groups: this.tempGroups,
       session_mode_enabled: modeSwitch ? modeSwitch.checked : true,
-      force_french_names: forceFrenchSwitch ? forceFrenchSwitch.checked : true
+      force_french_names: forceFrenchSwitch ? forceFrenchSwitch.checked : true,
+      pc_min: pcMinVal,
+      pc_max: pcMaxVal,
+      pc_prefix: pcPrefixVal
     };
 
     const api = this.getApi();
@@ -356,6 +394,9 @@ class SettingsManager {
           this.settings.groups = [...this.tempGroups];
           this.settings.session_mode_enabled = payload.session_mode_enabled;
           this.settings.force_french_names = payload.force_french_names;
+          this.settings.pc_min = pcMinVal;
+          this.settings.pc_max = pcMaxVal;
+          this.settings.pc_prefix = pcPrefixVal;
 
           if (statusMsg) {
             statusMsg.textContent = 'تم الحفظ بنجاح';
@@ -388,6 +429,9 @@ class SettingsManager {
       this.settings.groups = [...this.tempGroups];
       this.settings.session_mode_enabled = payload.session_mode_enabled;
       this.settings.force_french_names = payload.force_french_names;
+      this.settings.pc_min = pcMinVal;
+      this.settings.pc_max = pcMaxVal;
+      this.settings.pc_prefix = pcPrefixVal;
 
       if (statusMsg) {
         statusMsg.textContent = 'تم الحفظ بنجاح';
@@ -409,6 +453,9 @@ class SettingsManager {
     const instInput = document.getElementById('initInstitution');
     const yearInput = document.getElementById('initSchoolYear');
     const initForceFrenchSwitch = document.getElementById('initForceFrenchNamesSwitch');
+    const initPcMin = document.getElementById('initPcMin');
+    const initPcMax = document.getElementById('initPcMax');
+    const initPcPrefix = document.getElementById('initPcPrefix');
     const statusMsg = document.getElementById('initStatusMsg');
 
     const pwd = pwdInput ? pwdInput.value : '';
@@ -431,6 +478,10 @@ class SettingsManager {
       return;
     }
 
+    const pcMinVal = initPcMin ? Math.max(1, parseInt(initPcMin.value, 10) || 1) : 1;
+    const pcMaxVal = initPcMax ? Math.max(pcMinVal, parseInt(initPcMax.value, 10) || 20) : 20;
+    const pcPrefixVal = initPcPrefix ? (initPcPrefix.value.trim() || 'حاسوب') : 'حاسوب';
+
     const payload = {
       password: pwd,
       full_name: (nameInput ? nameInput.value : '').trim() || 'أستاذ مادة المعلوماتية',
@@ -438,7 +489,10 @@ class SettingsManager {
       school_year: (yearInput ? yearInput.value : '').trim() || '2025/2026',
       groups: this.initialGroups,
       session_mode_enabled: true,
-      force_french_names: initForceFrenchSwitch ? initForceFrenchSwitch.checked : true
+      force_french_names: initForceFrenchSwitch ? initForceFrenchSwitch.checked : true,
+      pc_min: pcMinVal,
+      pc_max: pcMaxVal,
+      pc_prefix: pcPrefixVal
     };
 
     const api = this.getApi();
@@ -452,6 +506,9 @@ class SettingsManager {
           this.settings.groups = [...this.initialGroups];
           this.settings.session_mode_enabled = true;
           this.settings.force_french_names = payload.force_french_names;
+          this.settings.pc_min = pcMinVal;
+          this.settings.pc_max = pcMaxVal;
+          this.settings.pc_prefix = pcPrefixVal;
 
           if (statusMsg) {
             statusMsg.textContent = 'تم تهيئة الإعدادات بنجاح!';

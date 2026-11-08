@@ -87,6 +87,14 @@ class StateEngine {
       }
     };
 
+    this.student = {
+      firstName: '',
+      lastName: '',
+      group: '1AS-01',
+      mode: 'exam',
+      pcNumber: 'حاسوب 01'
+    };
+
     // Phase hint definitions for Draggable Phase-based Assistance Window
     this.phaseHints = {
       1: 'المرحلة 1: شاشة العرض سوداء. اختر وسيط التثبيت من الرف على اليسار (فلاش ديسك أو قرص DVD)، واضغط زر التشغيل بالوحدة المركزية على اليمين، ثم اضغط سريعاً على [F2 أو Del] في لوحة المفاتيح الحقيقية لدخول البيوس قبل انقضاء المهلة (10 ثوانٍ).',
@@ -154,7 +162,8 @@ class StateEngine {
       firstName: '',
       lastName: '',
       group: '1AS-01',
-      mode: 'exam'
+      mode: 'exam',
+      pcNumber: 'حاسوب 01'
     };
 
     // 4. Reset media & simulation hardware states
@@ -303,6 +312,7 @@ class StateEngine {
       this.student.firstName = (studentData.firstName || '').trim();
       this.student.lastName = (studentData.lastName || '').trim();
       this.student.group = (studentData.group || '1AS-01').trim();
+      this.student.pcNumber = (studentData.pcNumber || '').trim() || 'حاسوب 01';
       
       // Modification 6: If session_mode_enabled is false, always practice mode
       if (settings.session_mode_enabled === false) {
@@ -569,6 +579,10 @@ class StateEngine {
 
     if (studentNameEl) {
       studentNameEl.textContent = `${this.student.lastName} ${this.student.firstName}`.trim() || 'تلميذ (غير مسجل)';
+    }
+    const studentPcEl = document.getElementById('hudPcNumber');
+    if (studentPcEl) {
+      studentPcEl.textContent = `🖥️ ${this.student.pcNumber || 'حاسوب 01'}`;
     }
     if (studentGroupEl) {
       studentGroupEl.textContent = this.student.group || '1AS-01';
