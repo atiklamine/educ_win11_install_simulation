@@ -5,7 +5,8 @@ const settingsApi = {
   load: () => ipcRenderer.invoke('settings:load'),
   save: (settingsData) => ipcRenderer.invoke('settings:save', settingsData),
   verifyPassword: (password) => ipcRenderer.invoke('settings:verifyPassword', password),
-  createInitial: (initialData) => ipcRenderer.invoke('settings:createInitial', initialData)
+  createInitial: (initialData) => ipcRenderer.invoke('settings:createInitial', initialData),
+  getLocalIp: () => ipcRenderer.invoke('network:getLocalIp')
 };
 
 // Expose window.api.settings as specified in prompt requirement

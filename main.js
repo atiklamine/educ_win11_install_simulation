@@ -87,7 +87,13 @@ ipcMain.handle('settings:load', async () => {
         institution: data.institution || '',
         school_year: data.school_year || '',
         groups: Array.isArray(data.groups) ? data.groups : [],
-        session_mode_enabled: data.session_mode_enabled !== false
+        session_mode_enabled: data.session_mode_enabled !== false,
+        network_sync: {
+          enabled: (data.network_sync && typeof data.network_sync.enabled === 'boolean') ? data.network_sync.enabled : true,
+          teacher_ip: (data.network_sync && data.network_sync.teacher_ip) || '192.168.1.10',
+          teacher_port: (data.network_sync && typeof data.network_sync.teacher_port === 'number') ? data.network_sync.teacher_port : 8888,
+          timeout_seconds: (data.network_sync && typeof data.network_sync.timeout_seconds === 'number') ? data.network_sync.timeout_seconds : 3
+        }
       }
     };
   } catch (err) {
@@ -161,6 +167,18 @@ ipcMain.handle('settings:save', async (_event, updateData) => {
     if (typeof updateData.pc_prefix === 'string') {
       current.pc_prefix = updateData.pc_prefix.trim();
     }
+    if (updateData.network_sync) {
+      if (!current.network_sync) current.network_sync = {};
+      if (typeof updateData.network_sync.enabled === 'boolean') {
+        current.network_sync.enabled = updateData.network_sync.enabled;
+      }
+      if (typeof updateData.network_sync.teacher_ip === 'string') {
+        current.network_sync.teacher_ip = updateData.network_sync.teacher_ip.trim();
+      }
+      if (typeof updateData.network_sync.teacher_port === 'number') {
+        current.network_sync.teacher_port = updateData.network_sync.teacher_port;
+      }
+    }
 
     writeSettingsFile(current);
     return { success: true };
@@ -195,7 +213,13 @@ ipcMain.handle('settings:createInitial', async (_event, initialData) => {
       force_french_names: initialData.force_french_names !== false,
       pc_min: typeof initialData.pc_min === 'number' ? initialData.pc_min : 1,
       pc_max: typeof initialData.pc_max === 'number' ? initialData.pc_max : 20,
-      pc_prefix: typeof initialData.pc_prefix === 'string' ? initialData.pc_prefix.trim() : 'حاسوب'
+      pc_prefix: typeof initialData.pc_prefix === 'string' ? initialData.pc_prefix.trim() : 'حاسوب',
+      network_sync: {
+        enabled: typeof initialData.network_sync_enabled === 'boolean' ? initialData.network_sync_enabled : true,
+        teacher_ip: typeof initialData.teacher_ip === 'string' && initialData.teacher_ip.trim() ? initialData.teacher_ip.trim() : '192.168.1.10',
+        teacher_port: typeof initialData.teacher_port === 'number' ? initialData.teacher_port : 8888,
+        timeout_seconds: 3
+      }
     };
 
     writeSettingsFile(initialSettings);
@@ -359,6 +383,135 @@ function sanitizeFilename(name, fallback = 'report') {
   return s || fallback;
 }
 
+// IPC: Get Best Local IPv4 address for network configuration
+ipcMain.handle('network:getLocalIp', () => {
+  try {
+    const os = require('os');
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+      for (const iface of interfaces[name]) {
+        if (iface.family === 'IPv4' && !iface.internal && !iface.address.startsWith('169.254.')) {
+          return iface.address;
+        }
+      }
+    }
+  } catch (e) {}
+  return '127.0.0.1';
+});
+
+// Helper: Resilient asynchronous upload of PDF report to Teacher Receiver
+function uploadReportToTeacher(targetFilename, pdfBuffer, payload, networkConfig) {
+  return new Promise((resolve) => {
+    if (!networkConfig || networkConfig.enabled === false) {
+      return resolve({
+        attempted: false,
+        sent: false,
+        duplicate: false,
+        message: 'المزامنة الشبكية معطلة في الإعدادات'
+      });
+    }
+
+    const http = require('http');
+    const teacherIp = (networkConfig.teacher_ip || '192.168.1.10').trim();
+    const teacherPort = Number(networkConfig.teacher_port) || 8888;
+    const timeoutMs = (Number(networkConfig.timeout_seconds) || 3) * 1000;
+    const sha256Hex = crypto.createHash('sha256').update(pdfBuffer).digest('hex');
+
+    const student = payload.student || {};
+    const evalData = payload.evaluation || {};
+
+    const options = {
+      hostname: teacherIp,
+      port: teacherPort,
+      path: '/upload',
+      method: 'POST',
+      timeout: timeoutMs,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Length': pdfBuffer.length,
+        'X-File-Name': encodeURIComponent(targetFilename),
+        'X-File-SHA256': sha256Hex,
+        'X-Student-Group': encodeURIComponent(student.group || ''),
+        'X-Student-PC': encodeURIComponent(student.pcNumber || ''),
+        'X-Student-LastName': encodeURIComponent(student.lastName || ''),
+        'X-Student-FirstName': encodeURIComponent(student.firstName || ''),
+        'X-Student-Score': encodeURIComponent(evalData.sortableGrade || '00.00'),
+        'X-Student-Time': encodeURIComponent(evalData.sortableTime || '00-00-00')
+      }
+    };
+
+    let settled = false;
+    const req = http.request(options, (res) => {
+      let respBody = '';
+      res.on('data', chunk => { respBody += chunk; });
+      res.on('end', () => {
+        if (settled) return;
+        settled = true;
+        if (res.statusCode === 200) {
+          resolve({
+            attempted: true,
+            sent: true,
+            duplicate: false,
+            teacherIp: teacherIp,
+            teacherPort: teacherPort,
+            message: 'تم تسليم النسخة بنجاح لحاسوب الأستاذ 🟢'
+          });
+        } else if (res.statusCode === 409) {
+          resolve({
+            attempted: true,
+            sent: true,
+            duplicate: true,
+            teacherIp: teacherIp,
+            teacherPort: teacherPort,
+            message: 'هذا التقرير مستلم مسبقاً بالفعل لدى الأستاذ ✔'
+          });
+        } else {
+          resolve({
+            attempted: true,
+            sent: false,
+            duplicate: false,
+            teacherIp: teacherIp,
+            teacherPort: teacherPort,
+            message: `استجاب خادم الأستاذ برمز: ${res.statusCode}`
+          });
+        }
+      });
+    });
+
+    req.on('timeout', () => {
+      req.destroy();
+      if (!settled) {
+        settled = true;
+        resolve({
+          attempted: true,
+          sent: false,
+          duplicate: false,
+          teacherIp: teacherIp,
+          teacherPort: teacherPort,
+          message: 'انتهت مهلة انتظار استجابة حاسوب الأستاذ (Timeout)'
+        });
+      }
+    });
+
+    req.on('error', (err) => {
+      if (!settled) {
+        settled = true;
+        resolve({
+          attempted: true,
+          sent: false,
+          duplicate: false,
+          teacherIp: teacherIp,
+          teacherPort: teacherPort,
+          message: 'تعذر الاتصال بحاسوب الأستاذ (غير متاح على الشبكة)'
+        });
+      }
+    });
+
+    req.write(pdfBuffer);
+    req.end();
+  });
+}
+
 // IPC: PDF Generation & Direct Save to Desktop
 ipcMain.handle('save-pdf-report', async (_event, data) => {
   try {
@@ -462,15 +615,35 @@ ipcMain.handle('save-pdf-report', async (_event, data) => {
     // Write file directly to Desktop
     fs.writeFileSync(targetFilePath, pdfBuffer);
 
-      if (printWindow && !printWindow.isDestroyed()) {
-        printWindow.destroy();
-        printWindow = null;
+    // Compute SHA-256 of the generated PDF
+    const sha256Hex = crypto.createHash('sha256').update(pdfBuffer).digest('hex');
+
+    // Read network sync settings from inf.dll
+    let networkConfig = { enabled: true, teacher_ip: '192.168.1.10', teacher_port: 8888, timeout_seconds: 3 };
+    try {
+      const savedSettings = readSettingsFile();
+      if (savedSettings && savedSettings.network_sync) {
+        networkConfig = savedSettings.network_sync;
       }
+    } catch (e) {}
+
+    // Perform silent, resilient network delivery to teacher
+    let networkResult = { attempted: false, sent: false, duplicate: false, message: '' };
+    if (networkConfig && networkConfig.enabled !== false) {
+      networkResult = await uploadReportToTeacher(targetFilename, pdfBuffer, payload, networkConfig);
+    }
+
+    if (printWindow && !printWindow.isDestroyed()) {
+      printWindow.destroy();
+      printWindow = null;
+    }
 
     return {
       success: true,
       filePath: targetFilePath,
-      fileName: targetFilename
+      fileName: targetFilename,
+      sha256: sha256Hex,
+      network: networkResult
     };
     } finally {
       if (printWindow && !printWindow.isDestroyed()) {

@@ -83,7 +83,9 @@ const settingsMgrPath = path.join(rootDir, 'src', 'js', 'settings-manager.js');
 
 assert(fs.existsSync(settingsMgrPath), 'src/js/settings-manager.js exists');
 assert(preloadJsCode.includes('settings:'), 'preload.js exposes settings API');
+assert(preloadJsCode.includes('getLocalIp'), 'preload.js exposes getLocalIp');
 assert(mainJsCode.includes('aes-256-cbc'), 'main.js uses AES-256-CBC crypto');
+assert(mainJsCode.includes('uploadReportToTeacher'), 'main.js contains uploadReportToTeacher');
 
 // Test encryption roundtrip
 const testPassword = 'TeacherPassword123';
@@ -125,6 +127,7 @@ const stateJs = fs.readFileSync(path.join(rootDir, 'src', 'js', 'state-engine.js
 
 assert(stateJs.includes('getPhaseHint(phase)'), 'StateEngine contains getPhaseHint');
 assert(stateJs.includes('installationMedia'), 'StateEngine tracks installationMedia');
+assert(stateJs.includes('lastDeliveredReportHash'), 'StateEngine tracks lastDeliveredReportHash');
 assert(appSimJs.includes('renderPhase6UnplugMedia'), 'app-simulator contains renderPhase6UnplugMedia');
 console.log('  ✓ PASS: Full harmony across USB, DVD, and PXE media across all phases.');
 

@@ -48,6 +48,7 @@ class StateEngine {
     this.timerInterval = null;
     this.isSessionActive = false;
     this.isCompleted = false;
+    this.lastDeliveredReportHash = null;
 
     // Simulation Flags
     this.selectedMedia = null; // 'usb' | 'dvd' | 'pxe'
@@ -139,10 +140,12 @@ class StateEngine {
     this.elapsedSeconds = 0;
     this.isSessionActive = false;
     this.isCompleted = false;
+    this.lastDeliveredReportHash = null;
 
     // 2. Clear simulation phases & scores to exact initial values
     this.currentPhase = 1;
     this.completedPhases.clear();
+    this.lastDeliveredReportHash = null;
     this.cognitiveScore = 0;
     this.practicalScore = 0.00;
     this.quizScores = {
@@ -326,6 +329,7 @@ class StateEngine {
 
     this.currentPhase = 1;
     this.completedPhases.clear();
+    this.lastDeliveredReportHash = null;
     this.cognitiveScore = 0;
     this.practicalScore = 0.00;
     this.quizScores = {

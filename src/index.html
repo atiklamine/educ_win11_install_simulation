@@ -1015,6 +1015,33 @@
           </div>
         </div>
 
+        <!-- Network Synchronization Configuration (Direct Teacher LAN Sync) -->
+        <div style="background: var(--info-box-bg); border: 1px solid var(--info-box-border); padding: 12px; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="font-weight: 700; font-size: 13px; color: var(--accent-color);">📡 إرسال نسخة من التقرير تلقائياً لحاسوب الأستاذ (LAN Sync):</div>
+            <label class="fluent-switch">
+              <input type="checkbox" id="setNetworkSyncEnabled" checked>
+              <span class="fluent-slider"></span>
+            </label>
+          </div>
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
+            <div>
+              <label for="setTeacherIp" class="win11-label" style="cursor: pointer;">عنوان IP لحاسوب الأستاذ:</label>
+              <div style="display: flex; gap: 6px;">
+                <input type="text" class="win11-input" id="setTeacherIp" placeholder="مثال: 192.168.1.10" value="192.168.1.10">
+                <button type="button" class="fluent-btn fluent-btn-standard" id="btnDetectMyIp" style="white-space: nowrap; font-size: 11px;" title="كشف IP هذا الجهاز واستخدامه">كشف IP الجهاز 📍</button>
+              </div>
+            </div>
+            <div>
+              <label for="setTeacherPort" class="win11-label" style="cursor: pointer;">منفذ الاستلام (Port):</label>
+              <input type="number" class="win11-input" id="setTeacherPort" min="1025" max="65534" value="8888">
+            </div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+            عند استخراج التقرير في المحاكي، يتم حفظه محلياً على سطح مكتب التلميذ وإرسال نسخة تلقائية عبر الشبكة المحلية إلى برنامج الاستقبال في حاسوب الأستاذ.
+          </div>
+        </div>
+
         <div class="settings-switch-row">
           <div>
             <strong>تمكين اختيار نمط الحصة للتلميذ:</strong>
@@ -1108,6 +1135,27 @@
             <div>
               <label for="initPcPrefix" class="win11-label" style="cursor: pointer;">تسمية الحاسوب:</label>
               <input type="text" class="win11-input" id="initPcPrefix" placeholder="مثال: حاسوب" value="حاسوب">
+            </div>
+          </div>
+        </div>
+
+        <!-- Initial Network Sync Config -->
+        <div style="background: var(--info-box-bg); border: 1px solid var(--info-box-border); padding: 12px; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="font-weight: 700; font-size: 13px; color: var(--accent-color);">📡 إرسال نسخة من التقرير تلقائياً لحاسوب الأستاذ:</div>
+            <label class="fluent-switch">
+              <input type="checkbox" id="initNetworkSyncEnabled" checked>
+              <span class="fluent-slider"></span>
+            </label>
+          </div>
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
+            <div>
+              <label for="initTeacherIp" class="win11-label" style="cursor: pointer;">عنوان IP لحاسوب الأستاذ:</label>
+              <input type="text" class="win11-input" id="initTeacherIp" placeholder="مثال: 192.168.1.10" value="192.168.1.10">
+            </div>
+            <div>
+              <label for="initTeacherPort" class="win11-label" style="cursor: pointer;">المنفذ (Port):</label>
+              <input type="number" class="win11-input" id="initTeacherPort" min="1025" max="65534" value="8888">
             </div>
           </div>
         </div>

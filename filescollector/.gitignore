@@ -1,5 +1,0 @@
-# FilesCollector local ignore
-*.ini
-*.pdb
-*.tmp
-tests/temp_*

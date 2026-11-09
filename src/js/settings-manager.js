@@ -16,7 +16,13 @@ class SettingsManager {
       force_french_names: true,
       pc_min: 1,
       pc_max: 20,
-      pc_prefix: 'حاسوب'
+      pc_prefix: 'حاسوب',
+      network_sync: {
+        enabled: true,
+        teacher_ip: '192.168.1.10',
+        teacher_port: 8888,
+        timeout_seconds: 3
+      }
     };
 
     this.tempGroups = [];
@@ -293,6 +299,14 @@ class SettingsManager {
     if (setPcMin) setPcMin.value = this.settings.pc_min || 1;
     if (setPcMax) setPcMax.value = this.settings.pc_max || 20;
     if (setPcPrefix) setPcPrefix.value = this.settings.pc_prefix || 'حاسوب';
+
+    const netSync = this.settings.network_sync || {};
+    const setNetSync = document.getElementById('setNetworkSyncEnabled');
+    const setTeacherIp = document.getElementById('setTeacherIp');
+    const setTeacherPort = document.getElementById('setTeacherPort');
+    if (setNetSync) setNetSync.checked = netSync.enabled !== false;
+    if (setTeacherIp) setTeacherIp.value = netSync.teacher_ip || '192.168.1.10';
+    if (setTeacherPort) setTeacherPort.value = netSync.teacher_port || 8888;
     if (statusMsg) {
       statusMsg.style.display = 'none';
       statusMsg.textContent = '';
@@ -368,6 +382,16 @@ class SettingsManager {
     const pcMaxVal = setPcMax ? Math.max(pcMinVal, parseInt(setPcMax.value, 10) || 20) : 20;
     const pcPrefixVal = setPcPrefix ? (setPcPrefix.value.trim() || 'حاسوب') : 'حاسوب';
 
+    const setNetSync = document.getElementById('setNetworkSyncEnabled');
+    const setTeacherIp = document.getElementById('setTeacherIp');
+    const setTeacherPort = document.getElementById('setTeacherPort');
+    const networkSyncVal = {
+      enabled: setNetSync ? setNetSync.checked : true,
+      teacher_ip: setTeacherIp && setTeacherIp.value.trim() ? setTeacherIp.value.trim() : '192.168.1.10',
+      teacher_port: setTeacherPort ? Math.max(1024, parseInt(setTeacherPort.value, 10) || 8888) : 8888,
+      timeout_seconds: 3
+    };
+
     const payload = {
       teacher: {
         full_name: (nameInput ? nameInput.value : '').trim(),
@@ -380,7 +404,8 @@ class SettingsManager {
       force_french_names: forceFrenchSwitch ? forceFrenchSwitch.checked : true,
       pc_min: pcMinVal,
       pc_max: pcMaxVal,
-      pc_prefix: pcPrefixVal
+      pc_prefix: pcPrefixVal,
+      network_sync: networkSyncVal
     };
 
     const api = this.getApi();
@@ -397,6 +422,7 @@ class SettingsManager {
           this.settings.pc_min = pcMinVal;
           this.settings.pc_max = pcMaxVal;
           this.settings.pc_prefix = pcPrefixVal;
+          this.settings.network_sync = networkSyncVal;
 
           if (statusMsg) {
             statusMsg.textContent = 'تم الحفظ بنجاح';
@@ -432,6 +458,7 @@ class SettingsManager {
       this.settings.pc_min = pcMinVal;
       this.settings.pc_max = pcMaxVal;
       this.settings.pc_prefix = pcPrefixVal;
+      this.settings.network_sync = networkSyncVal;
 
       if (statusMsg) {
         statusMsg.textContent = 'تم الحفظ بنجاح';
@@ -482,6 +509,16 @@ class SettingsManager {
     const pcMaxVal = initPcMax ? Math.max(pcMinVal, parseInt(initPcMax.value, 10) || 20) : 20;
     const pcPrefixVal = initPcPrefix ? (initPcPrefix.value.trim() || 'حاسوب') : 'حاسوب';
 
+    const initNetSwitch = document.getElementById('initNetworkSyncEnabled');
+    const initIpInput = document.getElementById('initTeacherIp');
+    const initPortInput = document.getElementById('initTeacherPort');
+    const initNetSyncVal = {
+      enabled: initNetSwitch ? initNetSwitch.checked : true,
+      teacher_ip: initIpInput && initIpInput.value.trim() ? initIpInput.value.trim() : '192.168.1.10',
+      teacher_port: initPortInput ? Math.max(1024, parseInt(initPortInput.value, 10) || 8888) : 8888,
+      timeout_seconds: 3
+    };
+
     const payload = {
       password: pwd,
       full_name: (nameInput ? nameInput.value : '').trim() || 'أستاذ مادة المعلوماتية',
@@ -492,7 +529,10 @@ class SettingsManager {
       force_french_names: initForceFrenchSwitch ? initForceFrenchSwitch.checked : true,
       pc_min: pcMinVal,
       pc_max: pcMaxVal,
-      pc_prefix: pcPrefixVal
+      pc_prefix: pcPrefixVal,
+      network_sync_enabled: initNetSyncVal.enabled,
+      teacher_ip: initNetSyncVal.teacher_ip,
+      teacher_port: initNetSyncVal.teacher_port
     };
 
     const api = this.getApi();
@@ -509,6 +549,7 @@ class SettingsManager {
           this.settings.pc_min = pcMinVal;
           this.settings.pc_max = pcMaxVal;
           this.settings.pc_prefix = pcPrefixVal;
+          this.settings.network_sync = initNetSyncVal;
 
           if (statusMsg) {
             statusMsg.textContent = 'تم تهيئة الإعدادات بنجاح!';
@@ -593,6 +634,20 @@ class SettingsManager {
     const btnCloseSet = document.getElementById('btnCloseSettingsModal');
     const btnAddGroup = document.getElementById('btnAddGroup');
     const newGroupInput = document.getElementById('newGroupInput');
+    const btnDetectIp = document.getElementById('btnDetectMyIp');
+
+    if (btnDetectIp) {
+      btnDetectIp.addEventListener('click', async () => {
+        const api = this.getApi();
+        if (api && typeof api.getLocalIp === 'function') {
+          const ip = await api.getLocalIp();
+          const teacherIpInput = document.getElementById('setTeacherIp');
+          if (teacherIpInput && ip) {
+            teacherIpInput.value = ip;
+          }
+        }
+      });
+    }
 
     if (btnSaveSet) {
       btnSaveSet.addEventListener('click', () => this.saveSettings());

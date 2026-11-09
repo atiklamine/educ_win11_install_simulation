@@ -330,17 +330,35 @@ class ReportPdf {
 
         if (res && res.success) {
           if (window.soundSynth) window.soundSynth.playSuccess();
+
+          if (se && res.sha256) {
+            se.lastDeliveredReportHash = res.sha256;
+          }
+
+          let netStatusText = '';
+          if (res.network) {
+            if (res.network.sent && !res.network.duplicate) {
+              netStatusText = `\n\n🟢 حالة التسليم للأستاذ: تم إرسال وتسليم نسخة رسمية بنجاح إلى حاسوب الأستاذ (${res.network.teacherIp}:${res.network.teacherPort})`;
+            } else if (res.network.sent && res.network.duplicate) {
+              netStatusText = `\n\nℹ️ حالة التسليم للأستاذ: هذا التقرير مستلم مسبقاً لدى الأستاذ (لم يطرأ أي تعديل على النتيجة).`;
+            } else if (res.network.attempted && !res.network.sent) {
+              netStatusText = `\n\n⚠️ حالة التسليم للأستاذ: تعذر الاتصال بحاسوب الأستاذ حالياً (${res.network.message}).\n💡 لا تقلق: تقريرك محفوظ بأمان تام على سطح مكتبك.`;
+            }
+          }
+
+          const detailsMsg = `اسم الملف: ${res.fileName}\nالمسار: ${res.filePath}${netStatusText}\n\nهل ترغب في فتح مكان الملف (المجلد) الآن؟`;
+
           const openNow = (typeof window.showPedagogicalConfirm === 'function')
             ? await window.showPedagogicalConfirm({
                 title: 'تم استخراج وثيقة التقييم بنجاح',
                 icon: '📄',
                 message: 'تم استخراج تقرير تقييم الكفاءة الرسمي وحفظه مباشرة على سطح المكتب بنجاح!',
-                details: `اسم الملف: ${res.fileName}\nالمسار: ${res.filePath}\n\nهل ترغب في فتح مكان الملف الآن؟`,
+                details: detailsMsg,
                 confirmText: 'فتح مكان الملف (المجلد) 📁',
                 cancelText: 'إغلاق ومتابعة ✔',
                 isDanger: false
               })
-            : confirm(`تم استخراج تقرير تقييم الكفاءة الرسمي بنجاح!\n\nاسم الملف: ${res.fileName}\nالمسار: ${res.filePath}\n\nهل ترغب في فتح مكان الملف الآن؟`);
+            : confirm(`تم استخراج تقرير تقييم الكفاءة الرسمي بنجاح!\n\n${detailsMsg}`);
           if (openNow && window.electronAPI.showInFolder) {
             window.electronAPI.showInFolder(res.filePath);
           }
