@@ -23,6 +23,9 @@ inf.dll
 */inf.dll
 dist/inf.dll
 
+# Portable archives
+filescollector.zip
+
 # Cache and temporary folders
 .cache/
 temp/

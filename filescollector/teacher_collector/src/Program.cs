@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace StudentAgent
+namespace TeacherCollector
 {
     static class Program
     {
@@ -10,7 +10,8 @@ namespace StudentAgent
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new AgentForm());
+            Application.Run(new MainForm());
         }
     }
 }
+

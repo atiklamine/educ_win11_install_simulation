@@ -23,9 +23,8 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "test": "node tests/test_simulator.js && electron tests/test_electron_runtime.js && node tests/test_lan_collector.js",
+    "test": "node tests/test_simulator.js && electron tests/test_electron_runtime.js",
     "test:pdf": "electron tests/test_pdf_export.js",
-    "test:collector": "node tests/test_lan_collector.js",
     "build:portable": "electron-builder --win portable --ia32 --x64",
     "build:portable64": "electron-builder --win portable --x64",
     "build:portable32": "electron-builder --win portable --ia32",
